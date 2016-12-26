@@ -16,6 +16,13 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from osbb.views.home import HomePageView
+from osbb.views.login import LoginPageView, LogoutPageView
+
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls, name='admin'),
+    url(r'^$', HomePageView.as_view(), name='home'),
+    url(r'^accounts/login/', LoginPageView.as_view(), name='login'),
+    url(r'^logout/', LogoutPageView.as_view(), name='logout'),
 ]

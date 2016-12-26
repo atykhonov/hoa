@@ -1,0 +1,20 @@
+{% extends 'bootstrap.html' %}
+
+{% load bootstrap3 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+{% block bootstrap3_content %}
+<div class="container">
+  <h1>{% block title %}(no title){% endblock %}</h1>
+
+  {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+
+  {% block content %}(no content){% endblock %}
+</div>
+
+{% endblock %}
