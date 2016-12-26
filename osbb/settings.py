@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import sys
 
+from django.utils.translation import ugettext_lazy as _
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -124,8 +126,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-# LANGUAGE_CODE = 'ua-uk'
-LANGUAGE_CODE = 'en-us'
+LANGUAGES = [
+    ('ua', _('Ukrainian')),
+]
+
+LANGUAGE_CODE = 'ua-uk'
+
+LOCALE_PATHS = [
+    BASE_DIR + '/locale',
+]
 
 TIME_ZONE = 'UTC'
 
