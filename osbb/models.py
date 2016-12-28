@@ -77,8 +77,6 @@ class PersonalAccount(BaseModel):
     )
 
 
-# Experimental
-
 class ApartmentTariff(BaseModel):
     apartment = models.ForeignKey(Apartment)
     date = models.DateField()
@@ -92,8 +90,6 @@ class HouseTariff(BaseModel):
     house = models.ForeignKey(House)
     service = models.ForeignKey(Service)  # One-to-One
     value = models.FloatField()
-
-###
 
 
 class ApartmentMeter(BaseModel):
@@ -109,7 +105,7 @@ class ApartmentMeterIndicator(BaseModel):
 
 class HousingCooperativeService(BaseModel):
     housing_cooperative = models.ForeignKey(HousingCooperative)
-    service = models.ForeignKey(Service)  # One-to-One
+    service = models.OneToOneField(Service)  # One-to-One
     # FIXME: Review max length 255, may be increase.
     notes = models.CharField(max_length=255)
 
