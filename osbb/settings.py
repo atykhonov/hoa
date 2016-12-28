@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'osbb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'osbb',
+        'NAME': 'osbb3',
         'USER': 'osbbadmindb',
         'PASSWORD': 'URi2QE',
         'PORT': '',
@@ -183,3 +183,5 @@ REST_FRAMEWORK = {
     ],
     'PAGE_SIZE': 10
 }
+
+AUTH_USER_MODEL = 'osbb.User'
