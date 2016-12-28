@@ -28,3 +28,6 @@ msgstr "Це є домашня сторінка!"
 #: osbb/templates/osbb/login.html:7
 msgid "Login"
 msgstr "Увійти"
+
+msgid "Password"
+msgstr "Пароль"
