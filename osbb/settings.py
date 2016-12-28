@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap3',
     'osbb',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -171,3 +172,5 @@ BOOTSTRAP3 = {
     'required_css_class': 'bootstrap3-required',
     'javascript_in_head': True,
 }
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

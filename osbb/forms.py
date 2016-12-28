@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.forms.formsets import BaseFormSet, formset_factory
+from django.utils.translation import ugettext_lazy as _
 
 
 from bootstrap3.tests import TestForm
@@ -28,8 +29,8 @@ MEDIA_CHOICES = (
 
 
 class LoginForm(forms.Form):
-    login = forms.CharField()
-    password = forms.CharField()
+    login = forms.CharField(help_text=_('Login'))
+    password = forms.CharField(help_text=_('Password'))
 
 
 class ContactForm(TestForm):
