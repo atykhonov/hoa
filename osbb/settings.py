@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'osbb',
     'django_nose',
     'rest_framework',
+    'autofixture',
 ]
 
 MIDDLEWARE = [
