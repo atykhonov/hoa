@@ -7,11 +7,15 @@ from rest_framework import urls, routers
 
 from osbb.views.home import HomePageView
 from osbb.views.login import LoginPageView, LogoutPageView
-from osbb.views.cooperative import HousingCooperativeViewSet
+from osbb.views.cooperative import (
+    HouseViewSet,
+    HousingCooperativeViewSet,
+)
 
 
 router = routers.DefaultRouter()
-router.register(r'cooperatives', HousingCooperativeViewSet, 'cooperative')
+router.register(r'cooperatives', HousingCooperativeViewSet)
+router.register(r'houses', HouseViewSet)
 
 
 urlpatterns = [
