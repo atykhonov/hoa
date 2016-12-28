@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.views.generic import FormView
-
-# from osbb.forms import LoginForm
-
-
 
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
+from django.contrib.auth import (
+    REDIRECT_FIELD_NAME,
+    login as auth_login,
+    logout as auth_logout,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
