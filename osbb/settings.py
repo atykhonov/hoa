@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'osbb',
     'django_nose',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
