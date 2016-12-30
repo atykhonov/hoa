@@ -5,15 +5,10 @@ from autofixture import AutoFixture
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import (
-    APIRequestFactory,
-    APITestCase,
-    force_authenticate,
-)
+from rest_framework.test import APITestCase
 import json
 
 from osbb.models import HousingCooperative
-from osbb.views.cooperative import HousingCooperativeViewSet
 
 
 User = get_user_model()
@@ -59,25 +54,25 @@ class BaseAPITestCase(APITestCase):
         self.manager.passwd = self.manager_password
         self.manager.save()
 
+    def _cmethod(self, method, url, user, data=None):
+        m = getattr(self.client, method)
+        if user:
+            token = self.getToken(user=user)
+            return m(url, data, HTTP_AUTHORIZATION='JWT {}'.format(token))
+        else:
+            return m(url, data)
+
     def cget(self, url, user, data=None):
-        token = self.getToken(user=user)
-        return self.client.get(
-            url, data, HTTP_AUTHORIZATION='JWT {}'.format(token))
+        return self._cmethod('get', url, user, data)
 
     def cput(self, url, user, data=None):
-        token = self.getToken(user=user)
-        return self.client.put(
-            url, data, HTTP_AUTHORIZATION='JWT {}'.format(token))
+        return self._cmethod('put', url, user, data)
 
     def cpost(self, url, user, data=None):
-        token = self.getToken(user=user)
-        return self.client.post(
-            url, data, HTTP_AUTHORIZATION='JWT {}'.format(token))
+        return self._cmethod('post', url, user, data)
 
     def cdelete(self, url, user, data=None):
-        token = self.getToken(user=user)
-        return self.client.delete(
-            url, data, HTTP_AUTHORIZATION='JWT {}'.format(token))
+        return self._cmethod('delete', url, user, data)
 
     def getToken(self, user=None):
         """
@@ -119,9 +114,33 @@ class TestHousingCooperative(BaseAPITestCase):
         self.assertTrue(
             HousingCooperative.objects.filter(name='test').exists())
 
+    def test_creation_by_inhabitant(self):
+        """
+        Creation of a cooperative is not allowed for a inhabitant.
+        """
+        url = reverse('cooperative-list')
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.inhabitant, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_creation_by_unauthenticated(self):
+        """
+        Creation of a cooperative is not allowed for an unauthenticated.
+        """
+        url = reverse('cooperative-list')
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, None, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_updating_by_manager(self):
         """
-        The cooperative is updated by manager.
+        The cooperative is updated by manager of the cooperative.
         """
         url = reverse('cooperative-detail', kwargs={'pk': self.cooperative.id})
         data = {
@@ -144,6 +163,18 @@ class TestHousingCooperative(BaseAPITestCase):
         response = self.cput(url, self.inhabitant, data)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_updating_by_unauthenticated(self):
+        """
+        Updating is not allowed for a unauthenticated user.
+        """
+        url = reverse('cooperative-detail', kwargs={'pk': self.cooperative.id})
+        data = {
+            'name': 'test-updated',
+        }
+        response = self.cput(url, None, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_deleting_by_admin(self):
         """
@@ -173,6 +204,16 @@ class TestHousingCooperative(BaseAPITestCase):
         response = self.cdelete(url, self.inhabitant)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_deleting_by_unauthenticated(self):
+        """
+        The cooperative is not allowed to be deleted by a
+        unauthenticated user.
+        """
+        url = reverse('cooperative-detail', kwargs={'pk': self.cooperative.id})
+        response = self.cdelete(url, None)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_retrieving_list_by_admin(self):
         """
@@ -205,6 +246,15 @@ class TestHousingCooperative(BaseAPITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_retrieving_list_by_unauthenticated(self):
+        """
+        The unauthenticated is not allowed to retrieve the cooperative list.
+        """
+        url = reverse('cooperative-list')
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_retrieving_item_by_admin(self):
         """
         The cooperative is retrieved by admin.
@@ -231,3 +281,13 @@ class TestHousingCooperative(BaseAPITestCase):
         response = self.cget(url, self.inhabitant, {})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieving_item_by_unauthenticated(self):
+        """
+        The cooperative is forbidden to be retrieved by an
+        unauthenticated.
+        """
+        url = reverse('cooperative-detail', kwargs={'pk': self.cooperative.id})
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
