@@ -24,9 +24,13 @@ class HousingCooperativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = HousingCooperative
         fields = (
+            'id',
             'name',
             'individual_tax_number',
             'edrpou',
             'houses',
             'certificate',
-        )
+            'legal_address',
+            'physical_address',
+            'phone_number',
+            )

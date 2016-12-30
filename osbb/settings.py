@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'osbb',
     'django_nose',
     'rest_framework',
+    'rest_framework_jwt',
     'autofixture',
 ]
 
@@ -99,7 +100,7 @@ WSGI_APPLICATION = 'osbb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'osbb3',
+        'NAME': 'osbb4',
         'USER': 'osbbadmindb',
         'PASSWORD': 'URi2QE',
         'PORT': '',
@@ -178,10 +179,37 @@ BOOTSTRAP3 = {
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAdminUser',
-    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    # 'DEFAULT_FILTER_BACKENDS': (
+    #     'rest_framework.filters.DjangoFilterBackend',
+    # ),
     'PAGE_SIZE': 10
 }
 
 AUTH_USER_MODEL = 'osbb.User'
+
+# AUTHENTICATION_BACKENDS = (
+#     'osbb.auth.EmailAuthBackend',
+#     # 'django.contrib.auth.backends.ModelBackend',
+# )
+
+
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DEBUG = False
+    TEMPLATE_DEBUG = False
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'simple_test_db'
+        }
+    }
+    PASSWORD_HASHERS = (
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    )

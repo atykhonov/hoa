@@ -5,10 +5,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
-    pass
-
-
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
@@ -19,6 +15,36 @@ class BaseModel(models.Model):
 
 class BaseModelTest(BaseModel):
     name = models.CharField(max_length=50)
+
+
+class HousingCooperative(BaseModel):
+    name = models.CharField(max_length=255)
+    individual_tax_number = models.CharField(max_length=10, blank=True)
+    edrpou = models.CharField(max_length=10, blank=True)
+    certificate = models.CharField(max_length=10, blank=True)
+    legal_address = models.CharField(max_length=255, blank=True)
+    physical_address = models.CharField(max_length=255, blank=True)
+    phone_number = models.CharField(max_length=13, blank=True)
+    # manager = models.OneToOneField(User, null=True)  # joined with auth_user
+    # accountant = models.OneToOneField()  # joined with auth_user
+    # pasportyst = models.OneToOneField()  # joined with auth_user
+    # bank_accounts = models.OneToOneField  # joined with bank_accounts
+    # ...
+
+
+class User(AbstractUser):
+
+    USERNAME_FIELD = 'email'
+
+    REQUIRED_FIELDS = []
+
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+
+    cooperative = models.ForeignKey(HousingCooperative, null=True)
 
 
 class Service(BaseModel):
@@ -37,21 +63,6 @@ class Meter(BaseModel):
     unit = models.CharField(max_length=10)
     entry_date = models.DateField(null=True)
     verification_date = models.DateField(null=True)
-
-
-class HousingCooperative(BaseModel):
-    name = models.CharField(max_length=255)
-    individual_tax_number = models.CharField(max_length=10)
-    edrpou = models.CharField(max_length=10)
-    certificate = models.CharField(max_length=10)
-    legal_address = models.CharField(max_length=255)
-    physical_address = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=13)
-    # manager = models.OneToOneField()  # joined with auth_user
-    # accountant = models.OneToOneField()  # joined with auth_user
-    # pasportyst = models.OneToOneField()  # joined with auth_user
-    # bank_accounts = models.OneToOneField  # joined with bank_accounts
-    # ...
 
 
 class House(BaseModel):
