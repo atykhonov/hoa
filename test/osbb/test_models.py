@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import date
 
+from autofixture import AutoFixture
 from django.test import TestCase
 from django.utils import timezone
 
@@ -19,6 +20,7 @@ from osbb.models import (
     Meter,
     PersonalAccount,
     Service,
+    User,
 )
 
 
@@ -98,8 +100,8 @@ class HousingCooperativeTestCase(TestCase):
         cooperative.house_set.create(name='second')
 
         houses = cooperative.house_set.all()
-        self.assertEqual('first', houses[1].name)
-        self.assertEqual('second', houses[0].name)
+        self.assertEqual('first', houses[0].name)
+        self.assertEqual('second', houses[1].name)
 
     def test_cooperative_with_service(self):
         """
@@ -160,14 +162,26 @@ class HouseTestCase(TestCase):
         address = 'wide str. 22, 33'
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(
-            housing_cooperative=cooperative, name=name, address=address)
+        house = House(cooperative=cooperative, name=name, address=address)
 
         house.save()
 
-        self.assertEqual(cooperative.id, house.housing_cooperative.id)
+        self.assertEqual(cooperative.id, house.cooperative.id)
         self.assertEqual(name, house.name)
         self.assertEqual(address, house.address)
+
+    def test_get_cooperative(self):
+        """
+        The cooperative is retrieved from the house.
+        """
+        hc_fixture = AutoFixture(HousingCooperative)
+        hc = hc_fixture.create(1)[0]
+        house_fixture = AutoFixture(House)
+        house = house_fixture.create(1)[0]
+
+        cooperative = house.get_cooperative()
+
+        self.assertEqual(hc.id, cooperative.id)
 
 
 class ApartmentTestCase(TestCase):
@@ -185,7 +199,7 @@ class ApartmentTestCase(TestCase):
         heating_area = 30
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         apartment = Apartment(
             house=house,
@@ -221,7 +235,7 @@ class PersonalAccountTestCase(TestCase):
         receipt_text = 'text'
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         apartment = Apartment(house=house, number=10)
         apartment.save()
@@ -264,7 +278,7 @@ class ApartmentMeterTestCase(TestCase):
         """
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         apartment = Apartment(house=house, number=20)
         apartment.save()
@@ -286,7 +300,7 @@ class ApartmentMeterIndicatorTestCase(TestCase):
         now = timezone.now()
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         apartment = Apartment(house=house, number=20)
         apartment.save()
@@ -312,7 +326,7 @@ class ApartmentTariffTestCase(TestCase):
         """
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         apartment = Apartment(house=house, number=10)
         apartment.save()
@@ -344,7 +358,7 @@ class HouseTariffTestCase(TestCase):
         """
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(housing_cooperative=cooperative)
+        house = House(cooperative=cooperative)
         house.save()
         service = Service()
         service.save()
@@ -362,3 +376,44 @@ class HouseTariffTestCase(TestCase):
         self.assertEqual(date, tariff.date)
         self.assertEqual(service.id, tariff.service.id)
         self.assertEqual(20, tariff.value)
+
+
+class UserTestCase(TestCase):
+
+    def test_is_manager(self):
+        """
+        If a user is not superuser and he is staff than this user is a
+        manager.
+        """
+        user = User(is_staff=True, is_superuser=False)
+
+        self.assertTrue(user.is_manager())
+
+    def test_superuser_is_not_manager(self):
+        """
+        If a user is superuser, he is not a manager even he is a staff.
+        """
+        user = User(is_staff=True, is_superuser=True)
+
+        self.assertFalse(user.is_manager())
+
+    def test_can_manage_superuser(self):
+        """
+        The user, which is superuser, can manage the cooperative.
+        """
+        user = User(is_superuser=True)
+        fixture = AutoFixture(HousingCooperative)
+        cooperative = fixture.create(1)[0]
+
+        self.assertTrue(user.can_manage(cooperative))
+
+    def test_can_manage_manager(self):
+        """
+        The user cannot manage the cooperative if he is not manager of the
+        cooperative.
+        """
+        user = User(is_staff=True)
+        fixture = AutoFixture(HousingCooperative)
+        cooperative = fixture.create(1)[0]
+
+        self.assertFalse(user.can_manage(cooperative))

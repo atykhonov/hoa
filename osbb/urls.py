@@ -16,7 +16,7 @@ from osbb.views.cooperative import (
 
 router = routers.DefaultRouter()
 router.register(r'cooperatives', HousingCooperativeViewSet, 'cooperative')
-router.register(r'houses', HouseViewSet)
+router.register(r'houses', HouseViewSet, 'house')
 
 
 urlpatterns = [

@@ -46,6 +46,35 @@ class User(AbstractUser):
 
     cooperative = models.ForeignKey(HousingCooperative, null=True)
 
+    def is_manager(self):
+        """
+        If a user is superuser, then it is not treated as a manager. If a
+        user is not superuser and is staff than this user is a
+        manager.
+        """
+        return not self.is_superuser and self.is_staff
+
+    def is_manager_of(self, cooperative):
+        """
+        Return True if the user is manager of the given `cooperative`.
+        """
+        if cooperative is None:
+            return False
+        if self.is_manager() and self.cooperative.id == cooperative.id:
+            return True
+        return False
+
+    def can_manage(self, cooperative):
+        """
+        Return True if the user can manage the given cooperative.
+        """
+        if self.is_superuser:
+            return True
+        if cooperative is None or self.cooperative is None:
+            return False
+        if self.is_staff and self.cooperative.id == cooperative.id:
+            return True
+
 
 class Service(BaseModel):
     name = models.CharField(max_length=50)
@@ -66,9 +95,15 @@ class Meter(BaseModel):
 
 
 class House(BaseModel):
-    housing_cooperative = models.ForeignKey(HousingCooperative)
+    cooperative = models.ForeignKey(HousingCooperative)
     name = models.CharField(max_length=50)
-    address = models.CharField(max_length=100)
+    address = models.CharField(max_length=100, blank=True)
+
+    def get_cooperative(self):
+        """
+        Return the cooperative of the house.
+        """
+        return self.cooperative
 
 
 class Apartment(BaseModel):

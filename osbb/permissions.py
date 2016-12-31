@@ -3,18 +3,21 @@ from __future__ import unicode_literals
 
 from rest_framework import permissions
 
+from osbb.models import HousingCooperative
 
-class CooperativePermission(permissions.BasePermission):
+
+class IsManager(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_staff
 
-    def has_object_permission(self, request, view, cooperative):
-        user = request.user
-        user_cooperative = request.user.cooperative
-        if user_cooperative:
-            return user_cooperative.id == cooperative.id and user.is_staff
-        return False
+    def has_object_permission(self, request, view, entity):
+        cooperative = None
+        if isinstance(entity, HousingCooperative):
+            cooperative = entity
+        else:
+            cooperative = entity.get_cooperative()
+        return request.user.is_manager_of(cooperative)
 
 
 class NoPermissions(permissions.BasePermission):

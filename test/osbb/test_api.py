@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 import json
 
-from osbb.models import HousingCooperative
+from osbb.models import House, HousingCooperative
 
 
 User = get_user_model()
@@ -17,8 +17,13 @@ User = get_user_model()
 class BaseAPITestCase(APITestCase):
 
     def setUp(self):
-        fixture = AutoFixture(HousingCooperative)
-        self.cooperative = fixture.create(1)[0]
+        hc_fixture = AutoFixture(HousingCooperative)
+        self.cooperative = hc_fixture.create(1)[0]
+
+        house_fixture = AutoFixture(House)
+        houses = house_fixture.create(2)
+        self.house1 = houses[0]
+        self.house2 = houses[1]
 
         self.inhabitant_email = 'inhabitant@example.com'
         self.inhabitant_password = 'ThkeT231'
@@ -105,14 +110,33 @@ class TestHousingCooperative(BaseAPITestCase):
         The cooperative is created with specific name.
         """
         url = reverse('cooperative-list')
+        itn = '1234567890'
+        edrpou = '2345678901'
+        certificate = '3456780912'
+        legal_address = 'legal address'
+        physical_address = 'physical address'
+        phone_number = '0961122333'
         data = {
             'name': 'test',
+            'individual_tax_number': itn,
+            'edrpou': edrpou,
+            'certificate': certificate,
+            'legal_address': legal_address,
+            'physical_address': physical_address,
+            'phone_number': phone_number,
         }
         response = self.cpost(url, self.admin, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(
-            HousingCooperative.objects.filter(name='test').exists())
+        query = HousingCooperative.objects.filter(name='test')
+        hc = query[0]
+        self.assertTrue(query.exists())
+        self.assertEqual(itn, hc.individual_tax_number)
+        self.assertEqual(edrpou, hc.edrpou)
+        self.assertEqual(certificate, hc.certificate)
+        self.assertEqual(legal_address, hc.legal_address)
+        self.assertEqual(physical_address, hc.physical_address)
+        self.assertEqual(phone_number, hc.phone_number)
 
     def test_creation_by_inhabitant(self):
         """
@@ -288,6 +312,277 @@ class TestHousingCooperative(BaseAPITestCase):
         unauthenticated.
         """
         url = reverse('cooperative-detail', kwargs={'pk': self.cooperative.id})
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieving_houses_by_admin(self):
+        """
+        Houses are retrieved by an admin.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        response = self.cget(url, self.admin, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(self.house1.name, response_content[0]['name'])
+        self.assertEqual(self.house1.address, response_content[0]['address'])
+        self.assertEqual(self.house2.name, response_content[1]['name'])
+        self.assertEqual(self.house2.address, response_content[1]['address'])
+
+    def test_retrieving_houses_by_manager(self):
+        """
+        The houses are forbidden to be retrived by a manager which doesn't
+        belong to the cooperative.
+        """
+        hc_fixture = AutoFixture(HousingCooperative)
+        cooperative = hc_fixture.create(1)[0]
+
+        url = reverse('cooperative-houses', kwargs={'pk': cooperative.id})
+        response = self.cget(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieving_houses_by_manager_of_cooperative(self):
+        """
+        The houses are retrieved by the manager of the cooperative.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        response = self.cget(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieving_houses_by_inhabitant(self):
+        """
+        The houses are forbidden to be retrived by a inhabitant.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        response = self.cget(url, self.inhabitant, {})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestHouse(BaseAPITestCase):
+
+    def test_creation_by_admin(self):
+        """
+        The house is created by admin.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_creation_by_manager(self):
+        """
+        Creation of a cooperative is not allowed for a manager, if this
+        manager is not a manager of the cooperative.
+        """
+        fixture = AutoFixture(HousingCooperative)
+        cooperative = fixture.create(1)[0]
+        url = reverse('cooperative-houses', kwargs={'pk': cooperative.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.manager, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_creation_by_manager_of_cooperation(self):
+        """
+        The house is created by the manage of the cooperation.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.manager, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_creation_by_inhabitant(self):
+        """
+        Creation of a cooperative is not allowed for a inhabitant.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.inhabitant, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_creation_by_unauthenticated(self):
+        """
+        The house is forbidden to be created by an unauthenticated.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        response = self.cpost(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_updating_by_manager(self):
+        """
+        Updating by manager is not allowed for a manager, if this manager
+        is not a manager of the cooperative.
+        """
+        cooperative = HousingCooperative()
+        cooperative.save()
+        house = House(name='house', cooperative=cooperative)
+        house.save()
+        url = reverse('house-detail', kwargs={'pk': house.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cput(url, self.manager, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_updating_by_manager_of_cooperation(self):
+        """
+        The house is updated by the manage of the cooperation.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cput(url, self.manager, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_updating_by_inhabitant(self):
+        """
+        The house is not allowed to be updated by inhabitant.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        data = {
+            'name': 'test',
+        }
+        response = self.cput(url, self.inhabitant, data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_updating_by_unauthenticated(self):
+        """
+        The house is forbidden to be updated by an unauthenticated.
+        """
+        url = reverse('cooperative-houses', kwargs={'pk': self.cooperative.id})
+        response = self.cput(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieving_list_by_admin(self):
+        """
+        All existing houses is retrieved by admin.
+        """
+        cooperative = HousingCooperative()
+        cooperative.save()
+        house = House(name='house', cooperative=cooperative)
+        house.save()
+
+        url = reverse('house-list')
+        response = self.cget(url, self.admin, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_content = json.loads(response.content.decode('utf-8'))
+        results = response_content['results']
+        self.assertEqual(self.house1.id, results[0]['id'])
+        self.assertEqual(self.house2.id, results[1]['id'])
+        self.assertEqual(house.id, results[2]['id'])
+
+    def test_retrieving_list_by_manager(self):
+        """
+        Only those houses are retrieved by manager, which belongs to his
+        cooperative.
+        """
+        cooperative = HousingCooperative()
+        cooperative.save()
+        house = House(name='house', cooperative=cooperative)
+        house.save()
+
+        url = reverse('house-list')
+        response = self.cget(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_content = json.loads(response.content.decode('utf-8'))
+        results = response_content['results']
+        self.assertEqual(2, len(results))
+        self.assertEqual(self.house1.id, results[0]['id'])
+        self.assertEqual(self.house2.id, results[1]['id'])
+
+    def test_retrieving_list_by_inhabitant(self):
+        """
+        Retrieving list by inhabitant is not allowed.
+        """
+        url = reverse('house-list')
+        response = self.cget(url, self.inhabitant, {})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieving_list_by_unauthenticated(self):
+        """
+        Retrieving list by unauthenticated is not allowed.
+        """
+        url = reverse('house-list')
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieving_item_by_admin(self):
+        """
+        The house is retrieved by admin.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
+        response = self.cget(url, self.admin, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(self.house1.id, response_content['id'])
+        self.assertEqual(self.house1.name, response_content['name'])
+
+    def test_retrieving_item_by_manager(self):
+        """
+        Retrieving the item is not allowed for a manager which doesn't
+        manage the cooperative.
+        """
+        cooperative = HousingCooperative()
+        cooperative.save()
+        house = House(cooperative=cooperative)
+        house.save()
+        url = reverse('house-detail', kwargs={'pk': house.id})
+        response = self.cget(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieving_item_by_manager_of_cooperative(self):
+        """
+        The house is retrieved by manager of the cooperative.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
+        response = self.cget(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(self.house1.id, response_content['id'])
+        self.assertEqual(self.house1.name, response_content['name'])
+
+    def test_retrieving_item_by_inhabitant(self):
+        """
+        Retrieving the item is not allowed for an inhabitant.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
+        response = self.cget(url, self.inhabitant, {})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieving_item_by_unauthenticated(self):
+        """
+        Retrieving the item is not allowed for an unauthenticated.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
         response = self.cget(url, None, {})
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
