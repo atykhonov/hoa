@@ -143,12 +143,7 @@ class Apartment(BaseModel):
 
 class PersonalAccount(BaseModel):
     uid = models.CharField(max_length=100, primary_key=True)
-    prefix = models.CharField(max_length=10)
-    receipt_text = models.CharField(max_length=255)
-    apartment = models.OneToOneField(
-        Apartment,
-        on_delete=models.CASCADE,
-    )
+    apartment = models.OneToOneField(Apartment)
 
 
 class ApartmentTariff(BaseModel):
