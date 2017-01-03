@@ -142,7 +142,7 @@ class Apartment(BaseModel):
 
 
 class PersonalAccount(BaseModel):
-    uid = models.CharField(max_length=100, primary_key=True)
+    uid = models.CharField(max_length=100)
     apartment = models.OneToOneField(Apartment)
 
 
