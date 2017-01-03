@@ -9,6 +9,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from osbb.views.home import HomePageView
 from osbb.views.login import LoginPageView, LogoutPageView
 from osbb.views.cooperative import (
+    ApartmentViewSet,
     HouseViewSet,
     HousingCooperativeViewSet,
 )
@@ -17,6 +18,7 @@ from osbb.views.cooperative import (
 router = routers.DefaultRouter()
 router.register(r'cooperatives', HousingCooperativeViewSet, 'cooperative')
 router.register(r'houses', HouseViewSet, 'house')
+router.register(r'apartments', ApartmentViewSet, 'apartment')
 
 
 urlpatterns = [

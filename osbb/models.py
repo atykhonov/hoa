@@ -116,7 +116,13 @@ class Apartment(BaseModel):
     dwelling_space = models.FloatField(null=True)
     heating_area = models.FloatField(null=True)
     # TODO: owner = models.ForeignKey()  # auth_user
-    # TODO: family_members = 
+    # TODO: family_members =
+
+    def get_cooperative(self):
+        """
+        Return the cooperative of the apartment.
+        """
+        return self.house.cooperative
 
 
 class PersonalAccount(BaseModel):

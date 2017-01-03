@@ -3,10 +3,28 @@ from __future__ import unicode_literals
 
 from rest_framework import serializers
 
-from osbb.models import House, HousingCooperative
+from osbb.models import Apartment, House, HousingCooperative
+
+
+class ApartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Apartment
+        fields = (
+            'id',
+            'number',
+            'floor',
+            'entrance',
+            'room_number',
+            'total_area',
+            'dwelling_space',
+            'heating_area',
+        )
 
 
 class HouseSerializer(serializers.ModelSerializer):
+
+    apartments = ApartmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = House
@@ -14,6 +32,7 @@ class HouseSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'address',
+            'apartments',
         )
 
 

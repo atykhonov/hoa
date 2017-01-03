@@ -223,6 +223,20 @@ class ApartmentTestCase(TestCase):
         self.assertEqual(dwelling_space, apartment.dwelling_space)
         self.assertEqual(heating_area, apartment.heating_area)
 
+    def test_get_cooperative(self):
+        """
+        The cooperative is retrieved from the apartment.
+        """
+        hc_fixture = AutoFixture(HousingCooperative)
+        hc = hc_fixture.create(1)[0]
+        AutoFixture(House).create(1)
+        apartment_fixture = AutoFixture(Apartment)
+        apartment = apartment_fixture.create(1)[0]
+
+        cooperative = apartment.get_cooperative()
+
+        self.assertEqual(hc.id, cooperative.id)
+
 
 class PersonalAccountTestCase(TestCase):
 
