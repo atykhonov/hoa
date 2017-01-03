@@ -7,7 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from osbb.models import Apartment, House, HousingCooperative
+from osbb.models import (
+    Apartment,
+    House,
+    HousingCooperative,
+    HousingCooperativeService as HCService,
+    Service,
+)
 from osbb.permissions import (
     IsManager,
     NoPermissions,
@@ -15,7 +21,9 @@ from osbb.permissions import (
 from osbb.serializers import (
     ApartmentSerializer,
     HouseSerializer,
-    HousingCooperativeSerializer,
+    HousingCooperativeSerializer as HCSerializer,
+    HousingCooperativeServiceSerializer as HCServiceSerializer,
+    ServiceSerializer,
 )
 
 
@@ -37,7 +45,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
     API endpoint that allows cooperatives to be viewed or edited.
     """
     queryset = HousingCooperative.objects.all()
-    serializer_class = HousingCooperativeSerializer
+    serializer_class = HCSerializer
 
     def get_permissions(self):
         """
@@ -91,6 +99,40 @@ class HousingCooperativeViewSet(BaseModelViewSet):
                 'status': 'Bad Request',
                 'message': 'House could not be created with received data'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['get', 'post'])
+    def services(self, request, pk):
+        """
+        Return the houses of the cooperative or create a new house.
+        """
+        cooperative = HousingCooperative.objects.get(pk=pk)
+        user = request.user
+        if not user.is_superuser:
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            hc_services = HCService.objects.filter(cooperative=pk)
+            context = {
+                'request': request,
+            }
+            serializer = HCServiceSerializer(
+                hc_services, many=True, context=context)
+            return Response(serializer.data)
+        elif request.method == 'POST':
+            data = request.data
+            data['cooperative'] = cooperative.id
+            serializer = HCServiceSerializer(data=data)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                HCService(**validated_data)
+                response_data = {
+                    'cooperative': validated_data['cooperative'].id,
+                    'service': validated_data['service'].id,
+                    'notes': validated_data['notes'],
+                }
+                return Response(response_data, status=status.HTTP_201_CREATED)
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HouseViewSet(BaseModelViewSet):
@@ -194,3 +236,17 @@ class ApartmentViewSet(BaseModelViewSet):
 
         serializer = ApartmentSerializer(apartments, many=True)
         return Response(serializer.data)
+
+
+class ServiceViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows services to be viewed or edited.
+    """
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+
+    def get_permissions(self):
+        user = self.request.user
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+        return (NoPermissions(), )

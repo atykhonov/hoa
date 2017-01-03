@@ -162,8 +162,8 @@ class ApartmentMeterIndicator(BaseModel):
 
 
 class HousingCooperativeService(BaseModel):
-    housing_cooperative = models.ForeignKey(HousingCooperative)
-    service = models.OneToOneField(Service)  # One-to-One
+    cooperative = models.ForeignKey(HousingCooperative)
+    service = models.OneToOneField(Service)
     # FIXME: Review max length 255, may be increase.
     notes = models.CharField(max_length=255)
 

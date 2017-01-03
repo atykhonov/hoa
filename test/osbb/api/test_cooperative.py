@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 import json
 
-from osbb.models import HousingCooperative
+from osbb.models import HousingCooperative, Service
 from test.osbb.testcase import BaseAPITestCase
 
 
@@ -91,6 +91,68 @@ class TestCooperativeByAdmin(BaseAPITestCase):
         self.assertEqual(self.house1.address, response_content[0]['address'])
         self.assertEqual(self.house2.name, response_content[1]['name'])
         self.assertEqual(self.house2.address, response_content[1]['address'])
+
+    def test_retrieving_services(self):
+        """
+        Services are retrieved by an admin.
+        """
+        url = reverse(
+            'cooperative-services', kwargs={'pk': self.cooperative1.id})
+        response = self.cget(url, self.admin, {})
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        response_content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(self.hc_service1.id, response_content[0]['id'])
+        self.assertEqual(
+            self.hc_service1.service.id, response_content[0]['service'])
+        self.assertEqual(
+            self.hc_service1.cooperative.id,
+            response_content[0]['cooperative']
+            )
+        self.assertEqual(self.hc_service1.notes, response_content[0]['notes'])
+
+        self.assertEqual(self.hc_service2.id, response_content[1]['id'])
+        self.assertEqual(
+            self.hc_service2.service.id, response_content[1]['service'])
+        self.assertEqual(
+            self.hc_service2.cooperative.id,
+            response_content[1]['cooperative']
+        )
+        self.assertEqual(self.hc_service2.notes, response_content[1]['notes'])
+
+    def test_service_creation(self):
+        """
+        The service is created by an admin.
+        """
+        service_fixture = AutoFixture(Service)
+        service = service_fixture.create(1)[0]
+        url = reverse(
+            'cooperative-services', kwargs={'pk': self.cooperative1.id})
+        data = {
+            'service': service.id,
+            'notes': 'some notes',
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+
+    def test_service_creation_invalid_service(self):
+        """
+        The service is created by an admin.
+        """
+        url = reverse(
+            'cooperative-services', kwargs={'pk': self.cooperative1.id})
+        data = {
+            'service': 442020,
+            'notes': 'some notes',
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        self.assertEqual(
+            response.data['service'][0],
+            u'Invalid pk "442020" - object does not exist.'
+        )
 
 
 class TestCooperativeByManager(BaseAPITestCase):

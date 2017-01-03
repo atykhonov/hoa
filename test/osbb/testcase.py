@@ -7,7 +7,13 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 import json
 
-from osbb.models import Apartment, House, HousingCooperative
+from osbb.models import (
+    Apartment,
+    House,
+    HousingCooperative,
+    HousingCooperativeService,
+    Service,
+)
 
 
 User = get_user_model()
@@ -82,6 +88,24 @@ class BaseAPITestCase(APITestCase):
         self.manager.set_password(self.manager_password)
         self.manager.passwd = self.manager_password
         self.manager.save()
+
+        service_fixture = AutoFixture(Service)
+        services = service_fixture.create(2)
+        self.service1 = services[0]
+        self.service2 = services[1]
+
+        self.hc_service1 = HousingCooperativeService(
+            cooperative=self.cooperative1,
+            service=self.service1,
+            notes='notes1',
+            )
+        self.hc_service1.save()
+        self.hc_service2 = HousingCooperativeService(
+            cooperative=self.cooperative1,
+            service=self.service2,
+            notes='notes2',
+            )
+        self.hc_service2.save()
 
     def _cmethod(self, method, url, user, data=None):
         m = getattr(self.client, method)
