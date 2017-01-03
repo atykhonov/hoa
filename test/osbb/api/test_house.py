@@ -20,10 +20,13 @@ class TestHouseByAdmin(BaseAPITestCase):
             'cooperative-houses', kwargs={'pk': self.cooperative1.id})
         data = {
             'name': 'test',
+            'tariff': 10000,
         }
         response = self.cpost(url, self.admin, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual('test', response.data['name'])
+        self.assertEqual(10000, response.data['tariff'])
 
     def test_retrieving_list(self):
         """

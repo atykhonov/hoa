@@ -114,6 +114,7 @@ class House(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative)
     name = models.CharField(max_length=50)
     address = models.CharField(max_length=100, blank=True)
+    tariff = models.IntegerField(default=None, null=True)
 
     def get_cooperative(self):
         """
@@ -131,6 +132,7 @@ class Apartment(BaseModel):
     total_area = models.FloatField(null=True)
     dwelling_space = models.FloatField(null=True)
     heating_area = models.FloatField(null=True)
+    tariff = models.IntegerField(default=None, null=True)
     # TODO: family_members =
 
     def get_cooperative(self):
@@ -143,7 +145,7 @@ class Apartment(BaseModel):
 class PersonalAccount(BaseModel):
     uid = models.CharField(max_length=100)
     apartment = models.OneToOneField(Apartment)
-    owner = models.OneToOneField(User)
+    owner = models.OneToOneField(User, null=True)
 
 
 class ApartmentTariff(BaseModel):

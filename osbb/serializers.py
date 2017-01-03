@@ -11,8 +11,22 @@ from osbb.models import (
     HousingCooperative,
     HousingCooperativeService,
     Meter,
+    PersonalAccount,
     Service,
 )
+
+
+class PersonalAccountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = PersonalAccount
+
+        fields = (
+            'uid',
+            'apartment',
+            'owner',
+            )
 
 
 class ApartmentMeterIndicatorSerializer(serializers.ModelSerializer):
@@ -24,7 +38,7 @@ class ApartmentMeterIndicatorSerializer(serializers.ModelSerializer):
         fields = (
             'date',
             'value',
-        )
+            )
 
 
 class MeterSerializer(serializers.ModelSerializer):
@@ -102,7 +116,14 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'dwelling_space',
             'heating_area',
             'meters',
+            'tariff',
             )
+
+    # def create(self, validated_data):
+    #     profile_data = validated_data.pop('profile')
+    #     user = User.objects.create(**validated_data)
+    #     Profile.objects.create(user=user, **profile_data)
+    #     return user
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -116,7 +137,8 @@ class HouseSerializer(serializers.ModelSerializer):
             'name',
             'address',
             'apartments',
-        )
+            'tariff',
+            )
 
 
 class HousingCooperativeSerializer(serializers.ModelSerializer):

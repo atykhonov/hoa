@@ -91,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'osbb.wsgi.application'
+# WSGI_APPLICATION = 'osbb.wsgi.application'
 
 
 # Database
@@ -187,19 +187,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
-    # 'DEFAULT_FILTER_BACKENDS': (
-    #     'rest_framework.filters.DjangoFilterBackend',
-    # ),
     'PAGE_SIZE': 10
 }
 
 AUTH_USER_MODEL = 'osbb.User'
-
-# AUTHENTICATION_BACKENDS = (
-#     'osbb.auth.EmailAuthBackend',
-#     # 'django.contrib.auth.backends.ModelBackend',
-# )
-
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DEBUG = False

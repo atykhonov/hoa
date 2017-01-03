@@ -15,6 +15,7 @@ from osbb.models import (
     HousingCooperative,
     HousingCooperativeService as HCService,
     Meter,
+    PersonalAccount,
     Service,
 )
 from osbb.permissions import (
@@ -197,14 +198,15 @@ class HouseViewSet(BaseModelViewSet):
         elif request.method == 'POST':
             serializer = ApartmentSerializer(data=request.data)
             if serializer.is_valid():
-                Apartment(house=house, **serializer.validated_data)
+                apartment = Apartment(house=house, **serializer.validated_data)
+                PersonalAccount(apartment=apartment)
+                response_data = serializer.validated_data
+                response_data['id'] = apartment.id
                 return Response(
-                    serializer.validated_data, status=status.HTTP_201_CREATED)
+                    response_data, status=status.HTTP_201_CREATED)
 
-            return Response({
-                'status': 'Bad Request',
-                'message': 'House could not be created with received data'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ApartmentViewSet(BaseModelViewSet):
