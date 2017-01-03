@@ -261,3 +261,54 @@ class TestApartmentByInhabitant(BaseAPITestCase):
         response = self.cget(url, self.inhabitant, {})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestApartmentByUnauthenticated(BaseAPITestCase):
+
+    def test_creation(self):
+        """
+        The apartment is not allowed to be created by unauthenticated.
+        """
+        url = reverse('house-apartments', kwargs={'pk': self.house1.id})
+        response = self.cpost(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_updating(self):
+        """
+        The apartment is not allowed to be updated by unauthenticated.
+        """
+        url = reverse('apartment-detail', kwargs={'pk': self.apartment1.id})
+        data = {
+            'number': 33,
+        }
+        response = self.cput(url, None, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_deleting(self):
+        """
+        The apartment is not allowed to deleted by unauthenticated.
+        """
+        url = reverse('apartment-detail', kwargs={'pk': self.apartment1.id})
+        response = self.cdelete(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieving_list(self):
+        """
+        The apartments are not allowed to be retrieved by unauthenticated.
+        """
+        url = reverse('apartment-list')
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieving_item(self):
+        """
+        The apartment is not allowed to be retrieved by unauthenticated.
+        """
+        url = reverse('apartment-detail', kwargs={'pk': self.apartment1.id})
+        response = self.cget(url, None, {})
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
