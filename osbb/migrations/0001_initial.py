@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('created_date', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
-                ('uid', models.CharField(max_length=100, primary_key=True, serialize=False)),
+                ('uid', models.CharField(max_length=100, serialize=False)),
                 ('prefix', models.CharField(max_length=10)),
                 ('receipt_text', models.CharField(max_length=255)),
                 ('apartment', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='osbb.Apartment')),

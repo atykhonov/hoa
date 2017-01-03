@@ -131,7 +131,6 @@ class Apartment(BaseModel):
     total_area = models.FloatField(null=True)
     dwelling_space = models.FloatField(null=True)
     heating_area = models.FloatField(null=True)
-    # TODO: owner = models.ForeignKey()  # auth_user
     # TODO: family_members =
 
     def get_cooperative(self):
@@ -144,6 +143,7 @@ class Apartment(BaseModel):
 class PersonalAccount(BaseModel):
     uid = models.CharField(max_length=100)
     apartment = models.OneToOneField(Apartment)
+    owner = models.OneToOneField(User)
 
 
 class ApartmentTariff(BaseModel):

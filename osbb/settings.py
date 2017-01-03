@@ -100,7 +100,7 @@ WSGI_APPLICATION = 'osbb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'osbb4',
+        'NAME': 'osbb7',
         'USER': 'osbbadmindb',
         'PASSWORD': 'URi2QE',
         'PORT': '',
