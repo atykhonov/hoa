@@ -8,7 +8,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 
 from osbb.views.home import HomePageView
 from osbb.views.login import LoginPageView, LogoutPageView
-from osbb.views.cooperative import (
+from osbb.views.api import (
     ApartmentViewSet,
     HouseViewSet,
     HousingCooperativeViewSet,
