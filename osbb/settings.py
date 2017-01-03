@@ -56,9 +56,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_jwt',
     'autofixture',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -187,7 +189,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    ),
 }
 
 AUTH_USER_MODEL = 'osbb.User'
@@ -204,3 +209,8 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
     PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',
     )
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:3000',
+    '127.0.0.1:3000',
+)
