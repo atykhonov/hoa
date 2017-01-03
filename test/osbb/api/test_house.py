@@ -132,7 +132,7 @@ class TestHouseByManagerOfCooperative(BaseAPITestCase):
 
     def test_creation(self):
         """
-        The house is created by the manage of the cooperation.
+        The house is created by the manage of the cooperative.
         """
         url = reverse(
             'cooperative-houses', kwargs={'pk': self.cooperative1.id})
@@ -145,7 +145,7 @@ class TestHouseByManagerOfCooperative(BaseAPITestCase):
 
     def test_updating(self):
         """
-        The house is updated by the manage of the cooperation.
+        The house is updated by the manage of the cooperative.
         """
         url = reverse('house-detail', kwargs={'pk': self.house1.id})
         data = {
@@ -154,6 +154,17 @@ class TestHouseByManagerOfCooperative(BaseAPITestCase):
         response = self.cput(url, self.manager, data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_deleting(self):
+        """
+        The house is successfully deleted by the manager of the
+        cooperative.
+        """
+        url = reverse('house-detail', kwargs={'pk': self.house1.id})
+        response = self.cdelete(url, self.manager, {})
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(House.objects.filter(pk=self.house1.id).exists())
 
     def test_retrieving_item(self):
         """

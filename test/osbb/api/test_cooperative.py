@@ -171,6 +171,16 @@ class TestCooperativeByManagerOfCooperative(BaseAPITestCase):
         hc = HousingCooperative.objects.get(pk=self.cooperative1.id)
         self.assertEqual(self.cooperative1.id, hc.id)
 
+    def test_deleting(self):
+        """
+        The cooperative is not allowed to be deleted by a manager.
+        """
+        url = reverse(
+            'cooperative-detail', kwargs={'pk': self.cooperative1.id})
+        response = self.cdelete(url, self.manager)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_retrieving_houses(self):
         """
         The houses are retrieved by the manager of the cooperative.
