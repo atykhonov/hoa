@@ -264,6 +264,35 @@ class PersonalAccountTestCase(TestCase):
         self.assertEqual(apartment.id, personal_account.apartment.id)
         self.assertEqual(uid, personal_account.uid)
 
+    def test_get_tariff_apartment(self):
+        """
+        The apartment tariff is retrieved if it is defined, even if house
+        tariff is also defined.
+        """
+        apartment_fixture = AutoFixture(Apartment, generate_fk=True)
+        apartment = apartment_fixture.create(1)[0]
+        house = apartment.house
+        house.tariff = 10000
+        house.save()
+        apartment.tariff = 20000
+        apartment.save()
+        personal_account = PersonalAccount(apartment=apartment)
+
+        self.assertEqual(20000, personal_account.get_tariff())
+
+    def test_get_tariff_house(self):
+        """
+        The house tariff is retrieved.
+        """
+        apartment_fixture = AutoFixture(Apartment, generate_fk=True)
+        apartment = apartment_fixture.create(1)[0]
+        house = apartment.house
+        house.tariff = 10000
+        house.save()
+        personal_account = PersonalAccount(apartment=apartment)
+
+        self.assertEqual(10000, personal_account.get_tariff())
+
 
 class ServiceTestCase(TestCase):
 

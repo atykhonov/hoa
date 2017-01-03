@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
+from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +15,7 @@ from osbb.models import (
     Apartment,
     ApartmentMeter,
     ApartmentMeterIndicator,
+    Charge,
     House,
     HousingCooperative,
     HousingCooperativeService as HCService,
@@ -25,6 +30,7 @@ from osbb.permissions import (
 from osbb.serializers import (
     ApartmentSerializer,
     ApartmentMeterIndicatorSerializer,
+    ChargeSerializer,
     HouseSerializer,
     HousingCooperativeSerializer as HCSerializer,
     HousingCooperativeServiceSerializer as HCServiceSerializer,
@@ -139,6 +145,59 @@ class HousingCooperativeViewSet(BaseModelViewSet):
 
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'])
+    def charge(self, request, pk=None):
+        charges = []
+        first_day = date.today().replace(day=1)
+        previous_month = first_day - relativedelta(days=1)
+        next_month = date.today() + relativedelta(months=1, day=1)
+        last_day = next_month - relativedelta(days=1)
+        cooperative = HousingCooperative.objects.get(pk=pk)
+        personal_accounts = PersonalAccount.objects.filter(
+            apartment__house__cooperative=cooperative)
+        for personal_account in personal_accounts:
+            apartment = personal_account.apartment
+            # import pdb
+            # pdb.set_trace()
+            meter = ApartmentMeter.objects.filter(apartment=apartment)[0]
+            indicator_beginning = ApartmentMeterIndicator.objects.filter(
+                meter=meter,
+                date__year=previous_month.year,
+                date__month=previous_month.month
+                )[0]
+            indicator_end = ApartmentMeterIndicator.objects.filter(
+                meter=meter,
+                date__year=first_day.year,
+                date__month=first_day.month
+                )[0]
+            tariff = personal_account.get_tariff()
+            value = (indicator_end.value - indicator_beginning.value) * tariff
+            charge = Charge(
+                personal_account=personal_account,
+                date=timezone.now().date(),
+                start_date=first_day,
+                end_date=last_day,
+                tariff=personal_account.get_tariff(),
+                indicator_beginning=indicator_beginning.value,
+                indicator_end=indicator_end.value,
+                value=value
+                )
+            charges.append(charge)
+        context = {
+            'request': request,
+        }
+        serializer = ChargeSerializer(charges, many=True, context=context)
+        for charge in charges:
+            charge.save()
+        return Response(serializer.data)
+        # if serializer.is_valid():
+        #     for charge in charges:
+        #         charge.save()
+        #     return Response(serializer.data)
+        # else:
+        #     return Response(
+        #         serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HouseViewSet(BaseModelViewSet):
@@ -348,6 +407,27 @@ class ApartmentMeterIndicatorViewSet(BaseModelViewSet):
     """
     queryset = ApartmentMeterIndicator.objects.all()
     serializer_class = ApartmentMeterIndicatorSerializer
+
+    def get_permissions(self):
+
+        user = self.request.user
+
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
+
+        return (NoPermissions(), )
+
+
+class ChargeViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows charge to be viewed or edited.
+    """
+    queryset = Charge.objects.all()
+    serializer_class = ChargeSerializer
 
     def get_permissions(self):
 

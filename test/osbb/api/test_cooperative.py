@@ -6,7 +6,10 @@ from django.urls import reverse
 from rest_framework import status
 import json
 
-from osbb.models import HousingCooperative, Service
+from osbb.models import (
+    HousingCooperative,
+    Service,
+)
 from test.osbb.testcase import BaseAPITestCase
 
 

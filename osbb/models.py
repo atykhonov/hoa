@@ -147,6 +147,12 @@ class PersonalAccount(BaseModel):
     apartment = models.OneToOneField(Apartment)
     owner = models.OneToOneField(User, null=True)
 
+    def get_tariff(self):
+        tariff = self.apartment.tariff
+        if not tariff:
+            return self.apartment.house.tariff
+        return tariff
+
 
 class ApartmentTariff(BaseModel):
     apartment = models.ForeignKey(Apartment)
@@ -194,4 +200,11 @@ class HousingCooperativeService(BaseModel):
 
 
 class Charge(BaseModel):
-    pass
+    personal_account = models.ForeignKey(PersonalAccount)
+    date = models.DateField(auto_now_add=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    tariff = models.IntegerField()
+    indicator_beginning = models.CharField(max_length=10)
+    indicator_end = models.CharField(max_length=10)
+    value = models.IntegerField()

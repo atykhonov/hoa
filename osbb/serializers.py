@@ -7,6 +7,7 @@ from osbb.models import (
     Apartment,
     ApartmentMeter,
     ApartmentMeterIndicator,
+    Charge,
     House,
     HousingCooperative,
     HousingCooperativeService,
@@ -14,6 +15,15 @@ from osbb.models import (
     PersonalAccount,
     Service,
 )
+
+
+class ChargeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Charge
+
+        fields = '__all__'
 
 
 class PersonalAccountSerializer(serializers.ModelSerializer):
