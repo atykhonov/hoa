@@ -110,7 +110,8 @@ class HouseViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        if user.is_staff and self.request.method in ('PUT', 'GET', 'POST', ):
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
         return (NoPermissions(), )
@@ -173,9 +174,8 @@ class ApartmentViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_method = self.request.method in (
-            'PUT', 'GET', 'POST', 'DELETE', )
-        if user.is_staff and allowed_method:
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
         return (NoPermissions(), )
