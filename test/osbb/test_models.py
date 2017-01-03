@@ -113,7 +113,7 @@ class HousingCooperativeTestCase(TestCase):
         service = Service(name='service')
         service.save()
         cooperative_service = HousingCooperativeService(
-            housing_cooperative=housing_cooperative,
+            cooperative=housing_cooperative,
             service=service,
             notes=notes,
         )
@@ -132,7 +132,7 @@ class HousingCooperativeTestCase(TestCase):
         service1 = Service(name='service1')
         service1.save()
         cooperative_service1 = HousingCooperativeService(
-            housing_cooperative=housing_cooperative,
+            cooperative=housing_cooperative,
             service=service1,
             notes=notes,
         )
@@ -140,7 +140,7 @@ class HousingCooperativeTestCase(TestCase):
         service2 = Service(name='service2')
         service2.save()
         cooperative_service2 = HousingCooperativeService(
-            housing_cooperative=housing_cooperative,
+            cooperative=housing_cooperative,
             service=service2,
             notes=notes,
         )
@@ -323,11 +323,11 @@ class ApartmentMeterIndicatorTestCase(TestCase):
         apartment_meter = ApartmentMeter(apartment=apartment, meter=meter)
         apartment_meter.save()
         meter_indicator = ApartmentMeterIndicator(
-            apartment_meter=apartment_meter, date=now, value=20)
+            meter=apartment_meter, date=now, value=20)
         meter_indicator.save()
 
         self.assertEqual(
-            apartment_meter.id, meter_indicator.apartment_meter.id)
+            apartment_meter.id, meter_indicator.meter.id)
         self.assertEqual(now, meter_indicator.date)
         self.assertEqual(20, meter_indicator.value)
 

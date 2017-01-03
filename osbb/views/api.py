@@ -9,9 +9,12 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from osbb.models import (
     Apartment,
+    ApartmentMeter,
+    ApartmentMeterIndicator,
     House,
     HousingCooperative,
     HousingCooperativeService as HCService,
+    Meter,
     Service,
 )
 from osbb.permissions import (
@@ -20,9 +23,11 @@ from osbb.permissions import (
 )
 from osbb.serializers import (
     ApartmentSerializer,
+    ApartmentMeterIndicatorSerializer,
     HouseSerializer,
     HousingCooperativeSerializer as HCSerializer,
     HousingCooperativeServiceSerializer as HCServiceSerializer,
+    MeterSerializer,
     ServiceSerializer,
 )
 
@@ -237,6 +242,36 @@ class ApartmentViewSet(BaseModelViewSet):
         serializer = ApartmentSerializer(apartments, many=True)
         return Response(serializer.data)
 
+    @detail_route(methods=['get', 'post'])
+    def meters(self, request, pk):
+        """
+        Return the meters of the house or create a new meter.
+        """
+        apartment = Apartment.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(apartment):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            apartment_meters = ApartmentMeter.objects.filter(apartment=pk)
+            context = {
+                'request': request,
+            }
+            meters = [m.meter for m in apartment_meters]
+            serializer = MeterSerializer(meters, many=True, context=context)
+            return Response(serializer.data)
+        elif request.method == 'POST':
+            serializer = MeterSerializer(data=request.data)
+            if serializer.is_valid():
+                meter = Meter(**serializer.validated_data)
+                meter.save()
+                meter = ApartmentMeter(apartment=apartment, meter=meter)
+                meter.save()
+                return Response(
+                    serializer.validated_data, status=status.HTTP_201_CREATED)
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ServiceViewSet(BaseModelViewSet):
     """
@@ -249,4 +284,78 @@ class ServiceViewSet(BaseModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return (IsAuthenticated(), )
+        return (NoPermissions(), )
+
+
+class MeterViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows meter to be viewed or edited.
+    """
+    queryset = Meter.objects.all()
+    serializer_class = MeterSerializer
+
+    def get_permissions(self):
+
+        user = self.request.user
+
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
+
+        return (NoPermissions(), )
+
+    @detail_route(methods=['get', 'post'])
+    def indicators(self, request, pk):
+        """
+        Return the indicators of the meter or create a new indicator.
+        """
+        meter = Meter.objects.get(pk=pk)
+        apartment_meter = ApartmentMeter.objects.get(meter=meter)
+        user = request.user
+        if not user.can_manage(apartment_meter.get_cooperative()):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            indicators = ApartmentMeterIndicator.objects.filter(
+                meter=apartment_meter)
+            context = {
+                'request': request,
+            }
+            serializer = ApartmentMeterIndicatorSerializer(
+                indicators, many=True, context=context)
+            return Response(serializer.data)
+        elif request.method == 'POST':
+            serializer = ApartmentMeterIndicatorSerializer(data=request.data)
+            if serializer.is_valid():
+                meter = ApartmentMeterIndicator(
+                    meter=apartment_meter, **serializer.validated_data)
+                meter.save()
+                return Response(
+                    serializer.validated_data, status=status.HTTP_201_CREATED)
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApartmentMeterIndicatorViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows apartment meter indicator to be viewed or
+    edited.
+    """
+    queryset = ApartmentMeterIndicator.objects.all()
+    serializer_class = ApartmentMeterIndicatorSerializer
+
+    def get_permissions(self):
+
+        user = self.request.user
+
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
+
         return (NoPermissions(), )

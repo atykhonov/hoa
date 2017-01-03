@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from autofixture import AutoFixture
 from django.urls import reverse
 from rest_framework import status
 import json
 
-from osbb.models import Apartment, House, HousingCooperative
+from osbb.models import Apartment
 from test.osbb.testcase import BaseAPITestCase
 
 

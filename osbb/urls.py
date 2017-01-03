@@ -10,8 +10,10 @@ from osbb.views.home import HomePageView
 from osbb.views.login import LoginPageView, LogoutPageView
 from osbb.views.api import (
     ApartmentViewSet,
+    ApartmentMeterIndicatorViewSet,
     HouseViewSet,
     HousingCooperativeViewSet,
+    MeterViewSet,
     ServiceViewSet,
 )
 
@@ -21,6 +23,9 @@ router.register(r'cooperatives', HousingCooperativeViewSet, 'cooperative')
 router.register(r'houses', HouseViewSet, 'house')
 router.register(r'apartments', ApartmentViewSet, 'apartment')
 router.register(r'services', ServiceViewSet, 'service')
+router.register(r'meters', MeterViewSet, 'meter')
+router.register(
+    r'meter-indicators', ApartmentMeterIndicatorViewSet, 'meter-indicator')
 
 
 urlpatterns = [

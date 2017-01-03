@@ -5,6 +5,22 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+METER_TYPES = (
+    ('HT', 'Heating'),
+    ('EL', 'Electricity'),
+    ('WT', 'Water and wastewater'),
+    ('WH', 'Water heating'),
+    ('GS', 'Gas'),
+)
+
+UNITS = (
+    ('M2', 'Square meters'),
+    ('MK', 'Square meters per kilocalorie'),
+    ('KW', 'Kilowatt'),
+    ('CM', 'Cubic meter'),
+)
+
+
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
@@ -87,9 +103,9 @@ class Tariff(BaseModel):
 
 
 class Meter(BaseModel):
-    type = models.CharField(max_length=10)
+    type = models.CharField(max_length=2, choices=METER_TYPES)
     number = models.CharField(max_length=10)
-    unit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=2, choices=UNITS)
     entry_date = models.DateField(null=True)
     verification_date = models.DateField(null=True)
 
@@ -152,13 +168,25 @@ class HouseTariff(BaseModel):
 
 class ApartmentMeter(BaseModel):
     apartment = models.ForeignKey(Apartment)
-    meter = models.ForeignKey(Meter)
+    meter = models.OneToOneField(Meter)
+
+    def get_cooperative(self):
+        """
+        Return the cooperative of the apartment.
+        """
+        return self.apartment.house.cooperative
 
 
 class ApartmentMeterIndicator(BaseModel):
-    apartment_meter = models.ForeignKey(ApartmentMeter)
+    meter = models.ForeignKey(ApartmentMeter)
     date = models.DateField()
     value = models.IntegerField()
+
+    def get_cooperative(self):
+        """
+        Return the cooperative of the apartment.
+        """
+        return self.meter.apartment.house.cooperative
 
 
 class HousingCooperativeService(BaseModel):
