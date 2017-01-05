@@ -1,0 +1,47 @@
+<div class="bs-docs-section">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="page-header">
+        <h1 id="tables">Об’єднання</h1>
+      </div>
+      <div class="bs-component">
+        <table class="table table-striped table-hover ">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Назва</th>
+              <th>ІПН</th>
+              <th>ЄДРПОУ</th>
+              <th>Свідоцтво</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let association of associations">
+              <td>{{association.id}}</td>
+              <td>{{association.name | slice:0:20}}</td>
+              <td>{{association.individual_tax_number}}</td>
+              <td>{{association.edrpou}}</td>
+              <td>{{association.certificate}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ag-grid-ng2 #agGrid style="width: 100%; height: 350px;" class="ag-fresh"
+
+             [gridOptions]="gridOptions"
+             [columnDefs]="columnDefs"
+             [showToolPanel]="showToolPanel"
+             [rowData]="rowData"
+
+             enableColResize
+             enableSorting
+             enableFilter
+
+             rowHeight="22"
+             rowSelection="multiple">
+
+</ag-grid-ng2>
