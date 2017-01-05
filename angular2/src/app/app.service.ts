@@ -130,8 +130,6 @@ export class AssociationService {
 
   private extractAssociations(response: Response) {
     let body = response.json();
-    console.log('Response Body: ');
-    console.log(body);
-    return body.results || { };
+    return body || { };
   }
 }
