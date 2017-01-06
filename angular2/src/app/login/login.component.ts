@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
 import { AuthenticationService } from '../app.service';
 
 @Component({
-    templateUrl: 'login.component.html'
+  templateUrl: 'login.component.html',
+  styleUrls: ['login.component.css']
 })
 
 export class LoginComponent implements OnInit {
@@ -21,7 +22,7 @@ export class LoginComponent implements OnInit {
 
     ngOnInit() {
         // reset login status
-        this.authenticationService.logout();
+        // this.authenticationService.logout();
     }
 
     login() {

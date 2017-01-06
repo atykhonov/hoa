@@ -2,7 +2,8 @@ import {
   Component,
   OnInit
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'foo',
@@ -26,11 +27,17 @@ export class FooComponent implements OnInit {
 
   public localState: any;
   constructor(
-    public route: ActivatedRoute
-  ) { }
+    public activatedRoute: ActivatedRoute,
+    public router: Router
+  ) {
+
+    console.log('URL: ');
+    console.log(this.router.url);
+  }
 
   public ngOnInit() {
-    this.route
+
+    this.activatedRoute
       .data
       .subscribe((data: any) => {
         // your resolved data from route

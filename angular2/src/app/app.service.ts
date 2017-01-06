@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs';
-import { Association } from './association';
+import { Association } from './association/association.model';
 import 'rxjs/add/operator/map'
 
 import { User } from './user';
@@ -43,42 +43,42 @@ export class AppState {
 
 @Injectable()
 export class AuthenticationService {
-    public token: string;
+  public token: string;
 
-    constructor(private http: Http) {
-        // set token if saved in local storage
-        var currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        this.token = currentUser && currentUser.token;
-    }
+  constructor(private http: Http) {
+    // set token if saved in local storage
+    var currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    this.token = currentUser && currentUser.token;
+  }
 
   login(email: string, password: string): Observable<boolean> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     return this.http.post('http://localhost:8000/api-token-auth/', JSON.stringify({ email: email, password: password }), options)
-            .map((response: Response) => {
-                // login successful if there's a jwt token in the response
-                let token = response.json() && response.json().token;
-                if (token) {
-                    // set token property
-                    this.token = token;
+      .map((response: Response) => {
+        // login successful if there's a jwt token in the response
+        let token = response.json() && response.json().token;
+        if (token) {
+          // set token property
+          this.token = token;
 
-                    // store username and jwt token in local storage to keep user logged in between page refreshes
-                    localStorage.setItem('currentUser', JSON.stringify({ email: email, token: token }));
+          // store username and jwt token in local storage to keep user logged in between page refreshes
+          localStorage.setItem('currentUser', JSON.stringify({ email: email, token: token }));
 
-                    // return true to indicate successful login
-                    return true;
-                } else {
-                    // return false to indicate failed login
-                    return false;
-                }
-            });
-    }
+          // return true to indicate successful login
+          return true;
+        } else {
+          // return false to indicate failed login
+          return false;
+        }
+      });
+  }
 
-    logout(): void {
-        // clear token remove user from local storage to log user out
-        this.token = null;
-        localStorage.removeItem('currentUser');
-    }
+  logout(): void {
+    // clear token remove user from local storage to log user out
+    this.token = null;
+    localStorage.removeItem('currentUser');
+  }
 
   private getHeaders(){
     let headers = new Headers();
@@ -96,9 +96,7 @@ export class UserService {
     }
 
     getUsers(): Observable<User[]> {
-        // add authorization header with jwt token
       let headers = new Headers({
-        // 'Authorization': 'JWT ' + this.authenticationService.token,
         'Content-Type': 'application/json'
       });
       let options = new RequestOptions({ headers: headers });
@@ -111,7 +109,9 @@ export class UserService {
 @Injectable()
 export class AssociationService {
 
-  private associationsUrl = 'http://localhost:8000/api/v1/cooperatives/?page=2';
+  private associationsUrl = 'http://localhost:8000/api/v1/cooperatives/';
+
+  private associationUrl = 'http://localhost:8000/api/v1/cooperatives/';
 
   constructor(
     private http: Http,
@@ -119,17 +119,55 @@ export class AssociationService {
   }
 
   getAssociations(): Observable<Association[]> {
+    return this.http.get(
+      this.associationsUrl,
+      this.getRequestOptions(),
+    ).map((response: Response) => {
+      let body = response.json();
+      return body || { };
+    });
+  }
+
+  addAssociation(association: Association): Observable<Association> {
+    return this.http.post(
+      this.associationsUrl,
+      JSON.stringify(association),
+      this.getRequestOptions()
+    ).map((response: Response) => {
+      let body = response.json();
+      return body || {};
+    })
+  }
+
+  updateAssociation(association: Association): Observable<Association> {
+    let url = `${this.associationUrl}${association.id}/`;
+    return this.http.put(
+      url,
+      JSON.stringify(association),
+      this.getRequestOptions()
+    ).map((response: Response) => {
+      let body = response.json();
+      return body || {};
+    })
+  }
+
+  deleteAssociation(association: Association): Observable<Association> {
+    let url = `${this.associationUrl}${association.id}/`;
+    return this.http.delete(
+      url,
+      this.getRequestOptions()
+    ).map((response: Response) => {
+      let body = response.json();
+      console.log(body);
+      return body || {};
+    })
+  }
+
+  private getRequestOptions(): RequestOptions {
     let headers = new Headers({
       'Authorization': ' JWT ' + this.authenticationService.token,
       'Content-Type': 'application/json'
     });
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.associationsUrl, options)
-      .map(this.extractAssociations);
-  }
-
-  private extractAssociations(response: Response) {
-    let body = response.json();
-    return body || { };
+    return new RequestOptions({ headers: headers });    
   }
 }

@@ -1,8 +1,11 @@
 <div class="bs-docs-section">
   <div class="row">
     <div class="col-md-12">
-      <div class="page-header">
-        <h1 id="tables">Об’єднання</h1>
+      <h1 id="tables">Об’єднання</h1>
+      <div class="btn-group">
+        <a (click)="show()">
+          <i class="material-icons">add_circle_outline</i> Додати об’єднання
+        </a>
       </div>
       <div class="bs-component">
         <table class="table table-striped table-hover ">
@@ -13,6 +16,7 @@
               <th>ІПН</th>
               <th>ЄДРПОУ</th>
               <th>Свідоцтво</th>
+              <th>Дії</th>
             </tr>
           </thead>
           <tbody>
@@ -22,9 +26,125 @@
               <td>{{association.individual_tax_number}}</td>
               <td>{{association.edrpou}}</td>
               <td>{{association.certificate}}</td>
+              <td>
+                <a (click)="editAssociation(association)">
+                  <i class="material-icons">mode_edit</i>
+                </a>
+                <a (click)="deleteAssociation(association)">
+                  <i class="material-icons">remove_circle_outline</i>
+                </a>
+              </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}"
+     [ngStyle]="{'display': visible ? 'block' : 'none', 'opacity': visibleAnimate ? 1 : 0}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form name="form" (ngSubmit)="f.form.valid && submitAssociation()" #f="ngForm" novalidate>
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"
+                  aria-hidden="true" (click)="hide()">×</button>
+          <h4 class="modal-title">Додати ОСББ</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="name">Назва</label>
+            <input type="text" class="form-control"
+                   id="name"
+                   name="name"
+                   [(ngModel)]="model.name"
+                   #name="ngModel"
+                   required />
+            <div *ngIf="f.submitted && !name.valid" class="alert alert-danger">
+              Це поле є обов’язковим
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="individual_tax_number">ІПН</label>
+            <input type="text" class="form-control"
+                   id="individual_tax_number"
+                   name="individual_tax_number"
+                   [(ngModel)]="model.individual_tax_number"
+                   #individual_tax_number="ngModel">
+          </div>
+          <div class="form-group">
+            <label for="edrpou">ЄДРПОУ</label>
+            <input type="text" class="form-control"
+                   id="edrpou"
+                   name="edrpou"
+                   [(ngModel)]="model.edrpou"
+                   #edrpou="ngModel">
+          </div>
+          <div class="form-group">
+            <label for="certificate">Свідоцтво</label>
+            <input type="text" class="form-control"
+                   id="certificate"
+                   name="certificate"
+                   [(ngModel)]="model.certificate"
+                   #certificate="ngModel">
+          </div>
+          <div class="form-group">
+            <label for="legal_address">Юридична адреса</label>
+            <input type="text" class="form-control"
+                   id="legal_address"
+                   name="legal_address"
+                   [(ngModel)]="model.legal_address"
+                   #legal_address="ngModel">
+          </div>
+          <div class="form-group">
+            <label for="physical_address">Фізична адреса</label>
+            <input type="text" class="form-control"
+                   id="physical_address"
+                   name="physical_address"
+                   [(ngModel)]="model.physical_address"
+                   #physical_address="ngModel">
+          </div>
+          <div class="form-group">
+            <label for="phone_number">Телефон</label>
+            <input type="text" class="form-control"
+                   id="phone_number"
+                   name="phone_number"
+                   [(ngModel)]="model.phone_number"
+                   #phone_number="ngModel">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" (click)="hide()">Close</button>
+
+          <!-- <button [disabled]="loading" class="btn btn-lg btn-primary">
+               <span *ngIf="loading" class="glyphicon glyphicon-refresh spinning"></span> Login
+               </button>
+             -->
+          <button [disabled]="loading" type="submit" class="btn btn-primary">
+            <span *ngIf="loading" class="glyphicon glyphicon-refresh spinning"></span> Save changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="processing modal fade in" data-backdrop="static" data-keyboard="false"
+     tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel"
+     [ngStyle]="{'display': processing ? 'block' : 'none'}">
+  <div class="modal-backdrop fade in"></div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Обробляється...</h4>
+      </div>
+      <div class="modal-body">
+        <div class="progress progress-striped active" style="margin-bottom:0;">
+          <div class="progress-bar" style="width: 100%">
+          </div>
+        </div>        
       </div>
     </div>
   </div>

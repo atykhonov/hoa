@@ -1,10 +1,13 @@
 export class Association {
-  id: number;
-  name: string;
-  individual_tax_number: string;
-  edrpou: string;
-  certificate: string;
-  legal_address: string;
-  physical_address: string;
-  phone_number: string;
+
+  constructor(
+    public name: string,
+    public individual_tax_number?: string,
+    public edrpou?: string,
+    public certificate?: string,
+    public legal_address?: string,
+    public physical_address?: string,
+    public phone_number?: string,
+    public id?: number,
+  ) { }
 }
