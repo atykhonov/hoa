@@ -1,0 +1,13 @@
+<md-dialog delete-dialog>
+  <md-dialog-content class="md-dialog-content">
+    <h2 class="md-title">Видалення Квартири</h2>
+    <p class="md-warn" ng-if="error" layout="row" layout-align="start center">
+      <md-icon>error_outline</md-icon>
+      <span>&nbsp; {{error}}</span>
+    </p>
+  </md-dialog-content>
+  <div class="md-actions">
+    <md-button class="md-primary" ng-click="ctrl.deletionConfirmed()">Видалити</md-button>
+    <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+  </div>
+</md-dialog>

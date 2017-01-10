@@ -1,0 +1,86 @@
+<md-card>
+  <md-toolbar class="md-table-toolbar md-default" ng-hide="selected.length || filter.show">
+    <div class="md-toolbar-tools">
+      <h2 class="md-title">Квартири</h2>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="filter.show = true">
+        <md-icon>filter_list</md-icon>
+      </md-button>
+      <md-button class="md-icon-button" ng-click="addApartment($event)">
+        <md-icon>add_circle_outline</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-toolbar class="md-table-toolbar md-default" ng-show="filter.show && !selected.length">
+    <div class="md-toolbar-tools">
+      <md-icon>search</md-icon>
+      <form flex name="filter.form">
+        <input type="text" ng-model="query.filter" ng-model-options="filter.options" placeholder="search">
+      </form>
+      <md-button class="md-icon-button" ng-click="removeFilter()">
+        <md-icon>close</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-toolbar class="md-table-toolbar alternate" ng-show="selected.length">
+    <div class="md-toolbar-tools">
+      <div>{{selected.length}} {{selected.length > 1 ? 'items' : 'item'}} selected</div>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="editApartment($event)">
+        <md-icon style="{{selected.length > 1 ? 'color: rgba(0,0,0,0.28);' : ''}}">
+          edit
+        </md-icon>
+      </md-button>
+      <md-button class="md-icon-button" ng-click="deleteApartment($event)">
+        <md-icon>delete</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <!-- exact table from live demo -->
+  <md-table-container>
+    <table md-table md-row-select multiple ng-model="selected" md-progress="promise" class="md-data-table">
+      <thead md-head md-order="query.order" md-on-reorder="getApartments">
+        <tr md-row>
+          <th md-column md-string>Будинок</th>
+          <th md-column md-numeric md-order-by="number"><span>Номер</span></th>
+          <th md-column md-numeric>Поверх</th>
+          <th md-column md-numeric>Під’їзд</th>
+          <th md-column md-numeric>К-сть кімнат</th>
+          <th md-column md-numeric>Загальна пл.</th>
+          <th md-column md-numeric>Житлова пл.</th>
+          <th md-column md-numeric>Опалювальна пл.</th>
+          <th md-column md-numeric>Тариф</th>
+          <th md-column>Власник</th>
+        </tr>
+      </thead>
+      <tbody md-body>
+        <tr md-row md-select="apartment" md-select-id="id" md-auto-select ng-repeat="apartment in apartments.data">
+          <td md-cell>{{apartment.house.name}}</td>
+          <td md-cell>{{apartment.number}}</td>
+          <td md-cell>{{apartment.floor}}</td>
+          <td md-cell>{{apartment.entrance}}</td>
+          <td md-cell>{{apartment.room_number}}</td>
+          <td md-cell>{{apartment.total_area}}</td>
+          <td md-cell>{{apartment.dwelling_space}}</td>
+          <td md-cell>{{apartment.heating_area}}</td>
+          <td md-cell>{{apartment.tariff}}</td>
+          <td md-cell>
+            <div ng-if="apartment.account.first_name == '' && apartment.account.last_name == ''">
+              <md-button ng-click="editAccount($event, apartment.id)">
+                <md-icon>account_circle</md-icon>
+              </md-button>
+            </div>
+            <div ng-if="apartment.account.first_name != '' || apartment.account.last_name != ''">
+              {{apartment.account.first_name}} {{apartment.account.last_name}}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </md-table-container>
+
+  <md-table-pagination md-limit="query.limit" md-limit-options="[5, 10, 15]" md-page="query.page" md-total="{{apartments.count}}" md-on-paginate="getApartments" md-page-select></md-table-pagination>
+</md-card>

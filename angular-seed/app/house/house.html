@@ -1,0 +1,67 @@
+<md-card>
+  <md-toolbar class="md-table-toolbar md-default" ng-hide="selected.length || filter.show">
+    <div class="md-toolbar-tools">
+      <h2 class="md-title">Будинки</h2>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="filter.show = true">
+        <md-icon>filter_list</md-icon>
+      </md-button>
+      <md-button class="md-icon-button" ng-click="addHouse($event)">
+        <md-icon>add_circle_outline</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-toolbar class="md-table-toolbar md-default" ng-show="filter.show && !selected.length">
+    <div class="md-toolbar-tools">
+      <md-icon>search</md-icon>
+      <form flex name="filter.form">
+        <input type="text" ng-model="query.filter" ng-model-options="filter.options" placeholder="search">
+      </form>
+      <md-button class="md-icon-button" ng-click="removeFilter()">
+        <md-icon>close</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-toolbar class="md-table-toolbar alternate" ng-show="selected.length">
+    <div class="md-toolbar-tools">
+      <div>{{selected.length}} {{selected.length > 1 ? 'items' : 'item'}} selected</div>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="editHouse($event)">
+        <md-icon style="{{selected.length > 1 ? 'color: rgba(0,0,0,0.28);' : ''}}">
+          edit
+        </md-icon>
+      </md-button>
+      <md-button class="md-icon-button" ng-click="deleteHouse($event)">
+        <md-icon>delete</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <!-- exact table from live demo -->
+  <md-table-container>
+    <table md-table md-row-select multiple ng-model="selected" md-progress="promise">
+      <thead md-head md-order="query.order" md-on-reorder="getHouses">
+        <tr md-row>
+          <th md-column md-string>ОСББ</th>
+          <th md-column md-order-by="name"><span>Назва</span></th>
+          <th md-column md-string>Адреса</th>
+          <th md-column md-string>Тариф</th>
+          <th md-column md-string>Квартири</th>
+        </tr>
+      </thead>
+      <tbody md-body>
+        <tr md-row md-select="house" md-select-id="id" md-auto-select ng-repeat="house in houses.data">
+          <td md-cell>{{house.cooperative.name}}</td>
+          <td md-cell>{{house.name}}</td>
+          <td md-cell>{{house.address}}</td>
+          <td md-cell>{{house.tariff}}</td>
+          <td md-cell><a href="#!/houses/{{house.id}}/apartments">{{house.apartments_count}}</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </md-table-container>
+
+  <md-table-pagination md-limit="query.limit" md-limit-options="[5, 10, 15]" md-page="query.page" md-total="{{houses.count}}" md-on-paginate="getHouses" md-page-select></md-table-pagination>
+</md-card>

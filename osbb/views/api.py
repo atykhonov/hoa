@@ -20,7 +20,7 @@ from osbb.models import (
     HousingCooperative,
     HousingCooperativeService as HCService,
     Meter,
-    PersonalAccount,
+    Account,
     Service,
 )
 from osbb.permissions import (
@@ -28,6 +28,7 @@ from osbb.permissions import (
     NoPermissions,
 )
 from osbb.serializers import (
+    AccountSerializer,
     ApartmentSerializer,
     ApartmentMeterIndicatorSerializer,
     ChargeSerializer,
@@ -50,6 +51,41 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response({
             'details': 'You do not have permission to perform this action.',
             }, status=status.HTTP_403_FORBIDDEN)
+
+    def get_page(self, request):
+        """
+        Retrieve from the `request` and return `page` parameter.
+        """
+        try:
+            page = int(request.query_params.get('page'))
+        except (ValueError, TypeError):
+            page = 1
+        page -= 1
+        return page
+
+    def get_limit(self, request):
+        """
+        Retrieve from the `request` and return `limit` parameter.
+        """
+        try:
+            limit = int(request.query_params.get('limit'))
+        except (ValueError, TypeError):
+            limit = 5
+        return limit
+
+    def list_paginated(self, request, queryset, serializer_class):
+        order = request.query_params.get('order', 'name')
+        limit = self.get_limit(request)
+        offset = self.get_page(request) * limit
+        limit = offset + limit
+        queryset = queryset.order_by(order).all()
+        queryset = queryset[offset:limit]
+        serializer = serializer_class(queryset, many=True)
+        data = {
+            'data': serializer.data,
+            'count': queryset.count(),
+        }
+        return Response(data)
 
 
 class HousingCooperativeViewSet(BaseModelViewSet):
@@ -82,7 +118,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
     def list(self, request):
         if request.user.is_staff and not request.user.is_superuser:
             return self._get_permission_denied_response()
-        return super(HousingCooperativeViewSet, self).list(request)
+        return self.list_paginated(
+            request, HousingCooperative.objects, HCSerializer)
 
     @detail_route(methods=['get', 'post'])
     def houses(self, request, pk):
@@ -95,15 +132,13 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             houses = House.objects.filter(cooperative=pk)
-            context = {
-                'request': request,
-            }
-            serializer = HouseSerializer(houses, many=True, context=context)
-            return Response(serializer.data)
+            return self.list_paginated(request, houses, HouseSerializer)
         elif request.method == 'POST':
             serializer = HouseSerializer(data=request.data)
             if serializer.is_valid():
-                House(cooperative=cooperative, **serializer.validated_data)
+                house = House(
+                    cooperative=cooperative, **serializer.validated_data)
+                house.save()
                 return Response(
                     serializer.validated_data, status=status.HTTP_201_CREATED)
 
@@ -154,7 +189,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         next_month = date.today() + relativedelta(months=1, day=1)
         last_day = next_month - relativedelta(days=1)
         cooperative = HousingCooperative.objects.get(pk=pk)
-        personal_accounts = PersonalAccount.objects.filter(
+        accounts = Account.objects.filter(
             apartment__house__cooperative=cooperative)
         for personal_account in personal_accounts:
             apartment = personal_account.apartment
@@ -227,15 +262,10 @@ class HouseViewSet(BaseModelViewSet):
         if request.user.is_superuser:
             houses = House.objects.all()
         else:
-            houses = House.objects.filter(cooperative=request.user.cooperative)
+            houses = House.objects.filter(
+                cooperative=request.user.cooperative)
 
-        page = self.paginate_queryset(houses)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = HouseSerializer(houses, many=True)
-        return Response(serializer.data)
+        return self.list_paginated(request, houses, HouseSerializer)
 
     @detail_route(methods=['get', 'post'])
     def apartments(self, request, pk):
@@ -248,17 +278,15 @@ class HouseViewSet(BaseModelViewSet):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             apartments = Apartment.objects.filter(house=pk)
-            context = {
-                'request': request,
-            }
-            serializer = ApartmentSerializer(
-                apartments, many=True, context=context)
-            return Response(serializer.data)
+            return self.list_paginated(
+                request, apartments, ApartmentSerializer)
         elif request.method == 'POST':
             serializer = ApartmentSerializer(data=request.data)
             if serializer.is_valid():
                 apartment = Apartment(house=house, **serializer.validated_data)
-                PersonalAccount(apartment=apartment)
+                apartment.save()
+                account = Account(apartment=apartment)
+                account.save()
                 response_data = serializer.validated_data
                 response_data['id'] = apartment.id
                 return Response(
@@ -295,13 +323,7 @@ class ApartmentViewSet(BaseModelViewSet):
             apartments = Apartment.objects.filter(
                 house__cooperative=request.user.cooperative)
 
-        page = self.paginate_queryset(apartments)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ApartmentSerializer(apartments, many=True)
-        return Response(serializer.data)
+        return self.list_paginated(request, apartments, ApartmentSerializer)
 
     @detail_route(methods=['get', 'post'])
     def meters(self, request, pk):
@@ -327,6 +349,36 @@ class ApartmentViewSet(BaseModelViewSet):
                 meter.save()
                 meter = ApartmentMeter(apartment=apartment, meter=meter)
                 meter.save()
+                return Response(
+                    serializer.validated_data, status=status.HTTP_201_CREATED)
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['get', 'put'])
+    def account(self, request, pk):
+        """
+        Return the account of the apartment or update the account.
+        """
+        apartment = Apartment.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(apartment):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            account = Account.objects.filter(apartment=pk)
+            context = {
+                'request': request,
+            }
+            serializer = AccountSerializer(account, context=context)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            account = apartment.account
+            serializer = AccountSerializer(data=request.data, partial=True)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                account.first_name = validated_data.get('first_name')
+                account.last_name = validated_data.get('last_name')
+                account.save()
                 return Response(
                     serializer.validated_data, status=status.HTTP_201_CREATED)
 

@@ -72,3 +72,10 @@ npm-debug.log
 *.css.shim.ts
 *.ngsummary.json
 *.shim.ngstyle.ts
+logs/*
+!.gitkeep
+node_modules/
+bower_components/
+tmp
+.DS_Store
+.idea

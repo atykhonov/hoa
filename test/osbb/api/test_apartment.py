@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 import json
 
-from osbb.models import Apartment, PersonalAccount
+from osbb.models import Apartment, Account
 from test.osbb.testcase import BaseAPITestCase
 
 
@@ -40,8 +40,8 @@ class TestApartmentByAdmin(BaseAPITestCase):
         self.assertEqual(
             data['heating_area'], response_content['heating_area'])
         self.assertEqual(data['tariff'], response_content['tariff'])
-        pa = PersonalAccount.objects.filter(apartment=response_content['id'])
-        self.assertIsNotNone(pa)
+        account = Account.objects.filter(apartment=response_content['id'])
+        self.assertIsNotNone(account)
 
     def test_deletion(self):
         """

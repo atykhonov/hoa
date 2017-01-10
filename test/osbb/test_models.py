@@ -18,7 +18,7 @@ from osbb.models import (
     HousingCooperative,
     HousingCooperativeService,
     Meter,
-    PersonalAccount,
+    Account,
     Service,
     User,
 )
@@ -238,7 +238,7 @@ class ApartmentTestCase(TestCase):
         self.assertEqual(hc.id, cooperative.id)
 
 
-class PersonalAccountTestCase(TestCase):
+class AccountTestCase(TestCase):
 
     def test_personal_account_creation(self):
         """
@@ -253,16 +253,16 @@ class PersonalAccountTestCase(TestCase):
         house.save()
         apartment = Apartment(house=house, number=10)
         apartment.save()
-        personal_account = PersonalAccount(
+        account = Account(
             apartment=apartment,
             uid=uid,
             owner=user,
         )
 
-        personal_account.save()
+        account.save()
 
-        self.assertEqual(apartment.id, personal_account.apartment.id)
-        self.assertEqual(uid, personal_account.uid)
+        self.assertEqual(apartment.id, account.apartment.id)
+        self.assertEqual(uid, account.uid)
 
     def test_get_tariff_apartment(self):
         """
@@ -276,9 +276,9 @@ class PersonalAccountTestCase(TestCase):
         house.save()
         apartment.tariff = 20000
         apartment.save()
-        personal_account = PersonalAccount(apartment=apartment)
+        account = Account(apartment=apartment)
 
-        self.assertEqual(20000, personal_account.get_tariff())
+        self.assertEqual(20000, account.get_tariff())
 
     def test_get_tariff_house(self):
         """
@@ -289,9 +289,9 @@ class PersonalAccountTestCase(TestCase):
         house = apartment.house
         house.tariff = 10000
         house.save()
-        personal_account = PersonalAccount(apartment=apartment)
+        account = Account(apartment=apartment)
 
-        self.assertEqual(10000, personal_account.get_tariff())
+        self.assertEqual(10000, account.get_tariff())
 
 
 class ServiceTestCase(TestCase):

@@ -15,7 +15,7 @@ from osbb.models import (
     House,
     HousingCooperative,
     Meter,
-    PersonalAccount,
+    Account,
 )
 from test.osbb.testcase import BaseAPITestCase
 
@@ -59,12 +59,12 @@ class TestCharge(BaseAPITestCase):
         self.create_indicators(self.apartment2, 40, 50)
         self.create_indicators(self.apartment3, 60, 70)
 
-        pa1 = PersonalAccount(apartment=self.apartment1)
-        pa1.save()
-        pa2 = PersonalAccount(apartment=self.apartment2)
-        pa2.save()
-        pa3 = PersonalAccount(apartment=self.apartment3)
-        pa3.save()
+        account1 = Account(apartment=self.apartment1)
+        account1.save()
+        account2 = Account(apartment=self.apartment2)
+        account2.save()
+        account3 = Account(apartment=self.apartment3)
+        account3.save()
 
         url = reverse(
             'cooperative-charge', kwargs={'pk': self.cooperative1.id})

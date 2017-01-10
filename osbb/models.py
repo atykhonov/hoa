@@ -41,6 +41,22 @@ class HousingCooperative(BaseModel):
     legal_address = models.CharField(max_length=255, blank=True)
     physical_address = models.CharField(max_length=255, blank=True)
     phone_number = models.CharField(max_length=13, blank=True)
+
+    def manager(self):
+        """
+        Return the manager of the cooperative.
+        """
+        managers = self.user_set.all()
+        if managers:
+            return managers[0]
+        else:
+            return None
+
+    def houses_count(self):
+        """
+        Return count of houses which belongs to the cooperative.
+        """
+        return self.house_set.count()
     # manager = models.OneToOneField(User, null=True)  # joined with auth_user
     # accountant = models.OneToOneField()  # joined with auth_user
     # pasportyst = models.OneToOneField()  # joined with auth_user
@@ -60,7 +76,8 @@ class User(AbstractUser):
         unique=True,
     )
 
-    cooperative = models.ForeignKey(HousingCooperative, null=True)
+    cooperative = models.ForeignKey(
+        HousingCooperative, models.SET_NULL, blank=True, null=True)
 
     def is_manager(self):
         """
@@ -116,6 +133,12 @@ class House(BaseModel):
     address = models.CharField(max_length=100, blank=True)
     tariff = models.IntegerField(default=None, null=True)
 
+    def apartments_count(self):
+        """
+        Return count of aparments which belongs to the house.
+        """
+        return self.apartment_set.count()
+
     def get_cooperative(self):
         """
         Return the cooperative of the house.
@@ -133,7 +156,6 @@ class Apartment(BaseModel):
     dwelling_space = models.FloatField(null=True)
     heating_area = models.FloatField(null=True)
     tariff = models.IntegerField(default=None, null=True)
-    # TODO: family_members =
 
     def get_cooperative(self):
         """
@@ -142,10 +164,15 @@ class Apartment(BaseModel):
         return self.house.cooperative
 
 
-class PersonalAccount(BaseModel):
+class Account(BaseModel):
     uid = models.CharField(max_length=100)
     apartment = models.OneToOneField(Apartment)
     owner = models.OneToOneField(User, null=True)
+    first_name = models.CharField(
+        blank=True, max_length=30, verbose_name='first name')
+    last_name = models.CharField(
+        blank=True, max_length=30, verbose_name='last name')
+    is_staff = models.BooleanField(default=False, verbose_name='staff status')
 
     def get_tariff(self):
         tariff = self.apartment.tariff
@@ -200,7 +227,7 @@ class HousingCooperativeService(BaseModel):
 
 
 class Charge(BaseModel):
-    personal_account = models.ForeignKey(PersonalAccount)
+    personal_account = models.ForeignKey(Account)
     date = models.DateField(auto_now_add=True)
     start_date = models.DateField()
     end_date = models.DateField()

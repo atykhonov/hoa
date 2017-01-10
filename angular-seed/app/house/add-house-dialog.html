@@ -1,0 +1,49 @@
+<form name="item.form" ng-submit="ctrl.addHouse()">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Додати Будинок</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
+
+      <div layout="row" class="input-row">
+        <!-- <md-input-container flex>
+             <label>ОСББ</label>
+             <md-select ng-model="house.cooperative_id" required>
+             <md-option ng-repeat="association in associations.data" value="{{association.id}}">
+             {{association.name}}
+             </md-option>
+             </md-select>
+             </md-input-container> -->
+        <md-input-container flex>
+          <label>Назва</label>
+          <input name="name" ng-model="house.name" md-maxlength="20" required>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Адреса</label>
+          <input name="address" ng-model="house.address" md-maxlength="20" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Тариф</label>
+          <input name="tariff" ng-model="house.tariff" required>
+        </md-input-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" ng-if="ctrl.add == true"
+                 class="md-primary" ng-disabled="item.form.$invalid">Додати Будинок</md-button>
+      <md-button type="submit" ng-if="ctrl.edit == true"
+                 class="md-primary" ng-click="ctrl.updateHouse()"
+                 ng-disabled="item.form.$invalid">Зберегти Будинок</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

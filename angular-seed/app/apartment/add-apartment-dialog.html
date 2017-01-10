@@ -1,0 +1,63 @@
+<form name="item.form" ng-submit="ctrl.addApartment()">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Додати Квартиру</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Номер</label>
+          <input name="name" ng-model="apartment.number" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Поверх</label>
+          <input name="floor" ng-model="apartment.floor" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Під’їзд</label>
+          <input name="entrance" ng-model="apartment.entrance" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>К-сть кімнат</label>
+          <input name="room_number" ng-model="apartment.room_number" required>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Загальна площа</label>
+          <input name="total_area" ng-model="apartment.total_area" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Житлова площа</label>
+          <input name="dwelling_space" ng-model="apartment.dwelling_space" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Опалювальна площа</label>
+          <input name="heating_area" ng-model="apartment.heating_area" required>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Індивідуальний тариф квартплати</label>
+          <input name="tariff" ng-model="apartment.tariff">
+        </md-input-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" ng-if="ctrl.add == true"
+                 class="md-primary" ng-disabled="item.form.$invalid">Додати Будинок</md-button>
+      <md-button type="submit" ng-if="ctrl.edit == true"
+                 class="md-primary" ng-click="ctrl.updateApartment()"
+                 ng-disabled="item.form.$invalid">Зберегти Будинок</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

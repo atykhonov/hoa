@@ -12,9 +12,23 @@ from osbb.models import (
     HousingCooperative,
     HousingCooperativeService,
     Meter,
-    PersonalAccount,
+    Account,
     Service,
+    User,
 )
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = User
+
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+        )
 
 
 class ChargeSerializer(serializers.ModelSerializer):
@@ -26,16 +40,18 @@ class ChargeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PersonalAccountSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        model = PersonalAccount
+        model = Account
 
         fields = (
             'uid',
             'apartment',
             'owner',
+            'first_name',
+            'last_name',
             )
 
 
@@ -112,6 +128,8 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
     meters = ApartmentMeterSerializer(many=True, read_only=True)
 
+    account = AccountSerializer(read_only=True)
+
     class Meta:
 
         model = Apartment
@@ -127,6 +145,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'heating_area',
             'meters',
             'tariff',
+            'account',
             )
 
     # def create(self, validated_data):
@@ -144,16 +163,21 @@ class HouseSerializer(serializers.ModelSerializer):
         model = House
         fields = (
             'id',
+            'cooperative',
             'name',
             'address',
             'apartments',
             'tariff',
+            'apartments_count',
             )
+        depth = 1
 
 
 class HousingCooperativeSerializer(serializers.ModelSerializer):
 
     houses = HouseSerializer(many=True, read_only=True)
+
+    manager = UserSerializer(read_only=True)
 
     class Meta:
         model = HousingCooperative
@@ -167,4 +191,6 @@ class HousingCooperativeSerializer(serializers.ModelSerializer):
             'legal_address',
             'physical_address',
             'phone_number',
+            'manager',
+            'houses_count',
             )
