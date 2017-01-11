@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from osbb.models import (
@@ -15,6 +16,7 @@ from osbb.models import (
     Account,
     Service,
     User,
+    UNITS,
 )
 
 
@@ -97,7 +99,30 @@ class ApartmentMeterSerializer(serializers.ModelSerializer):
             )
 
 
+class ServiceSerializer(serializers.ModelSerializer):
+
+    unit_translated = serializers.SerializerMethodField()
+
+    class Meta:
+
+        model = Service
+
+        fields = (
+            'id',
+            'name',
+            'unit',
+            'unit_translated',
+            )
+
+    def get_unit_translated(self, obj):
+        for unit in UNITS:
+            if unit[0] == obj.unit:
+                return _(unit[1])
+
+
 class HousingCooperativeServiceSerializer(serializers.ModelSerializer):
+
+    service = ServiceSerializer(read_only=True)
 
     class Meta:
 
@@ -109,19 +134,7 @@ class HousingCooperativeServiceSerializer(serializers.ModelSerializer):
             'service',
             'notes',
             )
-
-
-class ServiceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-
-        model = Service
-
-        fields = (
-            'id',
-            'name',
-            'unit',
-            )
+        depth = 1
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
@@ -148,12 +161,6 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'account',
             )
 
-    # def create(self, validated_data):
-    #     profile_data = validated_data.pop('profile')
-    #     user = User.objects.create(**validated_data)
-    #     Profile.objects.create(user=user, **profile_data)
-    #     return user
-
 
 class HouseSerializer(serializers.ModelSerializer):
 
@@ -179,6 +186,8 @@ class HousingCooperativeSerializer(serializers.ModelSerializer):
 
     manager = UserSerializer(read_only=True)
 
+    services = HousingCooperativeServiceSerializer(many=True, read_only=True)
+
     class Meta:
         model = HousingCooperative
         fields = (
@@ -193,4 +202,14 @@ class HousingCooperativeSerializer(serializers.ModelSerializer):
             'phone_number',
             'manager',
             'houses_count',
+            'services',
             )
+
+    def create(self, validated_data):
+        cooperative = HousingCooperative.objects.create(**validated_data)
+        cooperative.save()
+        service = Service.objects.get(required=True)
+        hc_service = HousingCooperativeService.objects.create(
+            cooperative=cooperative, service=service)
+        hc_service.save()
+        return cooperative

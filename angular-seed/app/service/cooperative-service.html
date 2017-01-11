@@ -1,12 +1,12 @@
 <md-card>
   <md-toolbar class="md-table-toolbar md-default" ng-hide="selected.length || filter.show">
     <div class="md-toolbar-tools">
-      <h2 class="md-title">Будинки</h2>
+      <h2 class="md-title">Послуги</h2>
       <div flex></div>
       <md-button class="md-icon-button" ng-click="filter.show = true">
         <md-icon>filter_list</md-icon>
       </md-button>
-      <md-button class="md-icon-button" ng-click="addHouse($event)">
+      <md-button class="md-icon-button" ng-click="assignService($event)">
         <md-icon>add_circle_outline</md-icon>
       </md-button>
     </div>
@@ -28,12 +28,12 @@
     <div class="md-toolbar-tools">
       <div>{{selected.length}} {{selected.length > 1 ? 'items' : 'item'}} selected</div>
       <div flex></div>
-      <md-button class="md-icon-button" ng-click="editHouse($event)">
+      <md-button class="md-icon-button" ng-click="editService($event)">
         <md-icon style="{{selected.length > 1 ? 'color: rgba(0,0,0,0.28);' : ''}}">
           edit
         </md-icon>
       </md-button>
-      <md-button class="md-icon-button" ng-click="deleteHouse($event)">
+      <md-button class="md-icon-button" ng-click="unassignService($event)">
         <md-icon>delete</md-icon>
       </md-button>
     </div>
@@ -41,32 +41,26 @@
 
   <!-- exact table from live demo -->
   <md-table-container>
-    <table md-table md-row-select multiple ng-model="selected" md-progress="promise">
-      <thead md-head md-order="query.order" md-on-reorder="getHouses">
+    <table md-table md-row-select multiple ng-model="selected" md-progress="promise" class="md-data-table">
+      <thead md-head md-order="query.order" md-on-reorder="getServices">
         <tr md-row>
           <th md-column md-string>ОСББ</th>
-          <th md-column md-string md-order-by="name"><span>Назва</span></th>
-          <th md-column md-string>Адреса</th>
-          <th md-column md-string>Тариф</th>
-          <th md-column md-string>Квартири</th>
+          <th md-column md-string>Послуга</th>
+          <th md-column md-string>Одиниці вимірювання</th>
+          <th md-column md-string>Коментарі</th>
         </tr>
       </thead>
       <tbody md-body>
-        <tr md-row md-select="house" md-select-id="id" md-auto-select ng-repeat="house in houses.data">
-          <td md-cell>{{house.cooperative.name}}</td>
-          <td md-cell>{{house.name}}</td>
-          <td md-cell>{{house.address}}</td>
-          <td md-cell>{{house.tariff}}</td>
-          <td md-cell>
-            <!-- <a href="#!/houses/{{house.id}}/apartments">{{house.apartments_count}}</a> -->
-            <md-button ng-click="viewApartments($event, house.id)" class="nav-btn">
-              <md-icon class="md-default-theme" class="material-icons">view_quilt</md-icon>
-            </md-button>
-          </td>
+        <tr md-row md-select="service" md-select-id="id" md-auto-select ng-repeat="service in services.data">
+          <td md-cell>{{service.cooperative.name}}</td>
+          <td md-cell>{{service.service.name}}</td>
+          <td md-cell ng-bind-html="service.service.unit_translated | trust"></td>
+          <td md-cell>{{service.notes ? service.notes : '—'}}</td>
         </tr>
       </tbody>
     </table>
   </md-table-container>
 
-  <md-table-pagination md-limit="query.limit" md-limit-options="[5, 10, 15]" md-page="query.page" md-total="{{houses.count}}" md-on-paginate="getHouses" md-page-select></md-table-pagination>
+  <md-table-pagination md-limit="query.limit" md-limit-options="[5, 10, 15]" md-page="query.page" md-total="{{services.count}}" md-on-paginate="getServices" md-page-select></md-table-pagination>
+
 </md-card>

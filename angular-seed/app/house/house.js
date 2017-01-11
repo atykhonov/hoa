@@ -15,8 +15,8 @@ angular.module('myApp.house', ['ngRoute'])
 
   .controller(
   'HouseCtrl',
-  ['$mdDialog', '$resources', '$scope', '$routeParams',
-    function ($mdDialog, $resources, $scope, $routeParams) {
+  ['$mdDialog', '$resources', '$scope', '$routeParams', '$location',
+    function ($mdDialog, $resources, $scope, $routeParams, $location) {
 
       var bookmark;
 
@@ -34,6 +34,10 @@ angular.module('myApp.house', ['ngRoute'])
         order: 'name',
         page: 1
       };
+
+      $scope.viewApartments = function (event, house_id) {
+        $location.url('/houses/' + house_id + '/apartments/');
+      }
 
       $scope.addHouse = function (event) {
         $mdDialog.show({

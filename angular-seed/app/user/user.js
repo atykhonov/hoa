@@ -15,7 +15,9 @@ angular.module('myApp.user', ['ngRoute'])
 
     function handleRequest(res) {
       var token = res.data ? res.data.token : null;
-      if (token) { console.log('JWT:', token); }
+      // if (token) { console.log('JWT:', token); }
+      console.log('Response: ');
+      console.log(res);
       self.message = res.data.message;
       auth.saveToken(token);
     }

@@ -4,14 +4,18 @@ from __future__ import unicode_literals
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
+from django.db import IntegrityError
 from django.utils import timezone
+from django.utils.translation import ugettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from osbb.models import (
+    Account,
     Apartment,
     ApartmentMeter,
     ApartmentMeterIndicator,
@@ -22,6 +26,7 @@ from osbb.models import (
     Meter,
     Account,
     Service,
+    UNITS,
 )
 from osbb.permissions import (
     IsManager,
@@ -78,9 +83,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         limit = self.get_limit(request)
         offset = self.get_page(request) * limit
         limit = offset + limit
-        queryset = queryset.order_by(order).all()
-        queryset = queryset[offset:limit]
-        serializer = serializer_class(queryset, many=True)
+        qset = queryset.order_by(order).all()
+        qset = qset[offset:limit]
+        serializer = serializer_class(qset, many=True)
         data = {
             'data': serializer.data,
             'count': queryset.count(),
@@ -147,7 +152,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
                 'message': 'House could not be created with received data'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['get', 'post'])
+    @detail_route(methods=['get', 'post', 'delete'])
     def services(self, request, pk):
         """
         Return the houses of the cooperative or create a new house.
@@ -158,28 +163,40 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             hc_services = HCService.objects.filter(cooperative=pk)
-            context = {
-                'request': request,
-            }
-            serializer = HCServiceSerializer(
-                hc_services, many=True, context=context)
-            return Response(serializer.data)
+            return self.list_paginated(
+                request, hc_services, HCServiceSerializer)
         elif request.method == 'POST':
             data = request.data
             data['cooperative'] = cooperative.id
-            serializer = HCServiceSerializer(data=data)
+            service = Service.objects.get(pk=data.get('service'))
+            serializer = HCServiceSerializer(data=data, partial=True)
             if serializer.is_valid():
                 validated_data = serializer.validated_data
-                HCService(**validated_data)
+                hc_service = HCService(
+                    cooperative=cooperative, service=service, **validated_data)
+                try:
+                    hc_service.save()
+                except IntegrityError:
+                    message = _(
+                        'For the given condominium service already exists')
+                    return Response(
+                        message, status=status.HTTP_400_BAD_REQUEST)
                 response_data = {
-                    'cooperative': validated_data['cooperative'].id,
-                    'service': validated_data['service'].id,
-                    'notes': validated_data['notes'],
+                    'cooperative': cooperative.id,
+                    'service': service.id,
+                    'notes': validated_data.get('notes'),
                 }
                 return Response(response_data, status=status.HTTP_201_CREATED)
-
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'DELETE':
+            try:
+                hc_service_id = int(request.query_params.get('service_id'))
+            except ValueError:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            hc_service = HCService.objects.get(pk=hc_service_id)
+            hc_service.delete()
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(methods=['post'])
     def charge(self, request, pk=None):
@@ -191,8 +208,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         cooperative = HousingCooperative.objects.get(pk=pk)
         accounts = Account.objects.filter(
             apartment__house__cooperative=cooperative)
-        for personal_account in personal_accounts:
-            apartment = personal_account.apartment
+        for account in accounts:
+            apartment = account.apartment
             # import pdb
             # pdb.set_trace()
             meter = ApartmentMeter.objects.filter(apartment=apartment)[0]
@@ -206,14 +223,14 @@ class HousingCooperativeViewSet(BaseModelViewSet):
                 date__year=first_day.year,
                 date__month=first_day.month
                 )[0]
-            tariff = personal_account.get_tariff()
+            tariff = account.get_tariff()
             value = (indicator_end.value - indicator_beginning.value) * tariff
             charge = Charge(
-                personal_account=personal_account,
+                account=account,
                 date=timezone.now().date(),
                 start_date=first_day,
                 end_date=last_day,
-                tariff=personal_account.get_tariff(),
+                tariff=account.get_tariff(),
                 indicator_beginning=indicator_beginning.value,
                 indicator_end=indicator_end.value,
                 value=value
@@ -399,6 +416,52 @@ class ServiceViewSet(BaseModelViewSet):
             return (IsAuthenticated(), )
         return (NoPermissions(), )
 
+    def list(self, request):
+        services = Service.objects.all()
+        return self.list_paginated(request, services, ServiceSerializer)
+
+
+class UnitViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows units to be viewed.
+    """
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+
+    def get_permissions(self):
+        user = self.request.user
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+        return (NoPermissions(), )
+
+    def list(self, request):
+        services = Service.objects.all()
+        return self.list_paginated(request, services, ServiceSerializer)
+
+
+class AccountViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows accounts to be viewed or edited.
+    """
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+
+    def get_permissions(self):
+        user = self.request.user
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+        return (NoPermissions(), )
+
+    def list(self, request):
+        if request.user.is_superuser:
+            accounts = Account.objects.all()
+        else:
+            cooperative = request.user.cooperative
+            accounts = Account.objects.filter(
+                account__apartment__house__cooperative=cooperative)
+
+        return self.list_paginated(request, accounts, AccountSerializer)
+
 
 class MeterViewSet(BaseModelViewSet):
     """
@@ -493,3 +556,20 @@ class ChargeViewSet(BaseModelViewSet):
             return (IsManager(), )
 
         return (NoPermissions(), )
+
+
+class UnitAPIView(APIView):
+    """
+    API endpoint that allows units to be viewed.
+    """
+    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        """
+        Return a list of all units.
+        """
+        units = {}
+        for item in UNITS:
+            units[item[0]] = _(item[1])
+        return Response({'data': units})

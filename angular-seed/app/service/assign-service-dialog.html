@@ -1,0 +1,43 @@
+<form name="item.form" ng-submit="ctrl.assignService()">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Додати Послугу</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
+
+      <p ng-if="error" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; {{ error }}</span>
+      </p>
+
+      <div layout="row" class="input-row">
+        <md-input-container class="md-block" flex-gt-sm>
+          <label>Послуга</label>
+          <md-select ng-model="service.service">
+            <md-option ng-repeat="service in services" value="{{service.id}}">
+              {{service.name}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Примітки</label>
+          <input name="notes" ng-model="service.notes" md-maxlength="255">
+        </md-input-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" class="md-primary"
+                 ng-disabled="item.form.$invalid">Зберегти</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

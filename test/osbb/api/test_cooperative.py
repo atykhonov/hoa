@@ -8,6 +8,7 @@ import json
 
 from osbb.models import (
     HousingCooperative,
+    HousingCooperativeService,
     Service,
 )
 from test.osbb.testcase import BaseAPITestCase
@@ -47,6 +48,27 @@ class TestCooperativeByAdmin(BaseAPITestCase):
         self.assertEqual(legal_address, hc.legal_address)
         self.assertEqual(physical_address, hc.physical_address)
         self.assertEqual(phone_number, hc.phone_number)
+
+    def test_creation_default_service(self):
+        """
+        The default service is created and assign to the cooperative when
+        the cooperative is created.
+        """
+        url = reverse('cooperative-list')
+        data = {
+            'name': 'test',
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        query = HousingCooperative.objects.filter(name='test')
+        hc = query[0]
+        self.assertTrue(query.exists())
+        query = HousingCooperativeService.objects.filter(cooperative=hc)
+        self.assertTrue(query.exists())
+        service = query[0].service
+        self.assertTrue(service.required)
+        self.assertEqual('Квартплата', service.name)
 
     def test_deleting(self):
         """

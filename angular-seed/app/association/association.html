@@ -1,7 +1,23 @@
 <md-card>
   <md-toolbar class="md-table-toolbar md-default" ng-hide="selected.length || filter.show">
     <div class="md-toolbar-tools">
-      <h2 class="md-title">Об’єднання (ОСББ)</h2>
+      <h2 class="md-title">ОСББ</h2>
+
+      <!-- <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar">
+           <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">
+           <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_balance</md-icon> Об’єднання (ОСББ)
+           </md-nav-item>
+           <md-nav-item md-nav-click="nbc.gotoHouses()" name="houses">
+           <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">location_city</md-icon> Будинки
+           </md-nav-item>
+           <md-nav-item md-nav-click="nbc.gotoApartments()" name="apartments">
+           <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">view_quilt</md-icon> Квартири
+           </md-nav-item>
+           <md-nav-item md-nav-click="nbc.gotoServices()" name="services">
+           <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">poll</md-icon> Послуги
+           </md-nav-item>
+           </md-nav-bar> -->
+      
       <div flex></div>
       <md-button class="md-icon-button" ng-click="filter.show = true">
         <md-icon>filter_list</md-icon>
@@ -49,11 +65,10 @@
           <th md-column md-string>Юридична адреса</th>
           <th md-column md-string>Фізична адреса</th>
           <th md-column md-string>Телефон</th>
-          <th md-column md-string>Керівник</th>
-          <th md-column md-string>Бухгалтер</th>
-          <th md-column md-string>Паспортист</th>
+          <th md-column md-string>Працівники</th>
           <th md-column md-string>Рахунки</th>
-          <th md-column md-string>Будинки</th>
+          <th md-column>Послуги</th>
+          <th md-column>Будинки</th>
         </tr>
       </thead>
       <tbody md-body>
@@ -82,11 +97,24 @@
           <td md-cell>{{association.legal_address}}</td>
           <td md-cell>{{association.physical_address}}</td>
           <td md-cell>{{association.phone_number}}</td>
-          <td md-cell>{{association.manager.first_name}} {{association.manager.last_name}}</td>
+          <td md-cell>
+            <md-button ng-click="editServices($event, association.id)" class="nav-btn">
+              <md-icon class="md-default-theme" class="material-icons">people</md-icon>
+            </md-button>
+          </td>
           <td md-cell></td>
-          <td md-cell></td>
-          <td md-cell></td>
-          <td md-cell><a href="#!/associations/{{association.id}}/houses">{{association.houses_count}}</a></td>
+          <td md-cell>
+            <md-button ng-click="editServices($event, association.id)" class="nav-btn">
+              <md-icon class="md-default-theme" class="material-icons">layers</md-icon>
+            </md-button>
+          </td>
+          <td md-cell>
+            <md-button ng-click="viewHouses($event, association.id)" class="nav-btn">
+              <!-- <a href="#!/associations/{{association.id}}/houses/"> -->
+              <md-icon class="md-default-theme" class="material-icons">location_city</md-icon>
+              <!-- </a> -->
+            </md-button>
+          </td>
         </tr>
       </tbody>
     </table>

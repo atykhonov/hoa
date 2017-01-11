@@ -111,7 +111,10 @@ class User(AbstractUser):
 
 class Service(BaseModel):
     name = models.CharField(max_length=50)
-    unit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=2, choices=UNITS)
+    # Required services are called services which are automatically
+    # created when cooperative is created.
+    required = models.BooleanField(default=False)
 
 
 class Tariff(BaseModel):
@@ -134,6 +137,7 @@ class House(BaseModel):
     tariff = models.IntegerField(default=None, null=True)
 
     def apartments_count(self):
+
         """
         Return count of aparments which belongs to the house.
         """
@@ -221,9 +225,12 @@ class ApartmentMeterIndicator(BaseModel):
 
 class HousingCooperativeService(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative)
-    service = models.OneToOneField(Service)
+    service = models.ForeignKey(Service)
     # FIXME: Review max length 255, may be increase.
     notes = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = (('cooperative', 'service', ), )
 
 
 class Charge(BaseModel):

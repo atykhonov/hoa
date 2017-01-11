@@ -9,98 +9,109 @@ angular.module('myApp.association', ['ngRoute'])
     });
   }])
 
-  .controller('AssociationCtrl', ['$mdDialog', '$resources', '$scope', function ($mdDialog, $resources, $scope) {
+  .controller(
+  'AssociationCtrl',
+  ['$mdDialog', '$resources', '$scope', '$location',
+    function ($mdDialog, $resources, $scope, $location) {
 
-    var bookmark;
+      var bookmark;
 
-    $scope.selected = [];
+      $scope.selected = [];
 
-    $scope.filter = {
-      options: {
-        debounce: 500
+      $scope.filter = {
+        options: {
+          debounce: 500
+        }
+      };
+
+      $scope.query = {
+        filter: '',
+        limit: '5',
+        order: 'name',
+        page: 1
+      };
+
+      $scope.editServices = function (event, association_id) {
+        $location.url('/cooperative/' + association_id + '/services/');
       }
-    };
 
-    $scope.query = {
-      filter: '',
-      limit: '5',
-      order: 'name',
-      page: 1
-    };
+      $scope.viewHouses = function (event, association_id) {
+        $location.url('/associations/' + association_id + '/houses/');
+      }
 
-    $scope.addAssociation = function (event) {
-      $mdDialog.show({
-        clickOutsideToClose: true,
-        controller: 'AddAssociationController',
-        controllerAs: 'ctrl',
-        focusOnOpen: true,
-        targetEvent: event,
-        templateUrl: 'association/add-association-dialog.html',
-      }).then($scope.getAssociations);
-    };
-
-    $scope.deleteAssociation = function (event) {
-      $mdDialog.show({
-        clickOutsideToClose: true,
-        controller: 'DeleteAssociationController',
-        controllerAs: 'ctrl',
-        focusOnOpen: false,
-        targetEvent: event,
-        locals: { associations: $scope.selected },
-        templateUrl: 'association/delete-dialog.html',
-      }).then($scope.getAssociations);
-    };
-
-    $scope.editAssociation = function (event) {
-      if ($scope.selected.length > 1) {
-        alert('Для редагування виберіть тільки один елемент.');
-      } else {
+      $scope.addAssociation = function (event) {
         $mdDialog.show({
           clickOutsideToClose: true,
-          controller: 'EditController',
+          controller: 'AddAssociationController',
           controllerAs: 'ctrl',
           focusOnOpen: true,
           targetEvent: event,
-          locals: { association: $scope.selected[0] },
           templateUrl: 'association/add-association-dialog.html',
         }).then($scope.getAssociations);
+      };
+
+      $scope.deleteAssociation = function (event) {
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'DeleteAssociationController',
+          controllerAs: 'ctrl',
+          focusOnOpen: false,
+          targetEvent: event,
+          locals: { associations: $scope.selected },
+          templateUrl: 'association/delete-dialog.html',
+        }).then($scope.getAssociations);
+      };
+
+      $scope.editAssociation = function (event) {
+        if ($scope.selected.length > 1) {
+          alert('Для редагування виберіть тільки один елемент.');
+        } else {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'EditController',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { association: $scope.selected[0] },
+            templateUrl: 'association/add-association-dialog.html',
+          }).then($scope.getAssociations);
+        }
+      };
+
+      function success(associations) {
+        $scope.associations = associations;
       }
-    };
 
-    function success(associations) {
-      $scope.associations = associations;
-    }
+      $scope.getAssociations = function () {
+        $scope.promise = $resources.cooperatives.get($scope.query, success).$promise;
+      };
 
-    $scope.getAssociations = function () {
-      $scope.promise = $resources.cooperatives.get($scope.query, success).$promise;
-    };
+      $scope.removeFilter = function () {
+        $scope.filter.show = false;
+        $scope.query.filter = '';
 
-    $scope.removeFilter = function () {
-      $scope.filter.show = false;
-      $scope.query.filter = '';
+        if ($scope.filter.form.$dirty) {
+          $scope.filter.form.$setPristine();
+        }
+      };
 
-      if ($scope.filter.form.$dirty) {
-        $scope.filter.form.$setPristine();
-      }
-    };
+      $scope.$watch('query.filter', function (newValue, oldValue) {
+        if (!oldValue) {
+          bookmark = $scope.query.page;
+        }
 
-    $scope.$watch('query.filter', function (newValue, oldValue) {
-      if (!oldValue) {
-        bookmark = $scope.query.page;
-      }
+        if (newValue !== oldValue) {
+          $scope.query.page = 1;
+        }
 
-      if (newValue !== oldValue) {
-        $scope.query.page = 1;
-      }
+        if (!newValue) {
+          $scope.query.page = bookmark;
+        }
 
-      if (!newValue) {
-        $scope.query.page = bookmark;
-      }
+        $scope.getAssociations();
+      });
 
-      $scope.getAssociations();
-    });
-
-  }])
+    }])
 
   .controller('AddAssociationController',
   ['$mdDialog', '$resources', '$scope',

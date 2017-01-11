@@ -83,6 +83,7 @@ angular.module('myApp', [
   'myApp.house',
   'myApp.apartment',
   'myApp.account',
+  'myApp.service',
   'myApp.navbar'
 ])
   .factory('authInterceptor', authInterceptor)
@@ -98,7 +99,13 @@ angular.module('myApp', [
         'http://localhost:8080/api/v1/houses/:house_id/apartments/',
         { house_id: '@house_id' }),
       apartments: $resource('http://localhost:8080/api/v1/apartments/:id/'),
-      apartment_account: $resource('http://localhost:8080/api/v1/apartments/:id/account/')
+      apartment_account: $resource('http://localhost:8080/api/v1/apartments/:id/account/'),
+      accounts: $resource('http://localhost:8080/api/v1/accounts/:id/'),
+      services: $resource('http://localhost:8080/api/v1/services/:id/'),
+      cooperative_services: $resource(
+        'http://localhost:8080/api/v1/cooperatives/:cooperative_id/services/',
+        { cooperative_id: '@cooperative_id' }),
+      units: $resource('http://localhost:8080/api/v1/units/'),
     };
   }])
   .service('user', userService)
@@ -112,7 +119,7 @@ angular.module('myApp', [
     $httpProvider.interceptors.push('authInterceptor');
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')
-      .accentPalette('pink');
+      .accentPalette('deep-orange');
   }])
   .config(['$resourceProvider', function ($resourceProvider) {
     $resourceProvider.defaults.stripTrailingSlashes = false;
@@ -124,7 +131,7 @@ angular.module('myApp', [
       delete: { method: 'DELETE' }
     };
   }])
-  .run(['$rootScope', '$location', '$routeParams', function ($rootScope, $location, $routeParams) {
+  .run(['$rootScope', '$location', '$routeParams', '$window', '$http', function ($rootScope, $location, $routeParams, $window, $http) {
     $rootScope.$on('$routeChangeSuccess', function (e, current, pre) {
       if (current.$$route !== undefined) {
         $rootScope.currentNavItem = 'associations';
@@ -133,7 +140,28 @@ angular.module('myApp', [
         }
       }
     });
+
+    // keep user logged in after page refresh
+    if ($window.localStorage['jwtToken']) {
+      $http.defaults.headers.common.Authorization = 'JWT ' + $window.localStorage['jwtToken'];
+    }
+
+    // redirect to login page if not logged in and trying to access a restricted page
+    $rootScope.$on('$locationChangeStart', function (event, next, current) {
+      var publicPages = ['/user'];
+      var restrictedPage = publicPages.indexOf($location.path()) === -1;
+      if (restrictedPage && !$window.localStorage['jwtToken']) {
+        $location.path('/user');
+      }
+    });
   }])
   .controller('RootController', ['$scope', function ($scope, $state) {
     $scope.currentNavItem = 'associations';
+  }])
+
+  .filter("trust", ['$sce', function ($sce) {
+    return function (htmlCode) {
+      return $sce.trustAsHtml(htmlCode);
+    }
   }]);
+

@@ -152,3 +152,15 @@ md-dialog[add-item-dialog] > md-dialog-content > form > .input-row > md-input-co
 .md-data-table md-icon {
     color: rgba(0,0,0,.54);
 }
+
+.navigation-bar md-icon {
+    color: inherit !important;
+}
+
+.nav-btn {
+    line-height: 40px;
+    width: 40px;
+    height: 40px;
+    display: block;
+    min-width: 0;
+}

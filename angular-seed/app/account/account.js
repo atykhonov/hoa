@@ -35,7 +35,7 @@ angular.module('myApp.account', ['ngRoute'])
         page: 1
       };
 
-      $scope.addApartment = function (event) {
+      $scope.addAccount = function (event) {
         $mdDialog.show({
           clickOutsideToClose: true,
           controller: 'AddAccountController',
@@ -112,7 +112,7 @@ angular.module('myApp.account', ['ngRoute'])
           $scope.query.page = bookmark;
         }
 
-        $scope.getApartments();
+        $scope.getAccounts();
       });
 
     }])
@@ -129,8 +129,7 @@ angular.module('myApp.account', ['ngRoute'])
         $mdDialog.hide(account);
       }
 
-      this.addAccount = function () {
-        $scope.account['apartment_id'] = $routeParams.id;
+      this.saveAccount = function () {
         $scope.promise = $resources.apartment_owner.create(
           $scope.apartment, success).$promise;
       }

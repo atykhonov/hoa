@@ -31,3 +31,18 @@ msgstr "Увійти"
 
 msgid "Password"
 msgstr "Пароль"
+
+msgid "Kilowatt"
+msgstr "кВт"
+
+msgid "Cubic meter"
+msgstr "м<sup>3</sup>"
+
+msgid "Square meters"
+msgstr "м<sup>2</sup>"
+
+msgid "Square meters per kilocalorie"
+msgstr "м<sup>2</sup>/кКал"
+
+msgid "For the given condominium service already exists"
+msgstr "Для даного ОСББ послуга вже додана."

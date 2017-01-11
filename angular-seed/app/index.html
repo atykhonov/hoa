@@ -22,23 +22,37 @@
 <body layout="column">
 
   <md-content class="md-padding" ng-controller="NavbarCtrl as nbc">
-    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links">
-      <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">Об’єднання (ОСББ)</md-nav-item>
-      <md-nav-item md-nav-click="nbc.gotoHouses()" name="houses">Будинки</md-nav-item>
-      <md-nav-item md-nav-click="nbc.gotoApartments()" name="apartments">Квартири</md-nav-item>
-      <md-nav-item md-nav-click="nbc.gotoAccounts()" name="personal-accounts">Особові рахунки</md-nav-item>
-      <md-nav-item md-nav-click="nbc.gotoCharges()" name="charges">Нарахування</md-nav-item>
+    
+    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar">
+      <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_balance</md-icon> ОСББ
+      </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoHouses()" name="houses">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">location_city</md-icon> Будинки
+      </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoApartments()" name="apartments">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">view_quilt</md-icon> Квартири
+      </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoAccounts()" name="personal-accounts">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_box</md-icon> Особові рахунки
+      </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoCharges()" name="charges">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">poll</md-icon> Нарахування
+      </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoServices()" name="services">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">layers</md-icon> Послуги
+      </md-nav-item>
       <!-- <md-nav-item md-nav-href="#!/view1" name="page1">view1</md-nav-item>
            <md-nav-item md-nav-href="#!/view2" name="page2">view2</md-nav-item> -->
       <md-nav-item md-nav-href="#!/user" name="login">Login</md-nav-item>
     </md-nav-bar>
   </md-content>
-  
+
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <md-content layout="column" flex ng-view></md-content>
+  <md-content layout="column" class="md-padding" flex ng-view></md-content>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
@@ -54,6 +68,7 @@
   <script src="house/house.js"></script>
   <script src="apartment/apartment.js"></script>
   <script src="account/account.js"></script>
+  <script src="service/service.js"></script>
   <script src="navbar/navbar.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>
@@ -63,6 +78,7 @@
   <script src="bower_components/angular-animate/angular-animate.js"></script>
   <script src="bower_components/angular-material/angular-material.js"></script>
   <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
 
   <script type="text/javascript" src="bower_components/angular-material-data-table/dist/md-data-table.min.js"></script>
 
