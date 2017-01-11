@@ -21,7 +21,7 @@
 </head>
 <body layout="column">
 
-  <md-content class="md-padding" ng-controller="NavbarCtrl as nbc">
+  <md-content ng-controller="NavbarCtrl as nbc">
     
     <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar">
       <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">
@@ -52,7 +52,7 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <md-content layout="column" class="md-padding" flex ng-view></md-content>
+  <md-content layout="column" flex ng-view></md-content>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
