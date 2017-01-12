@@ -215,3 +215,7 @@ CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:8000',
     'localhost:8000',
 )
+
+JWT_AUTH = {
+    'JWT_ALLOW_REFRESH': True,
+}

@@ -20,6 +20,7 @@ angular.module('myApp.user', ['ngRoute'])
       console.log(res);
       self.message = res.data.message;
       auth.saveToken(token);
+      // store.set('jwt', res.data.id_token);
     }
 
     $scope.login = function () {
