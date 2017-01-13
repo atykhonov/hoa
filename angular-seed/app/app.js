@@ -100,12 +100,12 @@ var app = angular.module('myApp', [
   'myApp.account',
   'myApp.service',
   'myApp.charge',
+  'myApp.meter',
+  'myApp.indicator',
   'myApp.navbar'
 ]);
 
-// .factory('authInterceptor', authInterceptor)
-
-app.factory('$resources', ['$resource', function ($resource) {
+app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   return {
     cooperatives: $resource('http://localhost:8080/api/v1/cooperatives/:id/'),
     assoc_houses: $resource(
@@ -124,12 +124,17 @@ app.factory('$resources', ['$resource', function ($resource) {
       'http://localhost:8080/api/v1/cooperatives/:cooperative_id/services/',
       { cooperative_id: '@cooperative_id' }),
     units: $resource('http://localhost:8080/api/v1/units/'),
+    cooperative_indicators: $resource(
+      APIV1 + 'cooperatives/:cooperative_id/indicators/')
   };
 }]);
 
+var API_URL = 'http://localhost:8080/';
+
 app.service('user', userService);
 app.service('auth', authService);
-app.constant('API', 'http://localhost:8080/');
+app.constant('API', API_URL);
+app.constant('APIV1', API_URL + 'api/v1/');
 app.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
   $locationProvider.hashPrefix('!');
   $routeProvider.otherwise({ redirectTo: '/' });

@@ -34,4 +34,15 @@ angular.module('myApp.navbar', ['ngRoute'])
         $location.url('services');
       }
 
+      this.gotoLogin = function () {
+        $location.url('login');
+      }
+
+      this.gotoMeters = function () {
+        $location.url('meters');
+      }
+
+      this.gotoIndicators = function () {
+        $location.url('indicators');
+      }
     }]);

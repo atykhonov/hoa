@@ -251,6 +251,21 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         #     return Response(
         #         serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @detail_route(methods=['get'])
+    def indicators(self, request, pk):
+        """
+        Return the indicators of the meters.
+        """
+        cooperative = HousingCooperative.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(cooperative):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            indicators = ApartmentMeterIndicator.objects.filter(
+                meter__apartment__house__cooperative=cooperative)
+            return self.list_paginated(
+                request, indicators, ApartmentMeterIndicatorSerializer)
+
 
 class HouseViewSet(BaseModelViewSet):
     """

@@ -21,7 +21,7 @@
 </head>
 <body layout="column">
 
-  <md-content ng-controller="NavbarCtrl as nbc">
+  <md-content ng-controller="NavbarCtrl as nbc" ng-cloak>
 
     <md-toolbar class="md-hue-2">
       <div class="md-toolbar-tools">
@@ -34,7 +34,7 @@
           </span>
         </h2>
         <span flex></span>
-        <md-button class="md-icon-button" aria-label="Favorite">
+        <md-button class="md-icon-button" aria-label="Favorite" ng-click="nbc.gotoLogin()">
           <md-icon>favorite</md-icon>
         </md-button>
         <md-button class="md-icon-button" aria-label="More">
@@ -56,15 +56,15 @@
       <md-nav-item md-nav-click="nbc.gotoAccounts()" name="personal-accounts">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_box</md-icon> Особові рахунки
       </md-nav-item>
+      <md-nav-item md-nav-click="nbc.gotoIndicators()" name="meters">
+        <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">access_time</md-icon> Показники
+      </md-nav-item>
       <md-nav-item md-nav-click="nbc.gotoCharges()" name="charges">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">poll</md-icon> Нарахування
       </md-nav-item>
       <md-nav-item md-nav-click="nbc.gotoServices()" name="services" ng-if="showMenuItems === true">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">layers</md-icon> Послуги
       </md-nav-item>
-      <!-- <md-nav-item md-nav-href="#!/view1" name="page1">view1</md-nav-item>
-           <md-nav-item md-nav-href="#!/view2" name="page2">view2</md-nav-item> -->
-      <md-nav-item md-nav-href="#!/user" name="login">Login</md-nav-item>
     </md-nav-bar>
   </md-content>
 
@@ -90,6 +90,8 @@
   <script src="account/account.js"></script>
   <script src="service/service.js"></script>
   <script src="charge/charge.js"></script>
+  <script src="meter/meter.js"></script>
+  <script src="indicator/indicator.js"></script>
   <script src="navbar/navbar.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>

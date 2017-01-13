@@ -3,7 +3,7 @@
 angular.module('myApp.user', ['ngRoute'])
 
   .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/user', {
+    $routeProvider.when('/login', {
       templateUrl: 'user/login.html',
       controller: 'UserCtrl'
     });
