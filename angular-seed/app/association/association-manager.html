@@ -87,10 +87,13 @@
         </md-card-title-text>
       </md-card-title>
       <md-card-content>
-        <p>
-          The titles of Washed Out's breakthrough song and the first single from Paracosm share the
-          two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
-        </p>
+        <table md-table multiple ng-model="selected" md-progress="services_promise">
+          <tbody md-body>
+            <tr md-row ng-repeat="item in services.data">
+              <td md-cell>{{item.service.name}}</td>
+            </tr>
+          </tbody>
+        </table>
       </md-card-content>
       <md-card-actions layout="row" layout-align="end center">
         <md-button class="md-icon-button" aria-label="Favorite">

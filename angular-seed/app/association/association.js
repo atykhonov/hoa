@@ -200,16 +200,23 @@ angular.module('myApp.association', ['ngRoute'])
   'AssociationManagerCtrl',
   ['$mdDialog', '$resources', '$scope', '$location', 'auth',
     function ($mdDialog, $resources, $scope, $location, auth) {
-      console.log('Manager Association: ');
-      console.log(auth.getUserInfo());
+
+      $scope.selected = [];
 
       var userInfo = auth.getUserInfo();
       var associationId = userInfo['cooperative_id'];
 
-      function success(association) {
+      function cooperatives_success(association) {
         $scope.association = association;
-        console.log(association);
       }
 
-      $scope.promise = $resources.cooperatives.get({ id: associationId }, success).$promise;
+      function services_succcess(services) {
+        $scope.services = services;
+      }
+
+      $scope.cooperatives_promise = $resources.cooperatives.get(
+        { id: associationId }, cooperatives_success).$promise;
+
+      $scope.services_promise = $resources.cooperative_services.get(
+        { cooperative_id: associationId }, services_succcess).$promise;
     }]);
