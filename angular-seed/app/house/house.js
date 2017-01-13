@@ -3,10 +3,10 @@
 angular.module('myApp.house', ['ngRoute'])
 
   .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/associations/:id/houses', {
-      templateUrl: 'house/house.html',
-      controller: 'HouseCtrl'
-    });
+    // $routeProvider.when('/associations/:id/houses', {
+    //   templateUrl: 'house/house.html',
+    //   controller: 'HouseCtrl'
+    // });
     $routeProvider.when('/houses', {
       templateUrl: 'house/house.html',
       controller: 'HouseCtrl'
@@ -15,10 +15,13 @@ angular.module('myApp.house', ['ngRoute'])
 
   .controller(
   'HouseCtrl',
-  ['$mdDialog', '$resources', '$scope', '$routeParams', '$location',
-    function ($mdDialog, $resources, $scope, $routeParams, $location) {
+  ['$mdDialog', '$resources', '$scope', '$location', 'auth',
+    function ($mdDialog, $resources, $scope, $location, auth) {
 
       var bookmark;
+
+      var userInfo = auth.getUserInfo();
+      var associationId = userInfo['cooperative_id'];
 
       $scope.selected = [];
 
@@ -84,14 +87,9 @@ angular.module('myApp.house', ['ngRoute'])
 
       $scope.getHouses = function () {
         var query = $scope.query;
-        if ($routeParams.id !== undefined) {
-          query['cooperative_id'] = $routeParams.id;
-          $scope.promise = $resources.assoc_houses.get(
-            $scope.query, success).$promise;
-        } else {
-          $scope.promise = $resources.houses.get(
-            $scope.query, success).$promise;
-        }
+        query['cooperative_id'] = associationId;
+        $scope.promise = $resources.assoc_houses.get(
+          $scope.query, success).$promise;
       };
 
       $scope.removeFilter = function () {
@@ -122,8 +120,8 @@ angular.module('myApp.house', ['ngRoute'])
     }])
 
   .controller('AddHouseController',
-  ['$mdDialog', '$resources', '$scope', '$routeParams',
-    function ($mdDialog, $resources, $scope, $routeParams) {
+  ['$mdDialog', '$resources', '$scope',
+    function ($mdDialog, $resources, $scope) {
 
       this.add = true;
 
@@ -134,7 +132,7 @@ angular.module('myApp.house', ['ngRoute'])
       }
 
       this.addHouse = function () {
-        $scope.house['cooperative_id'] = $routeParams.id;
+        $scope.house['cooperative_id'] = associationId;
         $scope.promise = $resources.assoc_houses.create($scope.house, success).$promise;
       }
     }])

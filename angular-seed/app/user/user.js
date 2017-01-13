@@ -9,36 +9,49 @@ angular.module('myApp.user', ['ngRoute'])
     });
   }])
 
-  .controller('UserCtrl', ['$scope', 'user', 'auth', function ($scope, user, auth) {
+  .controller(
+  'UserCtrl',
+  ['$scope', 'user', 'auth', '$rootScope', '$window',
+    function ($scope, user, auth, $rootScope, $window) {
 
-    var self = this;
+      var self = this;
 
-    function handleRequest(res) {
-      var token = res.data ? res.data.token : null;
-      // if (token) { console.log('JWT:', token); }
-      console.log('Response: ');
-      console.log(res);
-      self.message = res.data.message;
-      auth.saveToken(token);
-      // store.set('jwt', res.data.id_token);
-    }
+      function handleRequest(res) {
+        var token = res.data ? res.data.token : null;
+        // if (token) { console.log('JWT:', token); }
+        // console.log('Response: ');
+        // console.log(res);
+        self.message = res.data.message;
+        auth.saveToken(token);
 
-    $scope.login = function () {
-      user.login($scope.email, $scope.password)
-        .then(handleRequest, handleRequest)
-    }
-    self.register = function () {
-      user.register(self.username, self.password)
-        .then(handleRequest, handleRequest)
-    }
-    $scope.getQuote = function () {
-      user.getQuote()
-        .then(handleRequest, handleRequest)
-    }
-    $scope.logout = function () {
-      auth.logout && auth.logout()
-    }
-    $scope.isAuthed = function () {
-      return auth.isAuthed ? auth.isAuthed() : false
-    }
-  }]);
+        var userInfo = undefined;
+        user.getInfo().then(function (response) {
+          auth.saveUserInfo(response.data);
+        });
+      }
+
+      self.parseJwt = function (token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace('-', '+').replace('_', '/');
+        return JSON.parse($window.atob(base64));
+      }
+
+      $scope.login = function () {
+        user.login($scope.email, $scope.password)
+          .then(handleRequest, handleRequest)
+      }
+      self.register = function () {
+        user.register(self.username, self.password)
+          .then(handleRequest, handleRequest)
+      }
+      $scope.getQuote = function () {
+        user.getQuote()
+          .then(handleRequest, handleRequest)
+      }
+      $scope.logout = function () {
+        auth.logout && auth.logout()
+      }
+      $scope.isAuthed = function () {
+        return auth.isAuthed ? auth.isAuthed() : false
+      }
+    }]);

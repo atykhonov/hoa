@@ -3,16 +3,29 @@
 angular.module('myApp.association', ['ngRoute'])
 
   .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/associations', {
+    $routeProvider.when('/', {
+      templateUrl: 'association/association-manager.html',
+      controller: 'AssociationManagerCtrl'
+    });
+    $routeProvider.when('/associations/', {
       templateUrl: 'association/association.html',
       controller: 'AssociationCtrl'
+    });
+    $routeProvider.when('/associations/:id/', {
+      templateUrl: 'association/association-details.html',
+      controller: 'AssociationDetailsCtrl'
     });
   }])
 
   .controller(
   'AssociationCtrl',
-  ['$mdDialog', '$resources', '$scope', '$location',
-    function ($mdDialog, $resources, $scope, $location) {
+  ['$mdDialog', '$resources', '$scope', '$location', '$rootScope',
+    function ($mdDialog, $resources, $scope, $location, $rootScope) {
+
+      console.log('Association ID: ');
+      console.log($rootScope.associationId);
+
+      $scope.test = 'best';
 
       var bookmark;
 
@@ -175,4 +188,28 @@ angular.module('myApp.association', ['ngRoute'])
         return deferred.$promise;
       }
 
+    }])
+
+  .controller(
+  'AssociationDetailsCtrl',
+  ['$mdDialog', '$resources', '$scope', '$location',
+    function ($mdDialog, $resources, $scope, $location) {
+    }])
+
+  .controller(
+  'AssociationManagerCtrl',
+  ['$mdDialog', '$resources', '$scope', '$location', 'auth',
+    function ($mdDialog, $resources, $scope, $location, auth) {
+      console.log('Manager Association: ');
+      console.log(auth.getUserInfo());
+
+      var userInfo = auth.getUserInfo();
+      var associationId = userInfo['cooperative_id'];
+
+      function success(association) {
+        $scope.association = association;
+        console.log(association);
+      }
+
+      $scope.promise = $resources.cooperatives.get({ id: associationId }, success).$promise;
     }]);

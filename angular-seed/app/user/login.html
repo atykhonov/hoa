@@ -1,13 +1,16 @@
-<h1>Simple Angular Auth - Thinkster</h1>
+<md-card>
+  <h1>Simple Angular Auth - Thinkster</h1>
 
-<input type="text" ng-model="email" placeholder="email"><br>
-<input type="password" ng-model="password" placeholder="password"><br>
-<br>
+  <input type="text" ng-model="email" placeholder="email"><br>
+  <input type="password" ng-model="password" placeholder="password"><br>
+  <br>
 
-<button ng-click="user.register()">Register</button>
-<button ng-click="login()">Login</button>
-<button ng-click="logout()" ng-show="isAuthed()">Logout</button>
+  <button ng-click="user.register()">Register</button>
+  <button ng-click="login()">Login</button>
+  <button ng-click="logout()" ng-show="isAuthed()">Logout</button>
 
-<button ng-click="getQuote()">get quote</button>
-<br><br>
-{{message}}
+  <button ng-click="getQuote()">get quote</button>
+  <br><br>
+  {{message}}
+
+</md-card>

@@ -2,26 +2,36 @@
 
 angular.module('myApp.navbar', ['ngRoute'])
 
-  .controller('NavbarCtrl', ['$scope', '$location', function ($scope, $location) {
+  .controller(
+  'NavbarCtrl',
+  ['$scope', '$location', 'auth',
+    function ($scope, $location, auth) {
 
-    this.gotoAssociations = function () {
-      $location.url('associations');
-    }
+      var userInfo = auth.getUserInfo();
+      $scope.associationName = userInfo['cooperative_name'];
 
-    this.gotoHouses = function () {
-      $location.url('houses');
-    }
+      this.gotoAssociations = function () {
+        $location.url('/');
+      }
 
-    this.gotoApartments = function () {
-      $location.url('apartments');
-    }
+      this.gotoHouses = function () {
+        $location.url('houses');
+      }
 
-    this.gotoAccounts = function () {
-      $location.url('accounts');
-    }
+      this.gotoApartments = function () {
+        $location.url('apartments');
+      }
 
-    this.gotoServices = function () {
-      $location.url('services');
-    }
+      this.gotoAccounts = function () {
+        $location.url('accounts');
+      }
 
-  }]);
+      this.gotoCharges = function () {
+        $location.url('charges');
+      }
+
+      this.gotoServices = function () {
+        $location.url('services');
+      }
+
+    }]);

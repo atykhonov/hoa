@@ -450,6 +450,9 @@ class AccountViewSet(BaseModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return (IsAuthenticated(), )
+        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
         return (NoPermissions(), )
 
     def list(self, request):
@@ -458,7 +461,7 @@ class AccountViewSet(BaseModelViewSet):
         else:
             cooperative = request.user.cooperative
             accounts = Account.objects.filter(
-                account__apartment__house__cooperative=cooperative)
+                apartment__house__cooperative=cooperative)
 
         return self.list_paginated(request, accounts, AccountSerializer)
 
@@ -573,3 +576,22 @@ class UnitAPIView(APIView):
         for item in UNITS:
             units[item[0]] = _(item[1])
         return Response({'data': units})
+
+
+class UserAPIView(APIView):
+    """
+    API endpoint that allows user's info to be viewed.
+    """
+    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        """
+        Return a list of all units.
+        """
+        cooperative = request.user.cooperative
+        if request.user.cooperative:
+            return Response({
+                'cooperative_id': cooperative.id,
+                'cooperative_name': cooperative.name,
+            })

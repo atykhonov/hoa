@@ -26,10 +26,12 @@
     <md-toolbar class="md-hue-2">
       <div class="md-toolbar-tools">
         <md-button class="md-icon-button" aria-label="Settings" ng-disabled="true">
-          <md-icon>account_balance</md-icon>
+          <md-icon style="color: rgba(255,255,255,0.87);">account_balance</md-icon>
         </md-button>
         <h2>
-          <span>Кондомініум</span>
+          <span>
+            ОСББ <span ng-if="associationName">«{{associationName}}»</span>
+          </span>
         </h2>
         <span flex></span>
         <md-button class="md-icon-button" aria-label="Favorite">
@@ -57,7 +59,7 @@
       <md-nav-item md-nav-click="nbc.gotoCharges()" name="charges">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">poll</md-icon> Нарахування
       </md-nav-item>
-      <md-nav-item md-nav-click="nbc.gotoServices()" name="services">
+      <md-nav-item md-nav-click="nbc.gotoServices()" name="services" ng-if="showMenuItems === true">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">layers</md-icon> Послуги
       </md-nav-item>
       <!-- <md-nav-item md-nav-href="#!/view1" name="page1">view1</md-nav-item>
@@ -87,6 +89,7 @@
   <script src="apartment/apartment.js"></script>
   <script src="account/account.js"></script>
   <script src="service/service.js"></script>
+  <script src="charge/charge.js"></script>
   <script src="navbar/navbar.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>

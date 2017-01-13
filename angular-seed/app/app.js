@@ -36,9 +36,16 @@ function authService($window, store) {
     store.set('jwt', token);
   }
 
+  self.saveUserInfo = function (info) {
+    store.set('info', info);
+  }
+
+  self.getUserInfo = function () {
+    return store.get('info');
+  }
+
   self.getToken = function () {
     return store.get('jwt');
-    // return $window.localStorage['jwtToken'];
   }
 
   self.isAuthed = function () {
@@ -68,6 +75,10 @@ function userService($http, API, auth) {
       password: password
     })
   };
+
+  self.getInfo = function () {
+    return $http.get(API + 'api/v1/user-info/');
+  }
 }
 
 // Declare app level module which depends on views, and components
@@ -88,6 +99,7 @@ var app = angular.module('myApp', [
   'myApp.apartment',
   'myApp.account',
   'myApp.service',
+  'myApp.charge',
   'myApp.navbar'
 ]);
 

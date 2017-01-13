@@ -1,0 +1,105 @@
+<md-content layout-xs="column" layout="row">
+  <div flex-xs flex-gt-xs="50" layout="column">
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Інформація</span>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <md-table-container>
+          <table md-table>
+            <tbody md-body>
+              <tr md-row>
+                <td md-cell>ІПН:</td>
+                <td md-cell>{{association.individual_tax_number || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>ЄДРПОУ:</td>
+                <td md-cell>{{association.edrpou || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Свідоцтво:</td>
+                <td md-cell>{{association.certificate || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Юридична адреса:</td>
+                <td md-cell>{{association.legal_address || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Фізична адреса:</td>
+                <td md-cell>{{association.physical_address || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Телефон:</td>
+                <td md-cell>{{association.telephone || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Рахунки:</td>
+                <td md-cell>{{association.rahunky || '—'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+      </md-card-content>
+      <md-card-actions layout="row" layout-align="end center">
+        <md-button>Action 1</md-button>
+        <md-button>Action 2</md-button>
+      </md-card-actions>
+    </md-card>
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Працівники</span>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <md-table-container>
+          <table md-table>
+            <tbody md-body>
+              <tr md-row>
+                <td md-cell>Керівник:</td>
+                <td md-cell>{{association.manager || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Бухгалтер:</td>
+                <td md-cell>{{association.buhgalter || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Паспортист:</td>
+                <td md-cell>{{association.pasportyst || '—'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+      </md-card-content>
+      <md-card-actions layout="column" layout-align="start">
+        <md-button>Action 1</md-button>
+        <md-button>Action 2</md-button>
+      </md-card-actions>
+    </md-card>
+  </div>
+  <div flex-xs flex-gt-xs="50" layout="column">
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Послуги</span>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <p>
+          The titles of Washed Out's breakthrough song and the first single from Paracosm share the
+          two most important words in Ernest Greene's musical language: feel it. It's a simple request, as well...
+        </p>
+      </md-card-content>
+      <md-card-actions layout="row" layout-align="end center">
+        <md-button class="md-icon-button" aria-label="Favorite">
+          <md-icon>favourite</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Settings">
+          <md-icon>menu</md-icon>
+        </md-button>
+      </md-card-actions>
+    </md-card>
+  </div>
+</md-content>
