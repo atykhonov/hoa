@@ -28,6 +28,27 @@ class TestHouseByAdmin(BaseAPITestCase):
         self.assertEqual('test', response.data['name'])
         self.assertEqual(10000, response.data['tariff'])
 
+    def test_creation_with_apartments(self):
+        """
+        When a house is created, the defined number of apartments are
+        created for this house.
+        """
+        url = reverse(
+            'cooperative-houses', kwargs={'pk': self.cooperative1.id})
+        data = {
+            'name': 'test',
+            'tariff': 10000,
+            'apartments_count': 2,
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual('test', response.data['name'])
+        self.assertEqual(10000, response.data['tariff'])
+        self.assertEqual(2, response.data['apartments_count'])
+        house = House.objects.get(pk=response.data['id'])
+        self.assertEqual(2, house.apartments.count())
+
     def test_retrieving_list(self):
         """
         All existing houses is retrieved by admin.

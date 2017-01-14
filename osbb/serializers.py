@@ -166,6 +166,9 @@ class HouseSerializer(serializers.ModelSerializer):
 
     apartments = ApartmentSerializer(many=True, read_only=True)
 
+    cooperative = serializers.PrimaryKeyRelatedField(
+        queryset=HousingCooperative.objects.all())
+
     class Meta:
         model = House
         fields = (
@@ -178,6 +181,15 @@ class HouseSerializer(serializers.ModelSerializer):
             'apartments_count',
             )
         depth = 1
+
+    def create(self, validated_data):
+        house = House.objects.create(**validated_data)
+        house.save()
+        if house.apartments_count:
+            for n in range(house.apartments_count):
+                apartment = Apartment.objects.create(house=house, number=n+1)
+                apartment.save()
+        return house
 
 
 class HousingCooperativeSerializer(serializers.ModelSerializer):

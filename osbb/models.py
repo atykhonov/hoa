@@ -56,7 +56,7 @@ class HousingCooperative(BaseModel):
         """
         Return count of houses which belongs to the cooperative.
         """
-        return self.house_set.count()
+        return self.houses.count()
     # manager = models.OneToOneField(User, null=True)  # joined with auth_user
     # accountant = models.OneToOneField()  # joined with auth_user
     # pasportyst = models.OneToOneField()  # joined with auth_user
@@ -131,17 +131,11 @@ class Meter(BaseModel):
 
 
 class House(BaseModel):
-    cooperative = models.ForeignKey(HousingCooperative)
+    cooperative = models.ForeignKey(HousingCooperative, related_name='houses')
     name = models.CharField(max_length=50)
     address = models.CharField(max_length=100, blank=True)
     tariff = models.IntegerField(default=None, null=True)
-
-    def apartments_count(self):
-
-        """
-        Return count of aparments which belongs to the house.
-        """
-        return self.apartment_set.count()
+    apartments_count = models.IntegerField(null=True)
 
     def get_cooperative(self):
         """
@@ -151,7 +145,7 @@ class House(BaseModel):
 
 
 class Apartment(BaseModel):
-    house = models.ForeignKey(House)
+    house = models.ForeignKey(House, related_name='apartments')
     number = models.IntegerField()
     floor = models.IntegerField(null=True)
     entrance = models.IntegerField(null=True)

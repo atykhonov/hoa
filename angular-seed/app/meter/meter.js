@@ -40,7 +40,7 @@ app.controller(
         $location.url('/houses/' + house_id + '/apartments/');
       }
 
-      $scope.addHouse = function (event) {
+      $scope.addMeter = function (event) {
         $mdDialog.show({
           clickOutsideToClose: true,
           controller: 'AddHouseController',
@@ -51,7 +51,7 @@ app.controller(
         }).then($scope.getHouses);
       };
 
-      $scope.deleteHouse = function (event) {
+      $scope.deleteMeter = function (event) {
         $mdDialog.show({
           clickOutsideToClose: true,
           controller: 'DeleteHouseController',
@@ -63,7 +63,7 @@ app.controller(
         }).then($scope.getHouses);
       };
 
-      $scope.editHouse = function (event) {
+      $scope.editMeter = function (event) {
         if ($scope.selected.length > 1) {
           alert('Для редагування виберіть тільки один елемент.');
         } else {
@@ -118,7 +118,7 @@ app.controller(
     }]);
 
 app.controller(
-  'AddHouseController', [
+  'AddMeterController', [
     '$mdDialog', '$resources', '$scope',
     function ($mdDialog, $resources, $scope) {
 
@@ -137,7 +137,7 @@ app.controller(
     }])
 
 app.controller(
-  'DeleteHouseController', [
+  'DeleteMeterController', [
     'houses', '$mdDialog', '$resources', '$scope', '$q',
     function (houses, $mdDialog, $resources, $scope, $q) {
 
@@ -164,7 +164,7 @@ app.controller(
     }]);
 
 app.controller(
-  'EditHouseController', [
+  'EditMeterController', [
     'house', '$mdDialog', '$resources', '$scope', '$q',
     function (house, $mdDialog, $resources, $scope, $q) {
 

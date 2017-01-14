@@ -18,6 +18,8 @@ angular.module('myApp.house', ['ngRoute'])
   ['$mdDialog', '$resources', '$scope', '$location', 'auth',
     function ($mdDialog, $resources, $scope, $location, auth) {
 
+      var self = this;
+
       var bookmark;
 
       var userInfo = auth.getUserInfo();
@@ -119,20 +121,32 @@ angular.module('myApp.house', ['ngRoute'])
 
     }])
 
-  .controller('AddHouseController',
-  ['$mdDialog', '$resources', '$scope',
-    function ($mdDialog, $resources, $scope) {
+  .controller(
+  'AddHouseController', [
+    '$mdDialog', '$resources', '$scope', 'auth',
+    function ($mdDialog, $resources, $scope, auth) {
+
+      var self = this;
 
       this.add = true;
 
       this.cancel = $mdDialog.cancel;
+
+      var userInfo = auth.getUserInfo();
+      self.associationId = userInfo['cooperative_id'];
+
+      console.log(userInfo);
+      console.log('Association ID: ');
+      console.log(self.associationId);
 
       function success(house) {
         $mdDialog.hide(house);
       }
 
       this.addHouse = function () {
-        $scope.house['cooperative_id'] = associationId;
+        $scope.house['cooperative_id'] = self.associationId;
+        console.log('House: ');
+        console.log($scope.house);
         $scope.promise = $resources.assoc_houses.create($scope.house, success).$promise;
       }
     }])

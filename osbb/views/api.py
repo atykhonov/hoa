@@ -79,11 +79,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return limit
 
     def list_paginated(self, request, queryset, serializer_class):
-        order = request.query_params.get('order', 'name')
+        order = request.query_params.get('order', '')
         limit = self.get_limit(request)
         offset = self.get_page(request) * limit
         limit = offset + limit
-        qset = queryset.order_by(order).all()
+        qset = queryset.all()
+        if order:
+            qset = qset.order_by(order)
         qset = qset[offset:limit]
         serializer = serializer_class(qset, many=True)
         data = {
@@ -139,13 +141,12 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             houses = House.objects.filter(cooperative=pk)
             return self.list_paginated(request, houses, HouseSerializer)
         elif request.method == 'POST':
+            request.data['cooperative'] = cooperative.id
             serializer = HouseSerializer(data=request.data)
             if serializer.is_valid():
-                house = House(
-                    cooperative=cooperative, **serializer.validated_data)
-                house.save()
+                serializer.save()
                 return Response(
-                    serializer.validated_data, status=status.HTTP_201_CREATED)
+                    serializer.data, status=status.HTTP_201_CREATED)
 
             return Response({
                 'status': 'Bad Request',
@@ -159,8 +160,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         """
         cooperative = HousingCooperative.objects.get(pk=pk)
         user = request.user
-        if not user.is_superuser:
-            return self._get_permission_denied_response()
+        # if not user.is_superuser:
+        #     return self._get_permission_denied_response()
         if request.method == 'GET':
             hc_services = HCService.objects.filter(cooperative=pk)
             return self.list_paginated(
