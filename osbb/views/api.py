@@ -78,14 +78,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             limit = 5
         return limit
 
-    def list_paginated(self, request, queryset, serializer_class):
-        order = request.query_params.get('order', '')
+    def list_paginated(
+            self, request, queryset, serializer_class, order_by=None):
+        if order_by is None:
+            order_by = request.query_params.get('order', '')
         limit = self.get_limit(request)
         offset = self.get_page(request) * limit
         limit = offset + limit
         qset = queryset.all()
-        if order:
-            qset = qset.order_by(order)
+        if order_by:
+            qset = qset.order_by(order_by)
         qset = qset[offset:limit]
         serializer = serializer_class(qset, many=True)
         data = {
@@ -139,7 +141,14 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             houses = House.objects.filter(cooperative=pk)
-            return self.list_paginated(request, houses, HouseSerializer)
+            order_by = request.query_params.get('order')
+            if 'address' in order_by:
+                if order_by.startswith('-'):
+                    order_by = '-street'
+                else:
+                    order_by = 'street'
+            return self.list_paginated(
+                request, houses, HouseSerializer, order_by)
         elif request.method == 'POST':
             request.data['cooperative'] = cooperative.id
             serializer = HouseSerializer(data=request.data)

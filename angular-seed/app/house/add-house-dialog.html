@@ -19,18 +19,18 @@
              </md-select>
              </md-input-container> -->
         <md-input-container flex>
-          <label>Назва</label>
-          <input name="name" ng-model="house.name" md-maxlength="20" required>
+          <label>Вулиця</label>
+          <input name="street" ng-model="house.street" md-maxlength="20" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Номер</label>
+          <input name="number" ng-model="house.number" required>
         </md-input-container>
       </div>
       <div layout="row" class="input-row">
         <md-input-container flex>
-          <label>Адреса</label>
-          <input name="address" ng-model="house.address" md-maxlength="20" required>
-        </md-input-container>
-        <md-input-container flex>
           <label>Тариф</label>
-          <input name="tariff" ng-model="house.tariff" required>
+          <input name="tariff" ng-model="house.tariff">
         </md-input-container>
         <md-input-container flex>
           <label>Кількість квартир</label>

@@ -149,6 +149,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
         fields = (
             'id',
+            'house',
             'number',
             'floor',
             'entrance',
@@ -161,6 +162,8 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'account',
             )
 
+        depth = 1
+
 
 class HouseSerializer(serializers.ModelSerializer):
 
@@ -169,18 +172,27 @@ class HouseSerializer(serializers.ModelSerializer):
     cooperative = serializers.PrimaryKeyRelatedField(
         queryset=HousingCooperative.objects.all())
 
+    address = serializers.SerializerMethodField()
+
     class Meta:
         model = House
         fields = (
             'id',
             'cooperative',
-            'name',
             'address',
+            'street',
+            'number',
             'apartments',
             'tariff',
             'apartments_count',
             )
-        depth = 1
+
+        depth = 2
+
+    def get_address(self, obj):
+        if obj.street and obj.number:
+            return '{}, {}'.format(obj.street, obj.number)
+        return ''
 
     def create(self, validated_data):
         house = House.objects.create(**validated_data)

@@ -36,7 +36,7 @@ angular.module('myApp.house', ['ngRoute'])
       $scope.query = {
         filter: '',
         limit: '5',
-        order: 'name',
+        order: 'address',
         page: 1
       };
 

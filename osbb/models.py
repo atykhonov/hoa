@@ -132,16 +132,28 @@ class Meter(BaseModel):
 
 class House(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative, related_name='houses')
-    name = models.CharField(max_length=50)
-    address = models.CharField(max_length=100, blank=True)
+    street = models.CharField(max_length=30, blank=True)
+    number = models.IntegerField(default=None, null=True)
     tariff = models.IntegerField(default=None, null=True)
     apartments_count = models.IntegerField(null=True)
+
+    class Meta:
+        ordering = ['street', 'number', ]
 
     def get_cooperative(self):
         """
         Return the cooperative of the house.
         """
         return self.cooperative
+
+    @property
+    def address(self):
+        """
+        Return the address of the house.
+        """
+        if self.street and self.number:
+            return '{}, {}'.format(self.street, self.number)
+        return ''
 
 
 class Apartment(BaseModel):
