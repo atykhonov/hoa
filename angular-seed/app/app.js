@@ -87,6 +87,7 @@ var app = angular.module('myApp', [
   'ngMaterial',
   'md.data.table',
   'angular-storage',
+  'angularMoment',
   'ngRoute',
   'angular-jwt',
   'myApp.view1',

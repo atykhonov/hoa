@@ -13,8 +13,8 @@ app.config([
 
 app.controller(
   'IndicatorCtrl', [
-    '$mdDialog', '$resources', '$scope', '$location', 'auth', '$mdEditDialog',
-    function ($mdDialog, $resources, $scope, $location, auth, $mdEditDialog) {
+    '$mdDialog', '$resources', '$scope', '$location', 'auth', '$mdEditDialog', 'moment',
+    function ($mdDialog, $resources, $scope, $location, auth, $mdEditDialog, moment) {
 
       var bookmark;
 
@@ -86,15 +86,17 @@ app.controller(
         event.stopPropagation();
 
         function success(indicator) {
-          // $mdDialog.hide(house);
+          var indicators = $scope.indicators.data;
+          for (var i = 0; i < indicators.length; i++) {
+            if (indicators[i].id == indicator.id) {
+              indicators[i].date = moment(indicator.date);
+              break;
+            }
+          }
         }
 
         this.saveIndicator = function (indicator) {
-          console.log('Indicator: ');
-          console.log(indicator);
           var data = {
-            // 'meter': indicator.meter.id,
-            'meter_id': indicator.meter.id,
             'value': indicator.value,
           };
           $scope.promise = $resources.indicators.update(

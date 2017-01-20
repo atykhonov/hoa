@@ -216,6 +216,7 @@ class Meter(BaseModel):
 class MeterIndicator(BaseModel):
     meter = models.ForeignKey(Meter, related_name='indicators')
     period = models.DateField()
+    date = models.DateField(null=True)
     value = models.IntegerField(null=True)
 
     def get_cooperative(self):

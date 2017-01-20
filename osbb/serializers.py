@@ -62,8 +62,6 @@ class MeterIndicatorSerializer(serializers.ModelSerializer):
 
     address = serializers.SerializerMethodField()
 
-    # meter = serializers.PrimaryKeyRelatedField(queryset=Meter.objects.all())
-
     class Meta:
 
         model = MeterIndicator
@@ -72,6 +70,7 @@ class MeterIndicatorSerializer(serializers.ModelSerializer):
             'id',
             'account',
             'address',
+            'date',
             'meter',
             'period',
             'value',

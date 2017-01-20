@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import date
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.db import IntegrityError
@@ -574,7 +574,8 @@ class MeterIndicatorViewSet(BaseModelViewSet):
         data = request.data
         indicator = get_object_or_404(MeterIndicator, pk=kwargs.get('pk'))
         data = {
-            'value': request.data.get('value')
+            'value': request.data.get('value'),
+            'date': datetime.now().date(),
         }
         serializer = MeterIndicatorSerializer(
             indicator, data=data, partial=True)
