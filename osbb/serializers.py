@@ -6,13 +6,12 @@ from rest_framework import serializers
 
 from osbb.models import (
     Apartment,
-    ApartmentMeter,
-    ApartmentMeterIndicator,
     Charge,
     House,
     HousingCooperative,
     HousingCooperativeService,
     Meter,
+    MeterIndicator,
     Account,
     Service,
     User,
@@ -57,45 +56,56 @@ class AccountSerializer(serializers.ModelSerializer):
             )
 
 
-class ApartmentMeterIndicatorSerializer(serializers.ModelSerializer):
+class MeterIndicatorSerializer(serializers.ModelSerializer):
+
+    account = serializers.SerializerMethodField()
+
+    address = serializers.SerializerMethodField()
+
+    # meter = serializers.PrimaryKeyRelatedField(queryset=Meter.objects.all())
 
     class Meta:
 
-        model = ApartmentMeterIndicator
+        model = MeterIndicator
 
         fields = (
-            'date',
+            'id',
+            'account',
+            'address',
+            'meter',
+            'period',
             'value',
             )
+
+        depth = 3
+
+    def get_account(self, obj):
+        """Return the account to which the meter belongs to."""
+        return AccountSerializer(obj.meter.apartment.account).data
+
+    def get_address(self, obj):
+        """
+        Return the address of the account to which the meter belongs to.
+        """
+        apartment = obj.meter.apartment
+        house = apartment.house
+        return '{} {} {}, {}'.format(
+            _('str.'), house.street, house.number, apartment.number)
 
 
 class MeterSerializer(serializers.ModelSerializer):
 
-    indicators = ApartmentMeterIndicatorSerializer(many=True, read_only=True)
+    indicators = MeterIndicatorSerializer(many=True, read_only=True)
 
     class Meta:
 
         model = Meter
 
         fields = (
-            'type',
             'number',
-            'unit',
             'entry_date',
             'verification_date',
             'indicators',
-            )
-
-
-class ApartmentMeterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-
-        model = ApartmentMeter
-
-        fields = (
-            'apartment',
-            'meter',
             )
 
 
@@ -139,7 +149,7 @@ class HousingCooperativeServiceSerializer(serializers.ModelSerializer):
 
 class ApartmentSerializer(serializers.ModelSerializer):
 
-    meters = ApartmentMeterSerializer(many=True, read_only=True)
+    meters = MeterSerializer(many=True, read_only=True)
 
     account = AccountSerializer(read_only=True)
 
@@ -197,10 +207,18 @@ class HouseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         house = House.objects.create(**validated_data)
         house.save()
+        coop_services = house.cooperative.services.filter(
+            service__requires_meter=True)
         if house.apartments_count:
             for n in range(house.apartments_count):
                 apartment = Apartment.objects.create(house=house, number=n+1)
                 apartment.save()
+                for coop_service in coop_services:
+                    meter = Meter(
+                        apartment=apartment, service=coop_service.service)
+                    meter.save()
+                account = Account(apartment=apartment)
+                account.save()
         return house
 
 

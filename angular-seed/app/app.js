@@ -125,7 +125,9 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
       { cooperative_id: '@cooperative_id' }),
     units: $resource('http://localhost:8080/api/v1/units/'),
     cooperative_indicators: $resource(
-      APIV1 + 'cooperatives/:cooperative_id/indicators/')
+      APIV1 + 'cooperatives/:cooperative_id/indicators/'),
+    indicators: $resource(
+      APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' })
   };
 }]);
 

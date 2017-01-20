@@ -115,19 +115,12 @@ class Service(BaseModel):
     # Required services are called services which are automatically
     # created when cooperative is created.
     required = models.BooleanField(default=False)
+    requires_meter = models.BooleanField(default=False)
 
 
 class Tariff(BaseModel):
     # current = models.BooleanField()
     service = models.ForeignKey(Service)
-
-
-class Meter(BaseModel):
-    type = models.CharField(max_length=2, choices=METER_TYPES)
-    number = models.CharField(max_length=10)
-    unit = models.CharField(max_length=2, choices=UNITS)
-    entry_date = models.DateField(null=True)
-    verification_date = models.DateField(null=True)
 
 
 class House(BaseModel):
@@ -206,9 +199,12 @@ class HouseTariff(BaseModel):
     value = models.FloatField()
 
 
-class ApartmentMeter(BaseModel):
-    apartment = models.ForeignKey(Apartment)
-    meter = models.OneToOneField(Meter)
+class Meter(BaseModel):
+    apartment = models.ForeignKey(Apartment, related_name='meters')
+    service = models.ForeignKey(Service)
+    number = models.CharField(max_length=10)
+    entry_date = models.DateField(null=True)
+    verification_date = models.DateField(null=True)
 
     def get_cooperative(self):
         """
@@ -217,10 +213,10 @@ class ApartmentMeter(BaseModel):
         return self.apartment.house.cooperative
 
 
-class ApartmentMeterIndicator(BaseModel):
-    meter = models.ForeignKey(ApartmentMeter)
-    date = models.DateField()
-    value = models.IntegerField()
+class MeterIndicator(BaseModel):
+    meter = models.ForeignKey(Meter, related_name='indicators')
+    period = models.DateField()
+    value = models.IntegerField(null=True)
 
     def get_cooperative(self):
         """
@@ -230,7 +226,8 @@ class ApartmentMeterIndicator(BaseModel):
 
 
 class HousingCooperativeService(BaseModel):
-    cooperative = models.ForeignKey(HousingCooperative)
+    cooperative = models.ForeignKey(
+        HousingCooperative, related_name='services')
     service = models.ForeignKey(Service)
     # FIXME: Review max length 255, may be increase.
     notes = models.CharField(max_length=255)

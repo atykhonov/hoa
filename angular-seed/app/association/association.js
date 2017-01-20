@@ -22,9 +22,6 @@ angular.module('myApp.association', ['ngRoute'])
   ['$mdDialog', '$resources', '$scope', '$location', '$rootScope',
     function ($mdDialog, $resources, $scope, $location, $rootScope) {
 
-      console.log('Association ID: ');
-      console.log($rootScope.associationId);
-
       $scope.test = 'best';
 
       var bookmark;

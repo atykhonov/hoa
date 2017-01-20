@@ -5,6 +5,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import status, viewsets
@@ -17,13 +18,12 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from osbb.models import (
     Account,
     Apartment,
-    ApartmentMeter,
-    ApartmentMeterIndicator,
     Charge,
     House,
     HousingCooperative,
     HousingCooperativeService as HCService,
     Meter,
+    MeterIndicator,
     Account,
     Service,
     UNITS,
@@ -35,12 +35,12 @@ from osbb.permissions import (
 from osbb.serializers import (
     AccountSerializer,
     ApartmentSerializer,
-    ApartmentMeterIndicatorSerializer,
     ChargeSerializer,
     HouseSerializer,
     HousingCooperativeSerializer as HCSerializer,
     HousingCooperativeServiceSerializer as HCServiceSerializer,
     MeterSerializer,
+    MeterIndicatorSerializer,
     ServiceSerializer,
 )
 
@@ -271,10 +271,10 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         if not user.can_manage(cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
-            indicators = ApartmentMeterIndicator.objects.filter(
+            indicators = MeterIndicator.objects.filter(
                 meter__apartment__house__cooperative=cooperative)
             return self.list_paginated(
-                request, indicators, ApartmentMeterIndicatorSerializer)
+                request, indicators, MeterIndicatorSerializer)
 
 
 class HouseViewSet(BaseModelViewSet):
@@ -327,6 +327,12 @@ class HouseViewSet(BaseModelViewSet):
             if serializer.is_valid():
                 apartment = Apartment(house=house, **serializer.validated_data)
                 apartment.save()
+                for service in Service.objects.filter(requires_meter=True):
+                    meter = Meter(service=service)
+                    meter.save()
+                    apartment_meter = ApartmentMeter(
+                        apartment=apartment, meter=meter)
+                    apartment_meter.save()
                 account = Account(apartment=apartment)
                 account.save()
                 response_data = serializer.validated_data
@@ -543,13 +549,13 @@ class MeterViewSet(BaseModelViewSet):
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ApartmentMeterIndicatorViewSet(BaseModelViewSet):
+class MeterIndicatorViewSet(BaseModelViewSet):
     """
     API endpoint that allows apartment meter indicator to be viewed or
     edited.
     """
-    queryset = ApartmentMeterIndicator.objects.all()
-    serializer_class = ApartmentMeterIndicatorSerializer
+    queryset = MeterIndicator.objects.all()
+    serializer_class = MeterIndicatorSerializer
 
     def get_permissions(self):
 
@@ -564,8 +570,24 @@ class ApartmentMeterIndicatorViewSet(BaseModelViewSet):
 
         return (NoPermissions(), )
 
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        indicator = get_object_or_404(MeterIndicator, pk=kwargs.get('pk'))
+        data = {
+            'value': request.data.get('value')
+        }
+        serializer = MeterIndicatorSerializer(
+            indicator, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ChargeViewSet(BaseModelViewSet):
+
     """
     API endpoint that allows charge to be viewed or edited.
     """

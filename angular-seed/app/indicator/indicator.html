@@ -44,6 +44,7 @@
       <thead md-head md-order="query.order" md-on-reorder="getMeters">
         <tr md-row>
           <th md-column md-string>Особовий рахунок</th>
+          <th md-column md-string>Адреса</th>
           <th md-column md-numeric>Дата</th>
           <th md-column md-numeric>Лічильник</th>
           <th md-column md-numeric>Показник</th>
@@ -51,10 +52,13 @@
       </thead>
       <tbody md-body>
         <tr md-row md-select="indicator" md-select-id="id" md-auto-select ng-repeat="indicator in indicators.data">
-          <td md-cell>{{indicator.apartment.account.uid}}</td>
-          <td md-cell>{{indicator.date}}</td>
-          <td md-cell>{{indicator.meter.type}}</td>
-          <td md-cell>{{indicator.value}}</td>
+          <td md-cell>{{indicator.account.uid}}</td>
+          <td md-cell>{{indicator.address}}</td>
+          <td md-cell>{{indicator.date || '—'}}</td>
+          <td md-cell>{{indicator.meter.service.name || '—'}}</td>
+          <td md-cell ng-click="editComment($event, indicator)" ng-class="{'md-placeholder': !indicator.value}">
+            {{indicator.value || 'Ввести показник'}}
+          </td>
         </tr>
       </tbody>
     </table>

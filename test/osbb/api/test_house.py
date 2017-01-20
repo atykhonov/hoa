@@ -36,6 +36,25 @@ class TestHouseByAdmin(BaseAPITestCase):
         url = reverse(
             'cooperative-houses', kwargs={'pk': self.cooperative1.id})
         data = {
+            'tariff': 10000,
+            'apartments_count': 2,
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(10000, response.data['tariff'])
+        self.assertEqual(2, response.data['apartments_count'])
+        house = House.objects.get(pk=response.data['id'])
+        self.assertEqual(2, house.apartments.count())
+
+    def test_creation_with_accounts(self):
+        """
+        When a house is created, the defined number of apartments with
+        accounts are created.
+        """
+        url = reverse(
+            'cooperative-houses', kwargs={'pk': self.cooperative1.id})
+        data = {
             'name': 'test',
             'tariff': 10000,
             'apartments_count': 2,
@@ -43,11 +62,38 @@ class TestHouseByAdmin(BaseAPITestCase):
         response = self.cpost(url, self.admin, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual('test', response.data['name'])
-        self.assertEqual(10000, response.data['tariff'])
-        self.assertEqual(2, response.data['apartments_count'])
         house = House.objects.get(pk=response.data['id'])
-        self.assertEqual(2, house.apartments.count())
+        apartments = house.apartments
+        self.assertEqual(2, apartments.count())
+        self.assertIsNotNone(apartments.first().account)
+        self.assertIsNotNone(apartments.last().account)
+
+    def test_creation_with_meters(self):
+        """
+        When a house is created, it is created with apartments, which are
+        created with appropriate meters. There are should be the same
+        amount of meters for each apartment as the amount of services
+        for the cooperative.
+        """
+        url = reverse(
+            'cooperative-houses', kwargs={'pk': self.cooperative1.id})
+        data = {
+            'name': 'test',
+            'tariff': 10000,
+            'apartments_count': 2,
+        }
+        response = self.cpost(url, self.admin, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        house = House.objects.get(pk=response.data['id'])
+        apartments = house.apartments
+        self.assertEqual(2, apartments.count())
+        apartment1 = apartments.first()
+        self.assertEquals(2, apartment1.meters.count())
+        self.assertEquals(
+            self.service2, apartment1.meters.first().service)
+        self.assertEquals(
+            self.service3, apartment1.meters.last().service)
 
     def test_retrieving_list(self):
         """

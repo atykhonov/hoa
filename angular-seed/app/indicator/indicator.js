@@ -13,8 +13,8 @@ app.config([
 
 app.controller(
   'IndicatorCtrl', [
-    '$mdDialog', '$resources', '$scope', '$location', 'auth',
-    function ($mdDialog, $resources, $scope, $location, auth) {
+    '$mdDialog', '$resources', '$scope', '$location', 'auth', '$mdEditDialog',
+    function ($mdDialog, $resources, $scope, $location, auth, $mdEditDialog) {
 
       var bookmark;
 
@@ -77,6 +77,55 @@ app.controller(
             templateUrl: 'house/add-house-dialog.html',
           }).then($scope.getHouses);
         }
+      };
+
+      $scope.editComment = function (event, indicator) {
+
+        var self = this;
+
+        event.stopPropagation();
+
+        function success(indicator) {
+          // $mdDialog.hide(house);
+        }
+
+        this.saveIndicator = function (indicator) {
+          console.log('Indicator: ');
+          console.log(indicator);
+          var data = {
+            // 'meter': indicator.meter.id,
+            'meter_id': indicator.meter.id,
+            'value': indicator.value,
+          };
+          $scope.promise = $resources.indicators.update(
+            { 'indicator_id': indicator.id }, data, success).$promise;
+        }
+
+        var promise = $mdEditDialog.large({
+          'title': 'Показник',
+          'cancel': 'Відмінити',
+          'ok': 'Зберегти',
+          messages: {
+            test: ' '
+          },
+          'type': 'number',
+          modelValue: indicator.value,
+          placeholder: 'Введіть показник',
+          save: function (input) {
+            indicator.value = input.$modelValue;
+            console.log('The value has been saved!');
+            self.saveIndicator(indicator);
+          },
+          targetEvent: event
+        });
+
+        promise.then(function (ctrl) {
+          var input = ctrl.getInput();
+
+          input.$viewChangeListeners.push(function () {
+            input.$setValidity('test', input.$modelValue !== 'test');
+          });
+        });
       };
 
       function success(indicators) {

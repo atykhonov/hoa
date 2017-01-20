@@ -8,7 +8,9 @@ angular.module('myApp.navbar', ['ngRoute'])
     function ($scope, $location, auth) {
 
       var userInfo = auth.getUserInfo();
-      $scope.associationName = userInfo['cooperative_name'];
+      if (userInfo) {
+        $scope.associationName = userInfo['cooperative_name'];
+      }
 
       this.gotoAssociations = function () {
         $location.url('/');

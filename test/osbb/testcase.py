@@ -90,9 +90,16 @@ class BaseAPITestCase(APITestCase):
         self.manager.save()
 
         service_fixture = AutoFixture(Service)
-        services = service_fixture.create(2)
+        services = service_fixture.create(3)
         self.service1 = services[0]
+        self.service1.requires_meter = False
+        self.service1.save()
         self.service2 = services[1]
+        self.service2.requires_meter = True
+        self.service2.save()
+        self.service3 = services[2]
+        self.service3.requires_meter = True
+        self.service3.save()
 
         self.hc_service1 = HousingCooperativeService(
             cooperative=self.cooperative1,
@@ -106,6 +113,12 @@ class BaseAPITestCase(APITestCase):
             notes='notes2',
             )
         self.hc_service2.save()
+        self.hc_service3 = HousingCooperativeService(
+            cooperative=self.cooperative1,
+            service=self.service3,
+            notes='notes3',
+            )
+        self.hc_service3.save()
 
     def _cmethod(self, method, url, user, data=None):
         m = getattr(self.client, method)
