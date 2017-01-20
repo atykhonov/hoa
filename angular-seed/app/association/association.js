@@ -204,6 +204,9 @@ angular.module('myApp.association', ['ngRoute'])
       $scope.selected = [];
 
       var userInfo = auth.getUserInfo();
+      if (userInfo === undefined) {
+        $location.path('/login');
+      }
       var associationId = userInfo['cooperative_id'];
 
       function cooperatives_success(association) {
