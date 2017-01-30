@@ -108,31 +108,30 @@ var app = angular.module('myApp', [
 
 app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   return {
-    cooperatives: $resource('http://localhost:8080/api/v1/cooperatives/:id/'),
-    assoc_houses: $resource(
-      'http://localhost:8080/api/v1/cooperatives/:cooperative_id/houses/',
+    cooperatives: $resource(APIV1 + 'cooperatives/:id/'),
+    assoc_houses: $resource(APIV1 + 'cooperatives/:cooperative_id/houses/',
       // TODO: user just a simple id instead of cooperative_id or house_id.
       { cooperative_id: '@cooperative_id' }),
-    houses: $resource('http://localhost:8080/api/v1/houses/:id/'),
-    house_apartments: $resource(
-      'http://localhost:8080/api/v1/houses/:house_id/apartments/',
+    houses: $resource(APIV1 + 'houses/:id/'),
+    house_apartments: $resource(APIV1 + 'houses/:house_id/apartments/',
       { house_id: '@house_id' }),
-    apartments: $resource('http://localhost:8080/api/v1/apartments/:id/'),
-    apartment_account: $resource('http://localhost:8080/api/v1/apartments/:id/account/'),
-    accounts: $resource('http://localhost:8080/api/v1/accounts/:id/'),
-    services: $resource('http://localhost:8080/api/v1/services/:id/'),
+    apartments: $resource(APIV1 + 'apartments/:id/'),
+    apartment_account: $resource(APIV1 + 'apartments/:id/account/'),
+    accounts: $resource(APIV1 + 'accounts/:id/'),
+    services: $resource(APIV1 + 'services/:id/'),
     cooperative_services: $resource(
-      'http://localhost:8080/api/v1/cooperatives/:cooperative_id/services/',
+      APIV1 + 'cooperatives/:cooperative_id/services/',
       { cooperative_id: '@cooperative_id' }),
-    units: $resource('http://localhost:8080/api/v1/units/'),
+    units: $resource(APIV1 + 'units/'),
     cooperative_indicators: $resource(
       APIV1 + 'cooperatives/:cooperative_id/indicators/'),
     indicators: $resource(
-      APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' })
+      APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' }),
+    charges: $resource(APIV1 + 'charges/')
   };
 }]);
 
-var API_URL = 'http://localhost:8080/';
+var API_URL = 'http://192.168.10.43:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);
@@ -151,7 +150,7 @@ app.config(
 
       jwtOptionsProvider.config({
         authPrefix: 'JWT ',
-        whiteListedDomains: ['127.0.0.1', 'localhost']
+        whiteListedDomains: ['127.0.0.1', 'localhost', '192.168.10.43']
       });
 
       jwtInterceptorProvider.tokenGetter = function (store) {
@@ -236,9 +235,28 @@ app.controller('RootController', ['$scope', function ($scope, $state) {
   $scope.currentNavItem = 'associations';
 }])
 
-app.filter("trust", ['$sce', function ($sce) {
+app.filter('trust', ['$sce', function ($sce) {
   return function (htmlCode) {
     return $sce.trustAsHtml(htmlCode);
   }
 }]);
 
+app.filter('replace_space', [function () {
+
+  return function (value, num) {
+
+    var result = '';
+    var results = value.split(' ');
+    for (var i = 0; i < results.length; i++) {
+      var sep = ' ';
+      if (i == 0) {
+        sep = '';
+      }
+      if (i == num) {
+        sep = '<br />';
+      }
+      result += sep + results[i];
+    }
+    return result;
+  }
+}]);

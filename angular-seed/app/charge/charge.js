@@ -13,10 +13,13 @@ app.config([
 
 app.controller(
   'ChargeCtrl', [
-    '$mdDialog', '$resources', '$scope', '$routeParams',
-    function ($mdDialog, $resources, $scope, $routeParams) {
+    '$mdDialog', '$resources', '$scope', '$routeParams', 'auth', 'moment',
+    function ($mdDialog, $resources, $scope, $routeParams, auth, moment) {
 
       var bookmark;
+
+      var userInfo = auth.getUserInfo();
+      var associationId = userInfo['cooperative_id'];
 
       $scope.months = {
         1: 'січень',
@@ -33,6 +36,8 @@ app.controller(
         12: 'грудень',
       };
 
+      $scope.now = moment.now();
+
       $scope.years = [
         2016, 2017, 2018
       ];
@@ -48,92 +53,58 @@ app.controller(
       $scope.query = {
         filter: '',
         limit: '5',
-        order: 'number',
+        order: 'id',
         page: 1
       };
 
-      $scope.addApartment = function (event) {
-        $mdDialog.show({
-          clickOutsideToClose: true,
-          controller: 'AddApartmentController',
-          controllerAs: 'ctrl',
-          focusOnOpen: true,
-          targetEvent: event,
-          templateUrl: 'apartment/add-apartment-dialog.html',
-        }).then($scope.getApartments);
-      };
-
-      $scope.deleteApartment = function (event) {
-        $mdDialog.show({
-          clickOutsideToClose: true,
-          controller: 'DeleteApartmentController',
-          controllerAs: 'ctrl',
-          focusOnOpen: false,
-          targetEvent: event,
-          locals: { apartments: $scope.selected },
-          templateUrl: 'apartment/delete-dialog.html',
-        }).then($scope.getApartments);
-      };
-
-      $scope.editApartment = function (event) {
-        if ($scope.selected.length > 1) {
-          alert('Для редагування виберіть тільки один елемент.');
-        } else {
-          $mdDialog.show({
-            clickOutsideToClose: true,
-            controller: 'EditApartmentController',
-            controllerAs: 'ctrl',
-            focusOnOpen: true,
-            targetEvent: event,
-            locals: { apartment: $scope.selected[0] },
-            templateUrl: 'apartment/add-apartment-dialog.html',
-          }).then($scope.getApartments);
-        }
-      };
-
-      $scope.editAccount = function (event, apartment_id) {
-
-        event.stopPropagation();
-
-        var apartment = undefined;
-        var apartments = $scope.apartments.data;
-        for (var i = 0; i < apartments.length; i++) {
-          if (apartments[i].id == apartment_id) {
-            apartment = apartments[i];
-            break;
-          }
-        }
-        console.log(apartment_id);
-        console.log('Found apartment: ');
-        console.log(apartment);
-        console.log('All apartments: ');
-        console.log(apartments);
-        $mdDialog.show({
-          clickOutsideToClose: true,
-          controller: 'EditApartmentAccountController',
-          controllerAs: 'ctrl',
-          focusOnOpen: true,
-          targetEvent: event,
-          locals: { apartment: apartment },
-          templateUrl: 'apartment/edit-account-dialog.html',
-        }).then($scope.getApartments);
+      function success(response) {
+        var charges = [];
+        angular.forEach(response.data, function (charge, id) {
+          var item = {
+            'id': charge.id,
+            'account_id': charge.account.id,
+            'address': charge.address,
+            'service_charges': [],
+            'total': charge.total
+          };
+          angular.forEach($scope.services, function (service) {
+            var service_charge_value = 0;
+            angular.forEach(charge.services, function (service_charge, id) {
+              if (service_charge.service.id == service.id) {
+                service_charge_value = service_charge.value;
+              }
+            });
+            item['service_charges'].push({
+              'value': service_charge_value
+            });
+          });
+          charges.push(item);
+        });
+        charges.count = response.count;
+        $scope.charges = charges;
       }
 
-      function success(charges) {
-        $scope.charges = charges;
+      function success_services(response) {
+        var services = [];
+        angular.forEach(response.data, function (assoc_service, id) {
+          services.push({
+            'id': assoc_service.service.id,
+            'name': assoc_service.service.name
+          });
+        });
+        $scope.services = services;
+        $scope.getCharges();
       }
 
       $scope.getCharges = function () {
         var query = $scope.query;
-        if ($routeParams.id !== undefined) {
-          query['house_id'] = $routeParams.id;
-          $scope.promise = $resources.house_apartments.get(
-            $scope.query, success).$promise;
-        } else {
-          $scope.promise = $resources.apartments.get(
-            $scope.query, success).$promise;
-        }
+        $scope.promise = $resources.charges.get($scope.query, success).$promise;
       };
+
+      $scope.getServices = function () {
+        $scope.services_promise = $resources.cooperative_services.get(
+          { cooperative_id: associationId }, success_services).$promise;
+      }
 
       $scope.removeFilter = function () {
         $scope.filter.show = false;
@@ -157,91 +128,7 @@ app.controller(
           $scope.query.page = bookmark;
         }
 
-        $scope.getCharges();
+        $scope.getServices();
       });
-
-    }]);
-
-app.controller(
-  'AddApartmentController', [
-    '$mdDialog', '$resources', '$scope', '$routeParams',
-    function ($mdDialog, $resources, $scope, $routeParams) {
-
-      this.add = true;
-
-      this.cancel = $mdDialog.cancel;
-
-      function success(apartment) {
-        $mdDialog.hide(apartment);
-      }
-
-      this.addApartment = function () {
-        $scope.apartment['house_id'] = $routeParams.id;
-        $scope.promise = $resources.house_apartments.create($scope.apartment, success).$promise;
-      }
-    }]);
-
-app.controller(
-  'DeleteApartmentController', [
-    'apartments', '$mdDialog', '$resources', '$scope', '$q',
-    function (apartments, $mdDialog, $resources, $scope, $q) {
-
-      this.cancel = $mdDialog.cancel;
-
-      this.deletionConfirmed = function () {
-        $q.all(apartments.forEach(deleteApartment)).then(onComplete);
-      }
-
-      function deleteApartment(apartment, index) {
-        var deferred = $resources.apartments.delete({ id: apartment.id });
-
-        deferred.$promise.then(function () {
-          apartments.splice(index, 1);
-        });
-
-        return deferred.$promise;
-      }
-
-      function onComplete() {
-        $mdDialog.hide();
-      }
-
-    }]);
-
-app.controller(
-  'EditApartmentController', [
-    'apartment', '$mdDialog', '$resources', '$scope', '$q',
-    function (apartment, $mdDialog, $resources, $scope, $q) {
-
-      this.edit = true;
-
-      this.cancel = $mdDialog.cancel;
-
-      $scope.apartment = JSON.parse(JSON.stringify(apartment));
-
-      this.updateApartment = function () {
-        var deferred = $resources.apartments.update({ id: apartment.id }, $scope.apartment);
-        deferred.$promise.then(function () {
-          $mdDialog.hide(apartment);
-        });
-        return deferred.$promise;
-      }
-
-    }]);
-
-app.controller(
-  'EditApartmentAccountController', [
-    'apartment', '$mdDialog', '$resources', '$scope', '$q',
-    function (apartment, $mdDialog, $resources, $scope, $q) {
-
-      this.cancel = $mdDialog.cancel;
-
-      this.updateAccount = function () {
-        var deferred = $resources.apartment_account.update({ id: apartment.id }, $scope.account);
-        deferred.$promise.then(function () {
-          $mdDialog.hide(apartment);
-        });
-        return deferred.$promise;
-      }
 
     }]);

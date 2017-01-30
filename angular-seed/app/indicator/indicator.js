@@ -31,7 +31,7 @@ app.controller(
 
       $scope.query = {
         filter: '',
-        limit: '5',
+        limit: '6',
         order: 'id',
         page: 1
       };

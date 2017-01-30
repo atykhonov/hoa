@@ -608,6 +608,12 @@ class ChargeViewSet(BaseModelViewSet):
 
         return (NoPermissions(), )
 
+    def list(self, request):
+        user = request.user
+        queryset = self.queryset.filter(
+            account__apartment__house__cooperative=user.cooperative)
+        return self.list_paginated(request, queryset, ChargeSerializer)
+
 
 class UnitAPIView(APIView):
     """

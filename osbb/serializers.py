@@ -14,6 +14,7 @@ from osbb.models import (
     MeterIndicator,
     Account,
     Service,
+    ServiceCharge,
     User,
     UNITS,
 )
@@ -32,13 +33,47 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+class ServiceChargeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = ServiceCharge
+
+        fields = '__all__'
+
+        depth = 1
+
+
 class ChargeSerializer(serializers.ModelSerializer):
+
+    services = ServiceChargeSerializer(many=True, read_only=True)
+
+    address = serializers.SerializerMethodField()
 
     class Meta:
 
         model = Charge
 
-        fields = '__all__'
+        fields = (
+            'id',
+            'account',
+            'address',
+            'period',
+            'services',
+            'total',
+        )
+
+        depth = 2
+
+    def get_address(self, obj):
+        """
+        Return the address of the account to which the charge belongs
+        to.
+        """
+        apartment = obj.account.apartment
+        house = apartment.house
+        return '{} {} {}, {}'.format(
+            _('str.'), house.street, house.number, apartment.number)
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -48,6 +83,7 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
 
         fields = (
+            'id',
             'uid',
             'apartment',
             'owner',

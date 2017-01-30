@@ -16,6 +16,10 @@ angular.module('myApp.user', ['ngRoute'])
 
       var self = this;
 
+      $scope.email = 'manager@osbb.org';
+
+      $scope.password = 'tBZZdar4';
+
       function handleRequest(res) {
         var token = res.data ? res.data.token : null;
         // if (token) { console.log('JWT:', token); }

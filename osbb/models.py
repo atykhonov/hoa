@@ -116,11 +116,12 @@ class Service(BaseModel):
     # created when cooperative is created.
     required = models.BooleanField(default=False)
     requires_meter = models.BooleanField(default=False)
+    tariff = models.IntegerField(default=None, null=True)
 
 
-class Tariff(BaseModel):
-    # current = models.BooleanField()
-    service = models.ForeignKey(Service)
+# class Tariff(BaseModel):
+#     # current = models.BooleanField()
+#     service = models.ForeignKey(Service)
 
 
 class House(BaseModel):
@@ -212,6 +213,15 @@ class Meter(BaseModel):
         """
         return self.apartment.house.cooperative
 
+    def get_indicator(self, period):
+        """
+        Get indicator for the given period.
+        """
+        indicators = self.indicators.filter(period=period)
+        if indicators:
+            return indicators[0]
+        return None
+
 
 class MeterIndicator(BaseModel):
     meter = models.ForeignKey(Meter, related_name='indicators')
@@ -238,11 +248,15 @@ class HousingCooperativeService(BaseModel):
 
 
 class Charge(BaseModel):
-    personal_account = models.ForeignKey(Account)
-    date = models.DateField(auto_now_add=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    tariff = models.IntegerField()
+    account = models.ForeignKey(Account, related_name='charges')
+    period = models.DateField()
+    total = models.IntegerField(null=True)
+
+
+class ServiceCharge(BaseModel):
+    charge = models.ForeignKey(Charge, related_name='services')
+    service = models.ForeignKey(Service)
+    tariff = models.IntegerField(default=None, null=True)
     indicator_beginning = models.CharField(max_length=10)
     indicator_end = models.CharField(max_length=10)
     value = models.IntegerField()
