@@ -51,12 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap3',
-    'osbb',
     'django_nose',
     'rest_framework',
     'rest_framework_jwt',
     'autofixture',
     'corsheaders',
+    'core',
+    'osbb',
+    'address',
 ]
 
 MIDDLEWARE = [

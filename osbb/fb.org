@@ -1,0 +1,41 @@
+
+
+
+demi / # dumpe2fs $(mount | grep 'on \/mnt\/sda6' | awk '{print $1}') | grep 'Filesystem created:' 
+Filesystem created:       Fri Feb 24 08:13:55 2012
+
+
+4 роки. 4 роки тому поставив Gentoo Linux. Сьогодні ставлю/переношу систему на нове залізо, яке замінить старе. 4 роки чистого задоволення від цієї операційної системи. Швидка, гнучка, стабільна, багата на можливості, програми та вибір. Вона ніколи не змушувала робити те чи інше, тим чи іншим наперед визначеним способом (визначеним найкращими практиками чи творцями системи), а завжди давала свободу вибору. Чудовий інструмент, який практично весь цей час був непомітним (не привертав зайвої уваги), який завжди працював саме таким чином як я хотів. 4 роки прослужила надійно і без зайвих проблем. І продовжила б служити ще дуже довго, якщо би не потреба в новому залізі і перенесенні системи.
+
+Все точно так (ні слова зайвого), як описано в філософії цієї операційної системи:
+
+«Every user has work they need to do. The goal of Gentoo is to design tools and systems that allow a user to do that work as pleasantly and efficiently as possible, as they see fit. Our tools should be a joy to use, and should help the user to appreciate the richness of the Linux and free software community, and the flexibility of free software. This is only possible when the tool is designed to reflect and transmit the will of the user, and leave the possibilities open as to the final form of the raw materials (the source code.) If the tool forces the user to do things a particular way, then the tool is working against, rather than for, the user. We have all experienced situations where tools seem to be imposing their respective wills on us. This is backwards, and contrary to the Gentoo philosophy.
+
+Put another way, the Gentoo philosophy is to create better tools. When a tool is doing its job perfectly, you might not even be very aware of its presence, because it does not interfere and make its presence known, nor does it force you to interact with it when you don’t want it to. The tool serves the user rather than the user serving the tool.Ну, оригінальний меседж не про то.u byij
+
+The goal of Gentoo is to strive to create near-ideal tools. Tools that can accommodate the needs of many different users all with divergent goals. Don’t you love it when you find a tool that does exactly what you want to do? Doesn’t it feel great? Our mission is to give that sensation to as many people as possible.»
+
+Daniel Robbins 
+Previous Chief Architect
+
+
+
+emerge --depclean -av
+perl-cleaner --all
+
+
+
+CONFIG_DRM_RADEON_UMS should not be set
+CONFIG_FB_RADEON should not be set
+
+CONFIG_SND_HDA_PREALLOC_SIZE set to 2048 or higher
+
+sys-kernel/linux-firmware
+
+
+/usr/sbin/sensors-detect
+
+rc-update add lm_sensors default
+
+chown root:mail /var/spool/mail/
+chmod 03775 /var/spool/mail/

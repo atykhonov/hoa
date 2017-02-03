@@ -4,6 +4,9 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from address.models import Address
+from core.models import BaseModel
+
 
 METER_TYPES = (
     ('HT', 'Heating'),
@@ -19,18 +22,6 @@ UNITS = (
     ('KW', 'Kilowatt'),
     ('CM', 'Cubic meter'),
 )
-
-
-class BaseModel(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-
-class BaseModelTest(BaseModel):
-    name = models.CharField(max_length=50)
 
 
 class HousingCooperative(BaseModel):
@@ -126,13 +117,9 @@ class Service(BaseModel):
 
 class House(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative, related_name='houses')
-    street = models.CharField(max_length=30, blank=True)
-    number = models.IntegerField(default=None, null=True)
+    address = models.OneToOneField(Address, related_name='house_address')
     tariff = models.IntegerField(default=None, null=True)
     apartments_count = models.IntegerField(null=True)
-
-    class Meta:
-        ordering = ['street', 'number', ]
 
     def get_cooperative(self):
         """
@@ -140,19 +127,10 @@ class House(BaseModel):
         """
         return self.cooperative
 
-    @property
-    def address(self):
-        """
-        Return the address of the house.
-        """
-        if self.street and self.number:
-            return '{}, {}'.format(self.street, self.number)
-        return ''
-
 
 class Apartment(BaseModel):
     house = models.ForeignKey(House, related_name='apartments')
-    number = models.IntegerField()
+    address = models.OneToOneField(Address, related_name='apartment_address')
     floor = models.IntegerField(null=True)
     entrance = models.IntegerField(null=True)
     room_number = models.IntegerField(null=True)
@@ -183,6 +161,26 @@ class Account(BaseModel):
         if not tariff:
             return self.apartment.house.tariff
         return tariff
+
+    def get_pid(self):
+        """
+        Return personal account id.
+        """
+        indexes = ['', 'а', 'б', 'в', 'г']
+        address = self.apartment.address
+        city = address.city
+        house = address.house
+        house_index = indexes.index(house.index)
+        apartment = address.apartment
+        apartment_index = indexes.index(apartment.index)
+        return '{0:0>3}{1:0>4}{2:0>3}{3:0>1}{4:0>3}{5:0>1}'.format(
+            address.city.id,
+            address.street.id,
+            house.number,
+            house_index,
+            apartment.number,
+            apartment_index
+            )
 
 
 class ApartmentTariff(BaseModel):

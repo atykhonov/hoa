@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
+from address.models import Address
+from address.serializers import AddressSerializer
 from osbb.models import (
     Apartment,
     Charge,
@@ -78,6 +80,8 @@ class ChargeSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
 
+    pid = serializers.SerializerMethodField()
+
     class Meta:
 
         model = Account
@@ -85,11 +89,15 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'uid',
+            'pid',
             'apartment',
             'owner',
             'first_name',
             'last_name',
             )
+
+    def get_pid(self, obj):
+        return obj.get_pid()
 
 
 class MeterIndicatorSerializer(serializers.ModelSerializer):
@@ -122,10 +130,7 @@ class MeterIndicatorSerializer(serializers.ModelSerializer):
         """
         Return the address of the account to which the meter belongs to.
         """
-        apartment = obj.meter.apartment
-        house = apartment.house
-        return '{} {} {}, {}'.format(
-            _('str.'), house.street, house.number, apartment.number)
+        return obj.meter.apartment.address.medium()
 
 
 class MeterSerializer(serializers.ModelSerializer):
@@ -188,14 +193,19 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
     account = AccountSerializer(read_only=True)
 
+    address = AddressSerializer(read_only=True)
+
+    number = serializers.CharField(write_only=True)
+
     class Meta:
 
         model = Apartment
 
         fields = (
             'id',
-            'house',
+            'address',
             'number',
+            'house',
             'floor',
             'entrance',
             'room_number',
@@ -217,7 +227,11 @@ class HouseSerializer(serializers.ModelSerializer):
     cooperative = serializers.PrimaryKeyRelatedField(
         queryset=HousingCooperative.objects.all())
 
-    address = serializers.SerializerMethodField()
+    address = AddressSerializer(read_only=True)
+
+    street = serializers.CharField(write_only=True)
+
+    number = serializers.CharField(write_only=True)
 
     class Meta:
         model = House
@@ -234,26 +248,44 @@ class HouseSerializer(serializers.ModelSerializer):
 
         depth = 2
 
-    def get_address(self, obj):
-        if obj.street and obj.number:
-            return '{}, {}'.format(obj.street, obj.number)
-        return ''
+    def get_street(self, obj):
+        return obj.address.street.name
+
+    def get_number(self, obj):
+        return obj.address.house.number
 
     def create(self, validated_data):
-        house = House.objects.create(**validated_data)
+        """
+        Create a house with data taken from the given
+        `validated_data`.
+        """
+        msg = None
+        street_name = validated_data.pop('street', '')
+        if not street_name:
+            msg = 'Street field is required.'
+        house_number = validated_data.pop('number', '')
+        if not house_number:
+            msg = 'House number field is required.'
+        if msg:
+            raise serializers.ValidationError(msg)
+
+        address = Address.objects.create_address(street_name, house_number)
+
+        house = House.objects.create(address=address, **validated_data)
         house.save()
+
         coop_services = house.cooperative.services.filter(
             service__requires_meter=True)
         if house.apartments_count:
             for n in range(house.apartments_count):
-                apartment = Apartment.objects.create(house=house, number=n+1)
-                apartment.save()
+                address = Address.objects.create_address(
+                    street_name, house_number, n+1)
+                apartment = Apartment.objects.create(
+                    house=house, address=address)
                 for coop_service in coop_services:
-                    meter = Meter(
+                    meter = Meter.objects.create(
                         apartment=apartment, service=coop_service.service)
-                    meter.save()
-                account = Account(apartment=apartment)
-                account.save()
+                account = Account.objects.create(apartment=apartment)
         return house
 
 

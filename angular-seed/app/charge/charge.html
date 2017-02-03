@@ -2,15 +2,18 @@
   <md-toolbar class="md-table-toolbar md-default" ng-hide="selected.length || filter.show">
     <div class="md-toolbar-tools">
       <h2 class="md-title">Нарахування за {{ now | amDateFormat:'MMMM YYYY' }} р.</h2>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="calcCharges($event)">
+        <md-icon>update</md-icon>
+      </md-button>
     </div>
   </md-toolbar>
 
-  <!-- exact table from live demo -->
   <md-table-container>
     <table md-table md-progress="promise" class="md-data-table">
       <thead md-head md-order="query.order" md-on-reorder="getCharges">
         <tr md-row>
-          <th md-column md-string>Особовий<br />рахунок</th>
+          <th md-column md-string>Особовий рахунок</th>
           <th md-column md-string>Адреса</th>
           <th md-column md-numeric ng-repeat="service in services">
             <span ng-bind-html="service.name | replace_space: 2 | trust"></span><br />(грн.)

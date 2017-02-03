@@ -7,6 +7,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 import json
 
+from address.models import Address
 from osbb.models import (
     Apartment,
     House,
@@ -22,28 +23,72 @@ User = get_user_model()
 class BaseAPITestCase(APITestCase):
 
     def setUp(self):
+        address1 = Address.objects.create_address('korotka', 35)
+        address2 = Address.objects.create_address('korotka', 36)
         hc_fixture = AutoFixture(HousingCooperative)
         cooperatives = hc_fixture.create(2)
         self.cooperative1 = cooperatives[0]
         self.cooperative2 = cooperatives[1]
 
         house_fixture = AutoFixture(
-            House, field_values={'cooperative': self.cooperative1})
-        houses = house_fixture.create(2)
+            House, field_values={
+                'cooperative': self.cooperative1,
+                'address': address1,
+                }
+            )
+        houses = house_fixture.create(1)
         self.house1 = houses[0]
-        self.house2 = houses[1]
-
         house_fixture = AutoFixture(
-            House, field_values={'cooperative': self.cooperative2})
+            House, field_values={
+                'cooperative': self.cooperative1,
+                'address': address2,
+                }
+            )
+        self.house2 = houses[0]
+
+        address3 = Address.objects.create_address(
+            street='korotka', house=37)
+        house_fixture = AutoFixture(
+            House, field_values={
+                'cooperative': self.cooperative2,
+                'address': address3,
+                }
+            )
         houses = house_fixture.create(1)
         self.house3 = houses[0]
 
+        address4 = Address.objects.create_address(
+            street='korotka', house=35, apartment=79)
         apartment_fixture = AutoFixture(
-            Apartment, field_values={'house': self.house1})
-        apartments = apartment_fixture.create(3)
+            Apartment, field_values={
+                'house': self.house1,
+                'address': address4,
+                }
+            )
+        apartments = apartment_fixture.create(1)
         self.apartment1 = apartments[0]
-        self.apartment2 = apartments[1]
-        self.apartment3 = apartments[2]
+
+        address5 = Address.objects.create_address(
+            street='korotka', house=35, apartment=80)
+        apartment_fixture = AutoFixture(
+            Apartment, field_values={
+                'house': self.house1,
+                'address': address5,
+                }
+            )
+        apartments = apartment_fixture.create(1)
+        self.apartment2 = apartments[0]
+
+        address6 = Address.objects.create_address(
+            street='korotka', house=35, apartment=81)
+        apartment_fixture = AutoFixture(
+            Apartment, field_values={
+                'house': self.house1,
+                'address': address6,
+                }
+            )
+        apartments = apartment_fixture.create(1)
+        self.apartment3 = apartments[0]
 
         apartment_fixture = AutoFixture(
             Apartment, field_values={'house': self.house2})

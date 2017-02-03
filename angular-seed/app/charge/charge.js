@@ -115,6 +115,10 @@ app.controller(
         }
       };
 
+      $scope.calcCharges = function() {
+        alert('Ok! I will!');
+      };
+
       $scope.$watch('query.filter', function (newValue, oldValue) {
         if (!oldValue) {
           bookmark = $scope.query.page;

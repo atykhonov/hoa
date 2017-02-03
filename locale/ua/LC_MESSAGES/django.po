@@ -56,3 +56,24 @@ msgstr "м<sup>2</sup>"
 
 msgid "Square meters per kilocalorie"
 msgstr "м<sup>2</sup>/кКал"
+
+msgid "st"
+msgstr "вул"
+
+msgid "ln"
+msgstr "пров"
+
+msgid "ave"
+msgstr "просп"
+
+msgid "blvd"
+msgstr "б-р"
+
+msgid "sq"
+msgstr "пл"
+
+msgid "apt"
+msgstr "кв"
+
+msgid "hs"
+msgstr "буд"

@@ -220,6 +220,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             apartment__house__cooperative=cooperative)
         for account in accounts:
             apartment = account.apartment
+            # import pdb
+            # pdb.set_trace()
             meter = ApartmentMeter.objects.filter(apartment=apartment)[0]
             indicator_beginning = ApartmentMeterIndicator.objects.filter(
                 meter=meter,
@@ -606,15 +608,6 @@ class ChargeViewSet(BaseModelViewSet):
 
         return (NoPermissions(), )
 
-    def list(self, request):
-        user = request.user
-        queryset = self.queryset.filter(
-            account__apartment__house__cooperative=user.cooperative)
-        return self.list_paginated(request, queryset, ChargeSerializer)
-
-    def calc(self):
-        pass
-
 
 class UnitAPIView(APIView):
     """
@@ -631,6 +624,16 @@ class UnitAPIView(APIView):
         for item in UNITS:
             units[item[0]] = _(item[1])
         return Response({'data': units})
+
+    def list(self, request):
+        user = request.user
+        if request.user.is_superuser or requ:
+            apartments = Apartment.objects.all()
+        else:
+            apartments = Apartment.objects.filter(
+                house__cooperative=request.user.cooperative)
+
+        return self.list_paginated(request, apartments, ApartmentSerializer)
 
 
 class UserAPIView(APIView):

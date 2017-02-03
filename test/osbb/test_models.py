@@ -1,58 +1,25 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import date
-
 from autofixture import AutoFixture
 from django.test import TestCase
 from django.utils import timezone
 
+from address import models as addr_models
+from core.models import BaseModelTest
 from osbb.models import (
+    Account,
     Apartment,
-    ApartmentMeter,
-    ApartmentMeterIndicator,
     ApartmentTariff,
-    BaseModelTest,
     House,
     HouseTariff,
     HousingCooperative,
     HousingCooperativeService,
     Meter,
-    Account,
+    MeterIndicator,
     Service,
     User,
 )
-
-
-class TestBaseModelTestCase(TestCase):
-
-    def test_creation(self):
-        """
-        Created date is set and equals to date of today.
-        """
-        now = timezone.now()
-        model = BaseModelTest()
-
-        model.save()
-
-        self.assertEqual(now.date(), model.created_date.date())
-        self.assertEqual(now.hour, model.created_date.hour)
-
-    def test_modification(self):
-        """
-        `modified_date` is changed when model is changed.
-        """
-        model = BaseModelTest()
-        model.modified_date = date(year=2016, month=12, day=20)
-        model.save()
-
-        model.name = 'test'
-        model.save()
-
-        self.assertEqual('test', model.name)
-        now = timezone.now()
-        self.assertEqual(now.date(), model.created_date.date())
-        self.assertEqual(now.hour, model.created_date.hour)
 
 
 class HousingCooperativeTestCase(TestCase):
@@ -159,15 +126,24 @@ class HouseTestCase(TestCase):
         House is created with certain attributes.
         """
         name = 'house'
-        address = 'wide str. 22, 33'
+        city = addr_models.City.get_default_city()
+        street = addr_models.Street(
+            city=city,
+            name='korotka',
+            type=addr_models.Street.get_default_type()
+            )
+        street.save()
+        house = addr_models.House(street=street, number=35)
+        house.save()
+        address = addr_models.Address(city=city, street=street, house=house)
+        address.save()
         cooperative = HousingCooperative()
         cooperative.save()
-        house = House(cooperative=cooperative, name=name, address=address)
+        house = House(cooperative=cooperative, address=address)
 
         house.save()
 
         self.assertEqual(cooperative.id, house.cooperative.id)
-        self.assertEqual(name, house.name)
         self.assertEqual(address, house.address)
 
     def test_get_cooperative(self):
@@ -176,7 +152,8 @@ class HouseTestCase(TestCase):
         """
         hc_fixture = AutoFixture(HousingCooperative)
         hc = hc_fixture.create(1)[0]
-        house_fixture = AutoFixture(House)
+        house_fixture = AutoFixture(
+            House, field_values={'cooperative': hc}, generate_fk=True)
         house = house_fixture.create(1)[0]
 
         cooperative = house.get_cooperative()
@@ -292,6 +269,42 @@ class AccountTestCase(TestCase):
         account = Account(apartment=apartment)
 
         self.assertEqual(10000, account.get_tariff())
+
+
+class AccountPidTestCase(TestCase):
+
+    def test_get_pid_without_indexes(self):
+        """
+        If a house and apartment are without index, then the personal
+        account id is generated in form of the following string:
+        001000100100010.
+        """
+        addr_city = addr_models.City(name='Львів')
+        addr_city.save()
+        addr_street = addr_models.Street(
+            city=addr_city, name='Городоцька', type='Street')
+        addr_street.save()
+        addr_house = addr_models.House(street=addr_street, number=17)
+        addr_house.save()
+        addr_apartment = addr_models.Apartment(house=addr_house, number=33)
+        addr_apartment.save()
+        address = addr_models.Address(
+            city=addr_city,
+            street=addr_street,
+            house=addr_house,
+            apartment=addr_apartment
+            )
+        address.save()
+        house_fixture = AutoFixture(House, generate_fk=True)
+        house = house_fixture.create(1)[0]
+        apartment = Apartment(house=house, address=address)
+        user_fixture = AutoFixture(User, generate_fk=True)
+        user = user_fixture.create(1)[0]
+        account = Account(apartment=apartment, owner=user)
+
+        pid = account.get_pid()
+
+        self.assertEquals('001000101700330', pid)
 
 
 class ServiceTestCase(TestCase):

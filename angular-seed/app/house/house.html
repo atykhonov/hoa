@@ -52,11 +52,10 @@
       </thead>
       <tbody md-body>
         <tr md-row md-select="house" md-select-id="id" md-auto-select ng-repeat="house in houses.data">
-          <td md-cell>{{house.address}}</td>
+          <td md-cell>{{house.address.medium}}</td>
           <td md-cell>{{house.tariff || "—"}}</td>
           <td md-cell>{{house.apartments_count}}</td>
           <td md-cell>
-            <!-- <a href="#!/houses/{{house.id}}/apartments">{{house.apartments_count}}</a> -->
             <md-button ng-click="viewApartments($event, house.id)" class="nav-btn">
               <md-icon class="md-default-theme" class="material-icons">view_quilt</md-icon>
             </md-button>
