@@ -5,6 +5,10 @@
         <md-card-title-text>
           <span class="md-headline">Інформація</span>
         </md-card-title-text>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="changeInformation($event)">
+          <md-icon>mode_edit</md-icon>
+        </md-button>
       </md-card-title>
       <md-card-content>
         <md-table-container>
@@ -32,7 +36,7 @@
               </tr>
               <tr md-row>
                 <td md-cell>Телефон:</td>
-                <td md-cell>{{association.telephone || '—'}}</td>
+                <td md-cell>{{association.phone_number || '—'}}</td>
               </tr>
               <tr md-row>
                 <td md-cell>Рахунки:</td>
@@ -42,16 +46,16 @@
           </table>
         </md-table-container>
       </md-card-content>
-      <md-card-actions layout="row" layout-align="end center">
-        <md-button>Action 1</md-button>
-        <md-button>Action 2</md-button>
-      </md-card-actions>
     </md-card>
     <md-card>
       <md-card-title>
         <md-card-title-text>
           <span class="md-headline">Працівники</span>
         </md-card-title-text>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="changeEmployees($event)">
+          <md-icon>mode_edit</md-icon>
+        </md-button>
       </md-card-title>
       <md-card-content>
         <md-table-container>
@@ -59,7 +63,7 @@
             <tbody md-body>
               <tr md-row>
                 <td md-cell>Керівник:</td>
-                <td md-cell>{{association.manager || '—'}}</td>
+                <td md-cell>{{association.manager.full_name || '—'}}</td>
               </tr>
               <tr md-row>
                 <td md-cell>Бухгалтер:</td>
@@ -73,10 +77,6 @@
           </table>
         </md-table-container>
       </md-card-content>
-      <md-card-actions layout="column" layout-align="start">
-        <md-button>Action 1</md-button>
-        <md-button>Action 2</md-button>
-      </md-card-actions>
     </md-card>
   </div>
   <div flex-xs flex-gt-xs="50" layout="column">
@@ -85,6 +85,10 @@
         <md-card-title-text>
           <span class="md-headline">Послуги</span>
         </md-card-title-text>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="changeServices($event)">
+          <md-icon>mode_edit</md-icon>
+        </md-button>
       </md-card-title>
       <md-card-content>
         <table md-table multiple ng-model="selected" md-progress="services_promise">
@@ -95,14 +99,6 @@
           </tbody>
         </table>
       </md-card-content>
-      <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-icon-button" aria-label="Favorite">
-          <md-icon>favourite</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" aria-label="Settings">
-          <md-icon>menu</md-icon>
-        </md-button>
-      </md-card-actions>
     </md-card>
   </div>
 </md-content>

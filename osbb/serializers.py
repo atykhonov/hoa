@@ -24,6 +24,8 @@ from osbb.models import (
 
 class UserSerializer(serializers.ModelSerializer):
 
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
 
         model = User
@@ -32,7 +34,17 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'first_name',
             'last_name',
-        )
+            'full_name',
+            )
+
+    def get_full_name(self, instance):
+        if instance.first_name and instance.last_name:
+            return '{0} {1}'.format(instance.first_name, instance.last_name)
+        elif instance.first_name:
+            return instance.first_name
+        elif instance.last_name:
+            return instance.last_name
+        return ''
 
 
 class ServiceChargeSerializer(serializers.ModelSerializer):
@@ -82,22 +94,42 @@ class AccountSerializer(serializers.ModelSerializer):
 
     pid = serializers.SerializerMethodField()
 
+    address = serializers.SerializerMethodField()
+
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
 
         model = Account
 
         fields = (
             'id',
-            'uid',
             'pid',
             'apartment',
             'owner',
             'first_name',
             'last_name',
+            'full_name',
+            'address',
             )
 
-    def get_pid(self, obj):
-        return obj.get_pid()
+    def get_pid(self, instance):
+        return instance.get_pid()
+
+    def get_address(self, instance):
+        """
+        Return the address of the account.
+        """
+        return instance.apartment.address.medium()
+
+    def get_full_name(self, instance):
+        if instance.first_name and instance.last_name:
+            return '{0} {1}'.format(instance.last_name, instance.first_name)
+        elif instance.first_name:
+            return instance.first_name
+        elif instance.last_name:
+            return instance.last_name
+        return ''
 
 
 class MeterIndicatorSerializer(serializers.ModelSerializer):
@@ -162,6 +194,7 @@ class ServiceSerializer(serializers.ModelSerializer):
             'name',
             'unit',
             'unit_translated',
+            'required',
             )
 
     def get_unit_translated(self, obj):

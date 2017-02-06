@@ -131,7 +131,7 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   };
 }]);
 
-var API_URL = 'http://192.168.10.42:8080/';
+var API_URL = 'http://&192.168.10.43:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);
@@ -140,7 +140,7 @@ app.constant('APIV1', API_URL + 'api/v1/');
 app.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
   $locationProvider.hashPrefix('!');
   $routeProvider.otherwise({ redirectTo: '/' });
-}]);
+}]);e
 
 app.config(
   ['$httpProvider', '$mdThemingProvider', 'jwtOptionsProvider', 'jwtInterceptorProvider',
@@ -150,9 +150,7 @@ app.config(
 
       jwtOptionsProvider.config({
         authPrefix: 'JWT ',
-        whiteListedDomains: [
-          '127.0.0.1', 'localhost',
-          '192.168.10.42', '192.168.10.43', '192.168.0.2']
+        whiteListedDomains: ['127.0.0.1', 'localhost', '192.168.10.43']
       });
 
       jwtInterceptorProvider.tokenGetter = function (store) {
@@ -185,7 +183,7 @@ app.config(['$resourceProvider', function ($resourceProvider) {
     create: { method: 'POST' },
     get: { method: 'GET' },
     getAll: { method: 'GET', isArray: true },
-    update: { method: 'PATCH' },
+    update: { method: 'PUT' },
     delete: { method: 'DELETE' }
   };
 }]);

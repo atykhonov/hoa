@@ -33,7 +33,11 @@ SECRET_KEY = '#7ue+68l_spdkrr9@#_ruc#kwb80j=2_9h9+drwdmt$4mj%28u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.10.43', ]
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1', '192.168.10.42',
+    '192.168.10.43', '192.168.0.2',
+]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -217,6 +221,7 @@ CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:3000',
     '127.0.0.1:8000',
     'localhost:8000',
+    '192.168.10.42:8000',
     '192.168.10.43:8000',
 )
 

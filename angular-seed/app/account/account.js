@@ -1,19 +1,19 @@
 'use strict';
 
-angular.module('myApp.account', ['ngRoute'])
+var mod = angular.module('myApp.account', ['ngRoute']);
 
-  .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/apartment/:id/account', {
-      templateUrl: 'account/account.html',
-      controller: 'AccountCtrl'
-    });
-    $routeProvider.when('/accounts', {
-      templateUrl: 'account/account.html',
-      controller: 'AccountCtrl'
-    });
-  }])
+mod.config(['$routeProvider', function ($routeProvider) {
+  $routeProvider.when('/apartment/:id/account', {
+    templateUrl: 'account/account.html',
+    controller: 'AccountCtrl'
+  });
+  $routeProvider.when('/accounts', {
+    templateUrl: 'account/account.html',
+    controller: 'AccountCtrl'
+  });
+}]);
 
-  .controller(
+mod.controller(
   'AccountCtrl',
   ['$mdDialog', '$resources', '$scope', '$routeParams',
     function ($mdDialog, $resources, $scope, $routeParams) {
@@ -31,7 +31,7 @@ angular.module('myApp.account', ['ngRoute'])
       $scope.query = {
         filter: '',
         limit: '5',
-        order: 'first_name',
+        order: 'id',
         page: 1
       };
 
@@ -74,6 +74,21 @@ angular.module('myApp.account', ['ngRoute'])
         }
       };
 
+      $scope.editFullname = function (event, account) {
+
+        event.stopPropagation();
+
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'FullnameController',
+          controllerAs: 'ctrl',
+          focusOnOpen: true,
+          targetEvent: event,
+          locals: { account: account },
+          templateUrl: 'account/edit-account-fullname-dialog.html',
+        }).then($scope.getAccounts);
+      }
+
       function success(accounts) {
         $scope.accounts = accounts;
       }
@@ -115,9 +130,10 @@ angular.module('myApp.account', ['ngRoute'])
         $scope.getAccounts();
       });
 
-    }])
+    }]);
 
-  .controller('AddAccountController',
+mod.controller(
+  'AddAccountController',
   ['$mdDialog', '$resources', '$scope', '$routeParams',
     function ($mdDialog, $resources, $scope, $routeParams) {
 
@@ -133,9 +149,10 @@ angular.module('myApp.account', ['ngRoute'])
         $scope.promise = $resources.apartment_owner.create(
           $scope.apartment, success).$promise;
       }
-    }])
+    }]);
 
-  .controller('DeleteAccountController',
+mod.controller(
+  'DeleteAccountController',
   ['accounts', '$mdDialog', '$resources', '$scope', '$q',
     function (accounts, $mdDialog, $resources, $scope, $q) {
 
@@ -159,9 +176,10 @@ angular.module('myApp.account', ['ngRoute'])
         $mdDialog.hide();
       }
 
-    }])
+    }]);
 
-  .controller('EditAccountController',
+mod.controller(
+  'EditAccountController',
   ['account', '$mdDialog', '$resources', '$scope', '$q',
     function (account, $mdDialog, $resources, $scope, $q) {
 
@@ -172,6 +190,25 @@ angular.module('myApp.account', ['ngRoute'])
       $scope.account = JSON.parse(JSON.stringify(account));
 
       this.updateAccount = function () {
+        var deferred = $resources.accounts.update({ id: account.id }, $scope.account);
+        deferred.$promise.then(function () {
+          $mdDialog.hide(account);
+        });
+        return deferred.$promise;
+      }
+
+    }]);
+
+mod.controller(
+  'FullnameController',
+  ['account', '$mdDialog', '$resources', '$scope', '$q',
+    function (account, $mdDialog, $resources, $scope, $q) {
+
+      this.cancel = $mdDialog.cancel;
+
+      $scope.account = JSON.parse(JSON.stringify(account));
+
+      this.saveFullname = function () {
         var deferred = $resources.accounts.update({ id: account.id }, $scope.account);
         deferred.$promise.then(function () {
           $mdDialog.hide(account);

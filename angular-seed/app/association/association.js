@@ -1,23 +1,23 @@
 'use strict';
 
-angular.module('myApp.association', ['ngRoute'])
+var mod = angular.module('myApp.association', ['ngRoute']);
 
-  .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/', {
-      templateUrl: 'association/association-manager.html',
-      controller: 'AssociationManagerCtrl'
-    });
-    $routeProvider.when('/associations/', {
-      templateUrl: 'association/association.html',
-      controller: 'AssociationCtrl'
-    });
-    $routeProvider.when('/associations/:id/', {
-      templateUrl: 'association/association-details.html',
-      controller: 'AssociationDetailsCtrl'
-    });
-  }])
+mod.config(['$routeProvider', function ($routeProvider) {
+  $routeProvider.when('/', {
+    templateUrl: 'association/association-manager.html',
+    controller: 'AssociationManagerCtrl'
+  });
+  $routeProvider.when('/associations/', {
+    templateUrl: 'association/association.html',
+    controller: 'AssociationCtrl'
+  });
+  $routeProvider.when('/associations/:id/', {
+    templateUrl: 'association/association-details.html',
+    controller: 'AssociationDetailsCtrl'
+  });
+}]);
 
-  .controller(
+mod.controller(
   'AssociationCtrl',
   ['$mdDialog', '$resources', '$scope', '$location', '$rootScope',
     function ($mdDialog, $resources, $scope, $location, $rootScope) {
@@ -121,9 +121,10 @@ angular.module('myApp.association', ['ngRoute'])
         $scope.getAssociations();
       });
 
-    }])
+    }]);
 
-  .controller('AddAssociationController',
+mod.controller(
+  'AddAssociationController',
   ['$mdDialog', '$resources', '$scope',
     function ($mdDialog, $resources, $scope) {
 
@@ -139,9 +140,10 @@ angular.module('myApp.association', ['ngRoute'])
         $scope.promise = $resources.cooperatives.create($scope.association, success).$promise;
       }
 
-    }])
+    }]);
 
-  .controller('DeleteAssociationController',
+mod.controller(
+  'DeleteAssociationController',
   ['associations', '$mdDialog', '$resources', '$scope', '$q',
     function (associations, $mdDialog, $resources, $scope, $q) {
 
@@ -165,9 +167,10 @@ angular.module('myApp.association', ['ngRoute'])
         $mdDialog.hide();
       }
 
-    }])
+    }]);
 
-  .controller('EditController',
+mod.controller(
+  'EditController',
   ['association', '$mdDialog', '$resources', '$scope', '$q',
     function (association, $mdDialog, $resources, $scope, $q) {
 
@@ -185,20 +188,99 @@ angular.module('myApp.association', ['ngRoute'])
         return deferred.$promise;
       }
 
-    }])
+    }]);
 
-  .controller(
+mod.controller(
   'AssociationDetailsCtrl',
   ['$mdDialog', '$resources', '$scope', '$location',
     function ($mdDialog, $resources, $scope, $location) {
-    }])
 
-  .controller(
+
+    }]);
+
+mod.controller(
+  'ChangeInformationController',
+  ['association', '$scope', '$mdDialog', '$resources',
+    function (association, $scope, $mdDialog, $resources) {
+
+      $scope.association = association;
+
+      this.cancel = $mdDialog.cancel;
+
+      this.saveAssociation = function (event) {
+
+        var deferred = $resources.cooperatives.update(
+          {
+            id: association.id
+          },
+          $scope.association
+        );
+        deferred.$promise.then(function () {
+          $mdDialog.hide();
+        });
+        return deferred.$promise;
+      }
+    }]);
+
+mod.controller(
+  'ChangeAssociationServicesController',
+  ['association', 'assoc_services', '$scope', '$mdDialog', '$resources',
+    function (association, assoc_services, $scope, $mdDialog, $resources) {
+
+      $scope.selected = [];
+
+      $scope.association = association;
+
+      // The services which are assigned to the association.
+      $scope.assoc_services = assoc_services;
+
+      this.cancel = $mdDialog.cancel;
+
+      var services_success = function (services) {
+        $scope.services = services.data;
+        var selected_service_ids = [];
+        for (var i = 0; i < assoc_services.length; i++) {
+          var assoc_service = assoc_services[i];
+          selected_service_ids.push(assoc_service.service.id);
+        }
+        for (var i = 0; i < $scope.services.length; i++) {
+          var service = $scope.services[i];
+          if (selected_service_ids.indexOf(service.id) !== -1) {
+            $scope.services[i].selected = true;
+          }
+        }
+      };
+
+      $resources.services.get({ 'limit': 50 }, services_success).$promise;
+
+      this.saveAssociationServices = function (event) {
+
+        var selected_service_ids = [];
+        for (var i = 0; i < $scope.services.length; i++) {
+          var service = $scope.services[i];
+          if (service.selected) {
+            selected_service_ids.push(service.id);
+          }
+        }
+        var deferred = $resources.cooperative_services.update(
+          {
+            cooperative_id: $scope.association.id
+          },
+          selected_service_ids
+        );
+        deferred.$promise.then(function () {
+          $mdDialog.hide();
+        });
+        return deferred.$promise;
+      }
+    }]);
+
+mod.controller(
   'AssociationManagerCtrl',
   ['$mdDialog', '$resources', '$scope', '$location', 'auth',
     function ($mdDialog, $resources, $scope, $location, auth) {
 
-      $scope.selected = [];
+      this.cancel = $mdDialog.cancel;
 
       var userInfo = auth.getUserInfo();
       if (userInfo === undefined) {
@@ -217,6 +299,38 @@ angular.module('myApp.association', ['ngRoute'])
       $scope.cooperatives_promise = $resources.cooperatives.get(
         { id: associationId }, cooperatives_success).$promise;
 
-      $scope.services_promise = $resources.cooperative_services.get(
-        { cooperative_id: associationId }, services_succcess).$promise;
+      $scope.getAssocServices = function () {
+        $scope.services_promise = $resources.cooperative_services.get(
+          { cooperative_id: associationId, limit: 50 }, services_succcess).$promise;
+      }
+      $scope.getAssocServices();
+
+      $scope.changeInformation = function (event) {
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'ChangeInformationController',
+          controllerAs: 'ctrl',
+          focusOnOpen: true,
+          targetEvent: event,
+          locals: { association: $scope.association },
+          templateUrl: 'association/change-association-dialog.html',
+        }).then($scope.getAssociations);
+      };
+
+      $scope.changeServices = function (event) {
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'ChangeAssociationServicesController',
+          controllerAs: 'ctrl',
+          focusOnOpen: true,
+          targetEvent: event,
+          locals: {
+            association: $scope.association,
+            assoc_services: $scope.services.data
+          },
+          templateUrl: 'association/change-association-services-dialog.html',
+        }).then(function () {
+          $scope.getAssocServices();
+        });
+      }
     }]);

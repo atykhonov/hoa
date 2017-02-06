@@ -1,0 +1,37 @@
+<form name="item.form" ng-submit="ctrl.saveAssociationServices()">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Вибрати послуги</h2>
+
+      <div layout="row" class="input-row">
+        <md-table-container>
+          <table md-table class="md-data-table" fli>
+            <thead md-head>
+              <tr md-row>
+                <th md-column md-string>Послуга</th>
+              </tr>
+            </thead>
+            <tbody md-body>
+              <tr md-row ng-repeat="item in services">
+                <td md-cell>
+                  <md-checkbox>
+                    {{ item.service.name }}
+                  </md-checkbox>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit"
+                 class="md-primary" ng-disabled="item.form.$invalid">Зберегти</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

@@ -147,7 +147,6 @@ class Apartment(BaseModel):
 
 
 class Account(BaseModel):
-    uid = models.CharField(max_length=100)
     apartment = models.OneToOneField(Apartment)
     owner = models.OneToOneField(User, null=True)
     first_name = models.CharField(
@@ -181,6 +180,12 @@ class Account(BaseModel):
             apartment.number,
             apartment_index
             )
+
+    def get_cooperative(self):
+        """
+        Return the cooperative to which the account belongs to.
+        """
+        return self.apartment.get_cooperative()
 
 
 class ApartmentTariff(BaseModel):

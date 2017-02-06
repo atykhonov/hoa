@@ -114,7 +114,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        if user.is_staff and self.request.method in ('PUT', 'GET', 'POST', ):
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', )
+        if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
         return (NoPermissions(), )
@@ -162,11 +163,13 @@ class HousingCooperativeViewSet(BaseModelViewSet):
                 'message': 'House could not be created with received data'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['get', 'post', 'delete'])
+    @detail_route(methods=['get', 'post', 'delete', 'patch', ])
     def services(self, request, pk):
         """
         Return the houses of the cooperative or create a new house.
         """
+        
+        
         cooperative = HousingCooperative.objects.get(pk=pk)
         user = request.user
         # if not user.is_superuser:
@@ -175,30 +178,48 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             hc_services = HCService.objects.filter(cooperative=pk)
             return self.list_paginated(
                 request, hc_services, HCServiceSerializer)
-        elif request.method == 'POST':
-            data = request.data
-            data['cooperative'] = cooperative.id
-            service = Service.objects.get(pk=data.get('service'))
-            serializer = HCServiceSerializer(data=data, partial=True)
-            if serializer.is_valid():
-                validated_data = serializer.validated_data
-                hc_service = HCService(
-                    cooperative=cooperative, service=service, **validated_data)
-                try:
-                    hc_service.save()
-                except IntegrityError:
-                    message = _(
-                        'For the given condominium service already exists')
-                    return Response(
-                        message, status=status.HTTP_400_BAD_REQUEST)
-                response_data = {
+        elif request.method == 'PATCH':
+            saved_service_ids = []
+            assoc_service_ids = []
+            service_ids = request.data
+            for service_id in service_ids:
+                service = Service.objects.get(pk=service_id)
+                data = {
                     'cooperative': cooperative.id,
                     'service': service.id,
-                    'notes': validated_data.get('notes'),
                 }
-                return Response(response_data, status=status.HTTP_201_CREATED)
+                serializer = HCServiceSerializer(data=data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                validated_data = serializer.validated_data
+                hc_service = HCService(
+                    cooperative=cooperative,
+                    service=service,
+                    **validated_data
+                    )
+                try:
+                    hc_service.save()
+                    saved_service_ids.append(service.id)
+                    assoc_service_ids.append(hc_service.id)
+                except IntegrityError:
+                    pass
+                    # message = _(
+                    #     'For the given condominium service already exists')
+                    # return Response(
+                    #     message, status=status.HTTP_400_BAD_REQUEST)
+            for coop_service in cooperative.services.all():
+                if coop_service.service.id not in service_ids:
+                    coop_service.delete()
+                    # The cooperative service is deleted. This is
+                    # ok. But probably we should also delete all
+                    # related meters and meter indicators!
+            response_data = {
+                'cooperative': cooperative.id,
+                'services': saved_service_ids,
+                'cooperative_services': assoc_service_ids,
+                'notes': validated_data.get('notes'),
+            }
             return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                response_data, status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
             try:
                 hc_service_id = int(request.query_params.get('service_id'))
@@ -261,6 +282,8 @@ class HousingCooperativeViewSet(BaseModelViewSet):
 
     @detail_route(methods=['get'])
     def indicators(self, request, pk):
+
+
         """
         Return the indicators of the meters.
         """
@@ -292,7 +315,7 @@ class HouseViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
@@ -356,7 +379,7 @@ class ApartmentViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
@@ -417,7 +440,7 @@ class ApartmentViewSet(BaseModelViewSet):
             }
             serializer = AccountSerializer(account, context=context)
             return Response(serializer.data)
-        elif request.method == 'PUT':
+        elif request.method == 'PATCH':
             account = apartment.account
             serializer = AccountSerializer(data=request.data, partial=True)
             if serializer.is_valid():
@@ -443,6 +466,9 @@ class ServiceViewSet(BaseModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return (IsAuthenticated(), )
+        allowed_methods = ('GET', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
         return (NoPermissions(), )
 
     def list(self, request):
@@ -479,7 +505,7 @@ class AccountViewSet(BaseModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return (IsAuthenticated(), )
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
         return (NoPermissions(), )
@@ -509,7 +535,7 @@ class MeterViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
@@ -562,7 +588,7 @@ class MeterIndicatorViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
@@ -600,7 +626,7 @@ class ChargeViewSet(BaseModelViewSet):
         if user.is_superuser:
             return (IsAuthenticated(), )
 
-        allowed_methods = ('PUT', 'GET', 'POST', 'DELETE', )
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 

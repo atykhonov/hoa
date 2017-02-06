@@ -47,7 +47,7 @@
           <th md-column md-string md-order-by="address">Адреса</th>
           <th md-column md-numeric>Тариф</th>
           <th md-column md-numeric>К-ть квартир</th>
-          <th md-column md-string>Квартири</th>
+          <!-- <th md-column md-string>Квартири</th> -->
         </tr>
       </thead>
       <tbody md-body>
@@ -55,11 +55,11 @@
           <td md-cell>{{house.address.medium}}</td>
           <td md-cell>{{house.tariff || "—"}}</td>
           <td md-cell>{{house.apartments_count}}</td>
-          <td md-cell>
-            <md-button ng-click="viewApartments($event, house.id)" class="nav-btn">
-              <md-icon class="md-default-theme" class="material-icons">view_quilt</md-icon>
-            </md-button>
-          </td>
+          <!-- <td md-cell>
+               <md-button ng-click="viewApartments($event, house.id)" class="nav-btn">
+               <md-icon class="md-default-theme" class="material-icons">view_quilt</md-icon>
+               </md-button>
+               </td> -->
         </tr>
       </tbody>
     </table>

@@ -44,16 +44,18 @@
     <table md-table md-row-select multiple ng-model="selected" md-progress="promise" class="md-data-table">
       <thead md-head md-order="query.order" md-on-reorder="getAccounts">
         <tr md-row>
-          <th md-column md-numeric>Квартира</th>
-          <th md-column md-string><span>Ім’я</span></th>
-          <th md-column md-string md-order-by="last_name">Прізвище</th>
+          <th md-column md-string>Особовий рахунок</th>
+          <th md-column md-string>Адреса</th>
+          <th md-column md-string md-order-by="last_name">Прізвище, ім’я</th>
         </tr>
       </thead>
       <tbody md-body>
         <tr md-row md-select="account" md-select-id="id" md-auto-select ng-repeat="account in accounts.data">
-          <td md-cell>{{account.apartment}}</td>
-          <td md-cell>{{account.first_name}}</td>
-          <td md-cell>{{account.last_name}}</td>
+          <td md-cell>{{account.pid}}</td>
+          <td md-cell>{{account.address}}</td>
+          <td md-cell ng-click="editFullname($event, account)" ng-class="{'md-placeholder': !account.full_name}">
+            {{account.full_name || 'Змінити'}}
+          </td>
         </tr>
       </tbody>
     </table>
