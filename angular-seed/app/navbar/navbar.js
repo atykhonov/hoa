@@ -1,11 +1,15 @@
 'use strict';
 
-angular.module('myApp.navbar', ['ngRoute'])
+var mod = angular.module('myApp.navbar', ['ngRoute'])
 
-  .controller(
+mod.controller(
   'NavbarCtrl',
   ['$scope', '$location', 'auth',
     function ($scope, $location, auth) {
+
+      $scope.show = function () {
+        return auth.isAuthed();
+      }
 
       var userInfo = auth.getUserInfo();
       if (userInfo) {

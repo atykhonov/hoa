@@ -22,10 +22,6 @@ mod.controller(
 
       function handleRequest(res) {
         var token = res.data ? res.data.token : null;
-        if (token) { console.log('JWT:', token); }
-        console.log('Response: ');
-        console.log(res);
-        self.message = res.data.message;
         auth.saveToken(token);
 
         var userInfo = undefined;

@@ -24,7 +24,7 @@
 
   <md-content ng-controller="NavbarCtrl as nbc" ng-cloak>
 
-    <md-toolbar class="md-hue-2">
+    <md-toolbar class="md-hue-2" flex="100">
       <div class="md-toolbar-tools">
         <md-button class="md-icon-button" aria-label="Settings" ng-disabled="true">
           <md-icon style="color: rgba(255,255,255,0.87);">account_balance</md-icon>
@@ -44,7 +44,7 @@
       </div>
     </md-toolbar>
     
-    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar">
+    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar" ng-if="show()">
       <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_balance</md-icon> ОСББ
       </md-nav-item>
