@@ -1,27 +1,70 @@
-<md-card>
+<!-- <md-card>
 
-  <md-content layout-padding>
+     <md-content layout-padding>
 
-    <h1>Вхід</h1>
+     <h1>Вхід</h1>
 
-    <div ng-if="!isAuthed()">
-      <input type="text" ng-model="email" placeholder="email"><br>
-      <input type="password" ng-model="password" placeholder="password"><br>
+     <div ng-if="!isAuthed()">
+     <input type="text" ng-model="email" placeholder="email"><br>
+     <input type="password" ng-model="password" placeholder="password"><br>
 
-      <button ng-click="login()">Login</button>
-    </div>
-    <div ng-if="isAuthed()">
-      <div layout-padding>
-        Ви успішно увійшли як користувач {{ email }}.
-      </div>
-      <div layout-padding>
-        <a href="#!/">Перейти на головну сторінку.</a>
-      </div>
-      <div layout-padding>
-        <button ng-click="logout()" ng-show="isAuthed()">Logout</button>
-      </div>
-    </div>
+     <button ng-click="login()">Login</button>
+     </div>
+     <div ng-if="isAuthed()">
+     <div layout-padding>
+     Ви успішно увійшли як користувач {{ email }}.
+     </div>
+     <div layout-padding>
+     <a href="#!/">Перейти на головну сторінку.</a>
+     </div>
+     <div layout-padding>
+     <button ng-click="logout()" ng-show="isAuthed()">Logout</button>
+     </div>
+     </div>
 
-  </md-content>
+     </md-content>
 
-</md-card>
+     </md-card> -->
+
+
+<md-content layout-xs="column" layout="row">
+  <div flex-xs flex-gt-xs="50" layout="column">
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Вхід</span>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <div ng-if="!isAuthed()">
+          <div layout="column" class="input-row">
+            <md-input-container flex>
+              <label>Логін</label>
+              <input type="text" ng-model="email" placeholder="email"><br>
+            </md-input-container>
+            <md-input-container flex>
+              <label>Пароль</label>
+              <input type="password" ng-model="password" placeholder="password"><br>
+            </md-input-container>
+            <md-input-container flex>
+              <button ng-click="login()">Увійти</button>
+            </md-input-container>
+          </div>
+        </div>
+        <div ng-if="isAuthed()">
+          <div layout="column" class="input-row">
+            <md-input-container flex>
+              Ви успішно увійшли як користувач {{ email }}.
+            </md-input-container>
+            <md-input-container flex>
+              <a href="#!/">Перейти на головну сторінку.</a>
+            </md-input-container>
+            <md-input-container flex>
+              <button ng-click="logout()" ng-show="isAuthed()">Logout</button>
+            </md-input-container>
+          </div>
+        </div>
+      </md-card-content>
+    </md-card>
+  </div>
+</md-content>
