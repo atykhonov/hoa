@@ -31,14 +31,11 @@
         </md-button>
         <h2>
           <span>
-            ОСББ <span ng-if="associationName">«{{associationName}}»</span>
+            ОСББ <span ng-if="show()">«{{associationName}}»</span>
           </span>
         </h2>
         <span flex></span>
-        <md-button class="md-icon-button" aria-label="Favorite" ng-click="nbc.gotoLogin()">
-          <md-icon>favorite</md-icon>
-        </md-button>
-        <md-button class="md-icon-button" aria-label="More">
+        <md-button class="md-icon-button" aria-label="More" ng-click="nbc.gotoLogin()">
           <md-icon>menu</md-icon>
         </md-button>
       </div>
