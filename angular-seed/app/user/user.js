@@ -56,7 +56,7 @@ mod.controller(
       }
 
       $scope.isAuthed = function () {
-        return auth.isAuthed ? auth.isAuthed() : false
+        return auth.isAuthed();
       }
 
     }]);

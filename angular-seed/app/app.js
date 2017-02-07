@@ -50,7 +50,7 @@ function authService($window, store) {
   }
 
   self.logout = function () {
-    $window.localStorage.removeItem('jwtToken');
+    store.set('jwt', null);
   }
 }
 
@@ -169,14 +169,16 @@ app.config(['$resourceProvider', function ($resourceProvider) {
 }]);
 
 app.run(
-  ['$rootScope',
-    function ($rootScope) {
+  ['$rootScope', 'auth', '$location',
+    function ($rootScope, auth, $location) {
       $rootScope.$on('$routeChangeSuccess', function (e, current, pre) {
-        if (current.$$route !== undefined) {
-          $rootScope.currentNavItem = 'associations';
-          if (current.$$route.originalPath == '/associations/:id/houses') {
-            $rootScope.currentNavItem = 'houses';
-          }
+        var route = current.$$route;
+        if (route !== undefined && route.originalPath == '/login') {
+          return;
+        }
+        if (!auth.isAuthed()) {
+          e.preventDefault();
+          return $location.path("/login");
         }
       });
     }
