@@ -1,15 +1,15 @@
 'use strict';
 
-angular.module('myApp.user', ['ngRoute'])
+var mod = angular.module('myApp.user', ['ngRoute'])
 
-  .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider.when('/login', {
-      templateUrl: 'user/login.html',
-      controller: 'UserCtrl'
-    });
-  }])
+mod.config(['$routeProvider', function ($routeProvider) {
+  $routeProvider.when('/login', {
+    templateUrl: 'user/login.html',
+    controller: 'UserCtrl'
+  });
+}]);
 
-  .controller(
+mod.controller(
   'UserCtrl',
   ['$scope', 'user', 'auth', '$rootScope', '$window',
     function ($scope, user, auth, $rootScope, $window) {
@@ -22,9 +22,9 @@ angular.module('myApp.user', ['ngRoute'])
 
       function handleRequest(res) {
         var token = res.data ? res.data.token : null;
-        // if (token) { console.log('JWT:', token); }
-        // console.log('Response: ');
-        // console.log(res);
+        if (token) { console.log('JWT:', token); }
+        console.log('Response: ');
+        console.log(res);
         self.message = res.data.message;
         auth.saveToken(token);
 
@@ -44,18 +44,19 @@ angular.module('myApp.user', ['ngRoute'])
         user.login($scope.email, $scope.password)
           .then(handleRequest, handleRequest)
       }
-      self.register = function () {
-        user.register(self.username, self.password)
-          .then(handleRequest, handleRequest)
-      }
-      $scope.getQuote = function () {
-        user.getQuote()
-          .then(handleRequest, handleRequest)
-      }
+
       $scope.logout = function () {
         auth.logout && auth.logout()
       }
+
+      $scope.refreshToken = function () {
+        user.refreshToken().then(function (response) {
+          auth.refreshToken(response.data);
+        });
+      }
+
       $scope.isAuthed = function () {
         return auth.isAuthed ? auth.isAuthed() : false
       }
+
     }]);

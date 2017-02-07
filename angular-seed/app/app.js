@@ -1,26 +1,5 @@
 'use strict';
 
-function authInterceptor(API, auth) {
-  return {
-    // automatically attach Authorization header
-    request: function (config) {
-      var token = auth.getToken();
-      if (config.url.indexOf(API) === 0 && token) {
-        config.headers.Authorization = 'JWT ' + token;
-      }
-      return config;
-    },
-
-    // If a token was sent back, save it
-    response: function (res) {
-      if (res.config.url.indexOf(API) === 0 && res.data.token) {
-        auth.saveToken(res.data.token);
-      }
-      return res;
-    },
-  }
-}
-
 function authService($window, store) {
 
   var self = this;
@@ -32,7 +11,6 @@ function authService($window, store) {
   }
 
   self.saveToken = function (token) {
-    // $window.localStorage['jwtToken'] = token;
     store.set('jwt', token);
   }
 
@@ -58,16 +36,27 @@ function authService($window, store) {
     }
   }
 
+  self.needsFreshToken = function () {
+    var token = self.getToken();
+    if (token) {
+      var now = Math.round(new Date().getTime() / 1000);
+      var params = self.parseJwt(token);
+      if (params.exp - now < 5 * 60) {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+
   self.logout = function () {
     $window.localStorage.removeItem('jwtToken');
   }
 }
 
 function userService($http, API, auth) {
+
   var self = this;
-  self.getQuote = function () {
-    return $http.get(API + 'api-token-auth/quote')
-  }
 
   self.login = function (email, password) {
     return $http.post(API + 'api-token-auth/', {
@@ -78,6 +67,11 @@ function userService($http, API, auth) {
 
   self.getInfo = function () {
     return $http.get(API + 'api/v1/user-info/');
+  };
+
+  self.refreshToken = function () {
+    var token = auth.getToken();
+    return $http.post(API + 'api-token-refresh/', { token: token });
   }
 }
 
@@ -151,34 +145,10 @@ app.config(['$locationProvider', '$routeProvider', function ($locationProvider, 
 }]);
 
 app.config(
-  ['$httpProvider', '$mdThemingProvider', 'jwtOptionsProvider', 'jwtInterceptorProvider',
-    function ($httpProvider, $mdThemingProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  ['$httpProvider', '$mdThemingProvider',
+    function ($httpProvider, $mdThemingProvider) {
 
-      // $httpProvider.interceptors.push('authInterceptor');
-
-      jwtOptionsProvider.config({
-        authPrefix: 'JWT ',
-        whiteListedDomains: [
-          '127.0.0.1', 'localhost',
-          '192.168.10.42', '192.168.10.43', '192.168.0.2', '192.168.0.3']
-      });
-
-      jwtInterceptorProvider.tokenGetter = function (store) {
-        return store.get('jwt');
-      };
-
-      // jwtInterceptorProvider.tokenGetter = function (store) {
-      //   return $window.localStorage.get('id_token');
-      // }
-
-      // jwtOptionsProvider.config({
-      //   tokenGetter: ['myService', function (myService) {
-      //     myService.doSomething();
-      //     return localStorage.getItem('id_token');
-      //   }]
-      // });
-
-      $httpProvider.interceptors.push('jwtInterceptor');
+      $httpProvider.interceptors.push('authInterceptor');
 
       $mdThemingProvider.theme('default')
         .primaryPalette('blue')
@@ -199,41 +169,13 @@ app.config(['$resourceProvider', function ($resourceProvider) {
 }]);
 
 app.run(
-  ['$rootScope', '$location', '$routeParams', '$window', '$http', 'authManager', 'store', 'jwtHelper',
-    function ($rootScope, $location, $routeParams, $window, $http, authManager, store, jwtHelper) {
-
-      authManager.checkAuthOnRefresh();
-
+  ['$rootScope',
+    function ($rootScope) {
       $rootScope.$on('$routeChangeSuccess', function (e, current, pre) {
         if (current.$$route !== undefined) {
           $rootScope.currentNavItem = 'associations';
           if (current.$$route.originalPath == '/associations/:id/houses') {
             $rootScope.currentNavItem = 'houses';
-          }
-        }
-      });
-
-      // keep user logged in after page refresh
-      // if ($window.localStorage['jwtToken']) {
-      //   $http.defaults.headers.common.Authorization = 'JWT ' + $window.localStorage['jwtToken'];
-      // }
-
-      // redirect to login page if not logged in and trying to access a restricted page
-      // $rootScope.$on('$locationChangeStart', function (event, next, current) {
-      //   var publicPages = ['/user'];
-      //   var restrictedPage = publicPages.indexOf($location.path()) === -1;
-      //   if (restrictedPage && !$window.localStorage['jwtToken']) {
-      //     $location.path('/user');
-      //   }
-      // });
-
-      $rootScope.$on('$stateChangeStart', function (e, to) {
-        if (to.data && to.data.requiresLogin) {
-          if (!store.get('jwt') || jwtHelper.isTokenExpired(store.get('jwt'))) {
-            e.preventDefault();
-            // $state.go('login');
-            $location.path('/login');
-            console.log('Go to login!!!');
           }
         }
       });
@@ -270,3 +212,44 @@ app.filter('replace_space', [function () {
     return result;
   }
 }]);
+
+app.factory(
+  'authInterceptor',
+  ['auth', '$rootScope', '$injector', 'API',
+    function (auth, $rootScope, $injector, API) {
+
+      var authInterceptor = {
+
+        request: function (config) {
+          var token = auth.getToken();
+          if (config.url.indexOf(API) === 0 && token) {
+            config.headers.Authorization = 'JWT ' + token;
+          }
+          return config;
+        },
+
+        response: function (response) {
+          if (auth.isAuthed() && auth.needsFreshToken()) {
+            var user = $injector.get('user');
+            user.refreshToken().then(function (response) {
+              var token = response.data ? response.data.token : null;
+              auth.saveToken(token);
+            });
+          }
+          if (response.config.url.indexOf(API) === 0 && response.data.token) {
+            auth.saveToken(response.data.token);
+          }
+          return response;
+        },
+
+        responseError: function (response) {
+          if (response.status === 401) {
+            $rootScope.$broadcast('unauthorized');
+          }
+          return response;
+        }
+      };
+
+      return authInterceptor;
+
+    }]);
