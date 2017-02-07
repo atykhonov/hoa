@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -107,7 +109,8 @@ class Service(BaseModel):
     # created when cooperative is created.
     required = models.BooleanField(default=False)
     requires_meter = models.BooleanField(default=False)
-    tariff = models.IntegerField(default=None, null=True)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
 
 
 # class Tariff(BaseModel):
@@ -118,7 +121,8 @@ class Service(BaseModel):
 class House(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative, related_name='houses')
     address = models.OneToOneField(Address, related_name='house_address')
-    tariff = models.IntegerField(default=None, null=True)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
     apartments_count = models.IntegerField(null=True)
 
     def get_cooperative(self):
@@ -134,10 +138,14 @@ class Apartment(BaseModel):
     floor = models.IntegerField(null=True)
     entrance = models.IntegerField(null=True)
     room_number = models.IntegerField(null=True)
-    total_area = models.FloatField(null=True)
-    dwelling_space = models.FloatField(null=True)
-    heating_area = models.FloatField(null=True)
-    tariff = models.IntegerField(default=None, null=True)
+    total_area = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
+    dwelling_space = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
+    heating_area = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
 
     def get_cooperative(self):
         """
@@ -225,6 +233,19 @@ class Meter(BaseModel):
             return indicators[0]
         return None
 
+    def create_indicators(self):
+        """
+        Create indicators for the previous and the current mounths.
+        """
+        date = datetime.datetime.now().date()
+        period = datetime.date(
+            day=1, month=date.month, year=date.year)
+        MeterIndicator.objects.create(meter=self, period=period)
+
+        last_month_date = period - datetime.timedelta(days=1)
+        period = last_month_date.replace(day=1)
+        MeterIndicator.objects.create(meter=self, period=period)
+
 
 class MeterIndicator(BaseModel):
     meter = models.ForeignKey(Meter, related_name='indicators')
@@ -253,13 +274,15 @@ class HousingCooperativeService(BaseModel):
 class Charge(BaseModel):
     account = models.ForeignKey(Account, related_name='charges')
     period = models.DateField()
-    total = models.IntegerField(null=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
 
 class ServiceCharge(BaseModel):
     charge = models.ForeignKey(Charge, related_name='services')
     service = models.ForeignKey(Service)
-    tariff = models.IntegerField(default=None, null=True)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
     indicator_beginning = models.CharField(max_length=10)
     indicator_end = models.CharField(max_length=10)
-    value = models.IntegerField()
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+

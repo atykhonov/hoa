@@ -25,7 +25,7 @@ app.controller(
 
       $scope.filter = {
         options: {
-          debounce: 500
+          debounce: 500,
         }
       };
 
@@ -33,7 +33,8 @@ app.controller(
         filter: '',
         limit: '6',
         order: 'id',
-        page: 1
+        page: 1,
+        period: new Date(moment({ day: 1 }).format("YYYY-MM-DD")),
       };
 
       $scope.viewApartments = function (event, house_id) {
@@ -78,6 +79,18 @@ app.controller(
           }).then($scope.getHouses);
         }
       };
+
+      $scope.viewMeter = function (meter, event) {
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'MeterController',
+          controllerAs: 'ctrl',
+          focusOnOpen: true,
+          targetEvent: event,
+          locals: { meter: meter },
+          templateUrl: 'indicator/view-meter-dialog.html',
+        });
+      }
 
       $scope.editComment = function (event, indicator) {
 
@@ -150,19 +163,7 @@ app.controller(
         }
       };
 
-      $scope.$watch('query.filter', function (newValue, oldValue) {
-        if (!oldValue) {
-          bookmark = $scope.query.page;
-        }
-
-        if (newValue !== oldValue) {
-          $scope.query.page = 1;
-        }
-
-        if (!newValue) {
-          $scope.query.page = bookmark;
-        }
-
+      $scope.$watch('query.period', function (newValue, oldValue) {
         $scope.getIndicators();
       });
 
@@ -233,4 +234,12 @@ app.controller(
         return deferred.$promise;
       }
 
+    }]);
+
+app.controller(
+  'MeterController',
+  ['meter', '$mdDialog', '$resources', '$scope',
+    function (meter, $mdDialog, $resources, $scope) {
+
+      $scope.myDate = new Date(2017, 1, 1);
     }]);

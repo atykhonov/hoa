@@ -16,14 +16,14 @@
           <th md-column md-string>Особовий рахунок</th>
           <th md-column md-string>Адреса</th>
           <th md-column md-numeric ng-repeat="service in services">
-            <span ng-bind-html="service.name | replace_space: 2 | trust"></span><br />(грн.)
+            <span ng-bind-html="service.name | replace_space: 2 | trust"></span>, грн.
           </th>
-          <th md-column md-numeric>Всього (грн.)</th>
+          <th md-column md-numeric>Всього, грн.</th>
         </tr>
       </thead>
       <tbody md-body>
         <tr md-row ng-repeat="charge in charges">
-          <td md-cell>{{charge.account_id}}</td>
+          <td md-cell>{{charge.pid}}</td>
           <td md-cell>{{charge.address}}</td>
           <td md-cell ng-repeat="service_charge in charge.service_charges">
             {{ service_charge.value }}

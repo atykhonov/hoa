@@ -125,18 +125,26 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
     units: $resource(APIV1 + 'units/'),
     cooperative_indicators: $resource(
       APIV1 + 'cooperatives/:cooperative_id/indicators/'),
+    cooperative_recalccharges: $resource(
+      APIV1 + 'cooperatives/:cooperative_id/recalccharges/',
+      { cooperative_id: '@cooperative_id' }),
     indicators: $resource(
       APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' }),
     charges: $resource(APIV1 + 'charges/')
   };
 }]);
 
-var API_URL = 'http://192.168.10.42:8080/';
+var API_URL = 'http://192.168.0.3:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);
 app.constant('API', API_URL);
 app.constant('APIV1', API_URL + 'api/v1/');
+
+app.config(function ($compileProvider) {
+  $compileProvider.preAssignBindingsEnabled(true);
+});
+
 app.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
   $locationProvider.hashPrefix('!');
   $routeProvider.otherwise({ redirectTo: '/' });
@@ -152,7 +160,7 @@ app.config(
         authPrefix: 'JWT ',
         whiteListedDomains: [
           '127.0.0.1', 'localhost',
-          '192.168.10.42', '192.168.10.43', '192.168.0.2']
+          '192.168.10.42', '192.168.10.43', '192.168.0.2', '192.168.0.3']
       });
 
       jwtInterceptorProvider.tokenGetter = function (store) {

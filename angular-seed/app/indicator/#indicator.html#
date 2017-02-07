@@ -6,6 +6,7 @@
       <md-button class="md-icon-button" ng-click="filter.show = true">
         <md-icon>filter_list</md-icon>
       </md-button>
+
     </div>
   </md-toolbar>
 

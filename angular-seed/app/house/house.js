@@ -135,18 +135,15 @@ angular.module('myApp.house', ['ngRoute'])
       var userInfo = auth.getUserInfo();
       self.associationId = userInfo['cooperative_id'];
 
-      console.log(userInfo);
-      console.log('Association ID: ');
-      console.log(self.associationId);
-
       function success(house) {
         $mdDialog.hide(house);
       }
 
       this.addHouse = function () {
+        var data = {
+          cooperative_id: self.associationId
+        }
         $scope.house['cooperative_id'] = self.associationId;
-        console.log('House: ');
-        console.log($scope.house);
         $scope.promise = $resources.assoc_houses.create($scope.house, success).$promise;
       }
     }])
@@ -186,6 +183,22 @@ angular.module('myApp.house', ['ngRoute'])
       this.cancel = $mdDialog.cancel;
 
       $scope.house = JSON.parse(JSON.stringify(house));
+
+      $scope.house.street_name = function (name) {
+        if (arguments.length) {
+          $scope.house.street = name;
+          $scope.house.address.street.name = name;
+        }
+        return $scope.house.address.street.name;
+      }
+
+      $scope.house.house_number = function (number) {
+        if (arguments.length) {
+          $scope.house.number = number;
+          $scope.house.address.house.number = number;
+        }
+        return $scope.house.address.house.number;
+      }
 
       this.updateHouse = function () {
         var deferred = $resources.houses.update({ id: house.id }, $scope.house);

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+import datetime
 import os
 import sys
 
@@ -35,8 +36,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1', '192.168.10.42',
-    '192.168.10.43', '192.168.0.2',
+    '127.0.0.1',
+    '192.168.10.42',
+    '192.168.10.43',
+    '192.168.0.2',
+    '192.168.0.3',
 ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -223,8 +227,10 @@ CORS_ORIGIN_WHITELIST = (
     'localhost:8000',
     '192.168.10.42:8000',
     '192.168.10.43:8000',
+    '192.168.0.3:8000',
 )
 
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=15*60),
 }

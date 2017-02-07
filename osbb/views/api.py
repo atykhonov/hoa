@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import date, datetime
+import datetime
+from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
 from django.db import IntegrityError
@@ -43,6 +44,7 @@ from osbb.serializers import (
     MeterIndicatorSerializer,
     ServiceSerializer,
 )
+from osbb.utils import calccharges
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -142,14 +144,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             houses = House.objects.filter(cooperative=pk)
-            order_by = request.query_params.get('order')
-            if 'address' in order_by:
-                if order_by.startswith('-'):
-                    order_by = '-street'
-                else:
-                    order_by = 'street'
-            return self.list_paginated(
-                request, houses, HouseSerializer, order_by)
+            return self.list_paginated(request, houses, HouseSerializer)
         elif request.method == 'POST':
             request.data['cooperative'] = cooperative.id
             serializer = HouseSerializer(data=request.data)
@@ -230,60 +225,17 @@ class HousingCooperativeViewSet(BaseModelViewSet):
             return Response({}, status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(methods=['post'])
-    def charge(self, request, pk=None):
-        charges = []
-        first_day = date.today().replace(day=1)
-        previous_month = first_day - relativedelta(days=1)
-        next_month = date.today() + relativedelta(months=1, day=1)
-        last_day = next_month - relativedelta(days=1)
+    def recalccharges(self, request, pk=None):
         cooperative = HousingCooperative.objects.get(pk=pk)
-        accounts = Account.objects.filter(
-            apartment__house__cooperative=cooperative)
-        for account in accounts:
-            apartment = account.apartment
-            meter = ApartmentMeter.objects.filter(apartment=apartment)[0]
-            indicator_beginning = ApartmentMeterIndicator.objects.filter(
-                meter=meter,
-                date__year=previous_month.year,
-                date__month=previous_month.month
-                )[0]
-            indicator_end = ApartmentMeterIndicator.objects.filter(
-                meter=meter,
-                date__year=first_day.year,
-                date__month=first_day.month
-                )[0]
-            tariff = account.get_tariff()
-            value = (indicator_end.value - indicator_beginning.value) * tariff
-            charge = Charge(
-                account=account,
-                date=timezone.now().date(),
-                start_date=first_day,
-                end_date=last_day,
-                tariff=account.get_tariff(),
-                indicator_beginning=indicator_beginning.value,
-                indicator_end=indicator_end.value,
-                value=value
-                )
-            charges.append(charge)
+        charges = calccharges(cooperative=cooperative)
         context = {
             'request': request,
         }
         serializer = ChargeSerializer(charges, many=True, context=context)
-        for charge in charges:
-            charge.save()
         return Response(serializer.data)
-        # if serializer.is_valid():
-        #     for charge in charges:
-        #         charge.save()
-        #     return Response(serializer.data)
-        # else:
-        #     return Response(
-        #         serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['get'])
     def indicators(self, request, pk):
-
-
         """
         Return the indicators of the meters.
         """
@@ -292,8 +244,11 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         if not user.can_manage(cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
+            period = parse(request.query_params.get('period'))
             indicators = MeterIndicator.objects.filter(
-                meter__apartment__house__cooperative=cooperative)
+                meter__apartment__house__cooperative=cooperative,
+                period=period
+                )
             return self.list_paginated(
                 request, indicators, MeterIndicatorSerializer)
 
@@ -330,6 +285,20 @@ class HouseViewSet(BaseModelViewSet):
 
         return self.list_paginated(request, houses, HouseSerializer)
 
+    def update(self, request, *args, **kwargs):
+        house = get_object_or_404(House, pk=kwargs.get('pk'))
+        address = house.address
+        street_name = request.data.get('street', address.street.name)
+        house_number = request.data.get('number', address.house.number)
+        address.street.name = street_name
+        address.street.save()
+        address.house.number = house_number
+        address.house.save()
+        serializer = HouseSerializer(house, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @detail_route(methods=['get', 'post'])
     def apartments(self, request, pk):
         """
@@ -346,16 +315,13 @@ class HouseViewSet(BaseModelViewSet):
         elif request.method == 'POST':
             serializer = ApartmentSerializer(data=request.data)
             if serializer.is_valid():
-                apartment = Apartment(house=house, **serializer.validated_data)
-                apartment.save()
+                apartment = Apartment.objects.create(
+                    house=house, **serializer.validated_data)
                 for service in Service.objects.filter(requires_meter=True):
-                    meter = Meter(service=service)
-                    meter.save()
-                    apartment_meter = ApartmentMeter(
-                        apartment=apartment, meter=meter)
-                    apartment_meter.save()
-                account = Account(apartment=apartment)
-                account.save()
+                    meter = Meter.objects.create(
+                        apartment=apartment, service=service)
+                    meter.create_indicators()
+                account = Account.objects.create(apartment=apartment)
                 response_data = serializer.validated_data
                 response_data['id'] = apartment.id
                 return Response(
@@ -599,7 +565,7 @@ class MeterIndicatorViewSet(BaseModelViewSet):
         indicator = get_object_or_404(MeterIndicator, pk=kwargs.get('pk'))
         data = {
             'value': request.data.get('value'),
-            'date': datetime.now().date(),
+            'date': datetime.datetime.now().date(),
         }
         serializer = MeterIndicatorSerializer(
             indicator, data=data, partial=True)

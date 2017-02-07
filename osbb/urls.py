@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import urls, routers
-from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from osbb.views.home import HomePageView
 from osbb.views.login import LoginPageView, LogoutPageView
@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^logout/', LogoutPageView.as_view(), name='logout'),
     url(r'^api-auth/', include(urls, namespace='rest_framework')),
     url(r'^api-token-auth/', obtain_jwt_token, name='api-token-auth'),
+    url(r'^api-token-refresh/', refresh_jwt_token, name='api-token-refresh'),
     url(r'^api/v1/units/', UnitAPIView.as_view()),
     url(r'^api/v1/user-info/', UserAPIView.as_view()),
     url(r'^api/v1/', include(router.urls)),

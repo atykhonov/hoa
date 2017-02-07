@@ -62,7 +62,7 @@ app.controller(
         angular.forEach(response.data, function (charge, id) {
           var item = {
             'id': charge.id,
-            'account_id': charge.account.id,
+            'pid': charge.pid,
             'address': charge.address,
             'service_charges': [],
             'total': charge.total
@@ -115,8 +115,20 @@ app.controller(
         }
       };
 
-      $scope.calcCharges = function() {
-        alert('Ok! I will!');
+      $scope.calcCharges = function (event) {
+        // Appending dialog to document.body to cover sidenav in docs app
+        var confirm = $mdDialog.confirm()
+          .title('Перерахувати нарахування?')
+          .textContent('Усі нарахування за поточний місяць будуть перераховані.')
+          // .ariaLabel('Lucky day')
+          .targetEvent(event)
+          .ok('Перерахувати')
+          .cancel('Скасувати');
+
+        $mdDialog.show(confirm).then(function () {
+          $resources.cooperative_recalccharges.create({ cooperative_id: associationId });
+        }, function () {
+        });
       };
 
       $scope.$watch('query.filter', function (newValue, oldValue) {

@@ -1,4 +1,4 @@
-<form name="item.form" ng-submit="ctrl.addApartment()">
+<form name="item.form" ng-submit="ctrl.addApartment()" flex="50">
   <md-dialog add-item-dialog>
     <md-dialog-content class="md-dialog-content">
       
@@ -12,33 +12,33 @@
       <div layout="row" class="input-row">
         <md-input-container flex>
           <label>Номер</label>
-          <input name="name" ng-model="apartment.number" required>
+          <input name="name" ng-model="apartment.address.apartment.number" required>
         </md-input-container>
         <md-input-container flex>
           <label>Поверх</label>
-          <input name="floor" ng-model="apartment.floor" required>
+          <input name="floor" ng-model="apartment.floor">
         </md-input-container>
         <md-input-container flex>
           <label>Під’їзд</label>
-          <input name="entrance" ng-model="apartment.entrance" required>
+          <input name="entrance" ng-model="apartment.entrance">
         </md-input-container>
         <md-input-container flex>
           <label>К-сть кімнат</label>
-          <input name="room_number" ng-model="apartment.room_number" required>
+          <input name="room_number" ng-model="apartment.room_number">
         </md-input-container>
       </div>
       <div layout="row" class="input-row">
         <md-input-container flex>
           <label>Загальна площа</label>
-          <input name="total_area" ng-model="apartment.total_area" required>
+          <input name="total_area" ng-model="apartment.total_area">
         </md-input-container>
         <md-input-container flex>
           <label>Житлова площа</label>
-          <input name="dwelling_space" ng-model="apartment.dwelling_space" required>
+          <input name="dwelling_space" ng-model="apartment.dwelling_space">
         </md-input-container>
         <md-input-container flex>
           <label>Опалювальна площа</label>
-          <input name="heating_area" ng-model="apartment.heating_area" required>
+          <input name="heating_area" ng-model="apartment.heating_area">
         </md-input-container>
       </div>
       <div layout="row" class="input-row">

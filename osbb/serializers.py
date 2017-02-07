@@ -64,12 +64,15 @@ class ChargeSerializer(serializers.ModelSerializer):
 
     address = serializers.SerializerMethodField()
 
+    pid = serializers.SerializerMethodField()
+
     class Meta:
 
         model = Charge
 
         fields = (
             'id',
+            'pid',
             'account',
             'address',
             'period',
@@ -79,15 +82,18 @@ class ChargeSerializer(serializers.ModelSerializer):
 
         depth = 2
 
-    def get_address(self, obj):
+    def get_address(self, instance):
         """
         Return the address of the account to which the charge belongs
         to.
         """
-        apartment = obj.account.apartment
-        house = apartment.house
-        return '{} {} {}, {}'.format(
-            _('str.'), house.street, house.number, apartment.number)
+        return instance.account.apartment.address.medium()
+
+    def get_pid(self, instance):
+        """
+        Return personal account number.
+        """
+        return instance.account.get_pid()
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -262,9 +268,9 @@ class HouseSerializer(serializers.ModelSerializer):
 
     address = AddressSerializer(read_only=True)
 
-    street = serializers.CharField(write_only=True)
+    street = serializers.CharField(write_only=True, required=False)
 
-    number = serializers.CharField(write_only=True)
+    number = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = House
@@ -318,6 +324,7 @@ class HouseSerializer(serializers.ModelSerializer):
                 for coop_service in coop_services:
                     meter = Meter.objects.create(
                         apartment=apartment, service=coop_service.service)
+                    meter.create_indicators()
                 account = Account.objects.create(apartment=apartment)
         return house
 
