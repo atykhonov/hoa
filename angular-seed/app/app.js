@@ -128,7 +128,7 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   };
 }]);
 
-var API_URL = 'http://192.168.0.3:8080/';
+var API_URL = 'http://192.168.10.43:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);

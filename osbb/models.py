@@ -8,6 +8,7 @@ from django.db import models
 
 from address.models import Address
 from core.models import BaseModel
+from osbb.period import Period
 
 
 METER_TYPES = (
@@ -195,6 +196,95 @@ class Account(BaseModel):
         """
         return self.apartment.get_cooperative()
 
+    def create_balance(self):
+        """
+        Create zero balance for the account.
+        """
+        self.update_balance()
+
+    def get_balance(self, period=None):
+        """
+        Get balance for the given `period`. If `period` equals to `None`,
+        then the period is taken for the current month. If a balance,
+        for the current month (period), doesn't exist then it is
+        created.
+        """
+        if period is None:
+            period = datetime.datetime.now().date()
+        period = datetime.date(day=1, month=period.month, year=period.year)
+        try:
+            balance = AccountBalance.objects.get(account=self, period=period)
+        except AccountBalance.DoesNotExist:
+            balance = AccountBalance.objects.create(
+                account=self, period=period, value=value)
+        return balance
+
+    def create_previous_balance(self):
+        """
+        Create and return balance for the previous month with zero
+        value.
+        """
+        period = Period()
+        return AccountBalance.objects.create(
+            account=self, period=period.previous(), value=0)
+
+    def create_present_balance(self):
+        """
+        Create and return balance for the present month with zero
+        value.
+        """
+        period = Period()
+        return AccountBalance.objects.create(
+            account=self, period=period.present(), value=0)
+
+    def get_present_balance(self):
+        """
+        Get balance for the present month.
+        """
+        period = Period()
+        try:
+            balance = AccountBalance.objects.get(
+                account=self, period=period.present())
+        except AccountBalance.DoesNotExist:
+            return None
+        return balance
+
+    def get_previous_balance(self):
+        """
+        Get balance for the previous month.
+        """
+        period = Period()
+        try:
+            balance = AccountBalance.objects.get(
+                account=self, period=period.previous())
+        except AccountBalance.DoesNotExist:
+            return None
+        return balance
+
+    def get_present_or_previous_balance(self):
+        """
+        Get the balance for the present or previous month. If it doesn't
+        exist for the previous month, then create it.
+        """
+        balance = self.get_present_balance()
+        if not balance:
+            balance = self.get_previous_balance()
+        return balance
+
+    def update_balance(self, value=0):
+        """
+        Update balance for the present or previous month. If the balance
+        doesn't exist it is created for the previous month.
+        """
+        balance = self.get_present_or_previous_balance()
+        if not balance:
+            period = Period()
+            balance = AccountBalance.objects.create(
+                account=self, period=period.previous(), value=value)
+        else:
+            balance.value = value
+            balance.save()
+
 
 class ApartmentTariff(BaseModel):
     apartment = models.ForeignKey(Apartment)
@@ -286,3 +376,11 @@ class ServiceCharge(BaseModel):
     indicator_end = models.CharField(max_length=10)
     value = models.DecimalField(max_digits=10, decimal_places=2)
 
+
+class AccountBalance(BaseModel):
+    account = models.ForeignKey(Account, related_name='balances')
+    period = models.DateField()
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        ordering = ['period']

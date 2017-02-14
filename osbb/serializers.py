@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from decimal import Decimal
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from address.models import Address
 from address.serializers import AddressSerializer
 from osbb.models import (
+    Account,
+    AccountBalance,
     Apartment,
     Charge,
     House,
@@ -14,7 +17,6 @@ from osbb.models import (
     HousingCooperativeService,
     Meter,
     MeterIndicator,
-    Account,
     Service,
     ServiceCharge,
     User,
@@ -96,6 +98,20 @@ class ChargeSerializer(serializers.ModelSerializer):
         return instance.account.get_pid()
 
 
+class AccountBalanceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = AccountBalance
+
+        fields = (
+            'id',
+            'account',
+            'period',
+            'value',
+            )
+
+
 class AccountSerializer(serializers.ModelSerializer):
 
     pid = serializers.SerializerMethodField()
@@ -103,6 +119,8 @@ class AccountSerializer(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
 
     full_name = serializers.SerializerMethodField()
+
+    balance = serializers.SerializerMethodField()
 
     class Meta:
 
@@ -117,6 +135,7 @@ class AccountSerializer(serializers.ModelSerializer):
             'last_name',
             'full_name',
             'address',
+            'balance',
             )
 
     def get_pid(self, instance):
@@ -136,6 +155,17 @@ class AccountSerializer(serializers.ModelSerializer):
         elif instance.last_name:
             return instance.last_name
         return ''
+
+    def get_balance(self, instance):
+        """
+        Get balance of the account.
+        """
+        balance = instance.get_present_balance()
+        if not balance:
+            balance = instance.get_previous_balance()
+            if not balance:
+                return Decimal(0)
+        return balance.value
 
 
 class MeterIndicatorSerializer(serializers.ModelSerializer):
@@ -326,6 +356,7 @@ class HouseSerializer(serializers.ModelSerializer):
                         apartment=apartment, service=coop_service.service)
                     meter.create_indicators()
                 account = Account.objects.create(apartment=apartment)
+                account.create_balance()
         return house
 
 

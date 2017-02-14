@@ -135,6 +135,22 @@ angular.module('myApp.house', ['ngRoute'])
       var userInfo = auth.getUserInfo();
       self.associationId = userInfo['cooperative_id'];
 
+      $scope.house = {};
+
+      $scope.house.street_name = function (name) {
+        if (arguments.length) {
+          $scope.house.street = name;
+        }
+        return $scope.house.street;
+      }
+
+      $scope.house.house_number = function (number) {
+        if (arguments.length) {
+          $scope.house.number = number;
+        }
+        return $scope.house.number;
+      }
+
       function success(house) {
         $mdDialog.hide(house);
       }

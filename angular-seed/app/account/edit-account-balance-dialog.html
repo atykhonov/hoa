@@ -1,0 +1,23 @@
+<form name="item.form" ng-submit="ctrl.saveBalance()" flex="50">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Змінити прізвище та ім’я</h2>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Баланс</label>
+          <input name="balance" ng-model="account.balance" md-maxlength="20" required>
+        </md-input-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" class="md-primary"
+                 ng-disabled="item.form.$invalid">Зберегти</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

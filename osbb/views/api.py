@@ -163,8 +163,6 @@ class HousingCooperativeViewSet(BaseModelViewSet):
         """
         Return the houses of the cooperative or create a new house.
         """
-        
-        
         cooperative = HousingCooperative.objects.get(pk=pk)
         user = request.user
         # if not user.is_superuser:
@@ -322,6 +320,7 @@ class HouseViewSet(BaseModelViewSet):
                         apartment=apartment, service=service)
                     meter.create_indicators()
                 account = Account.objects.create(apartment=apartment)
+                account.create_balance()
                 response_data = serializer.validated_data
                 response_data['id'] = apartment.id
                 return Response(
@@ -485,6 +484,19 @@ class AccountViewSet(BaseModelViewSet):
                 apartment__house__cooperative=cooperative)
 
         return self.list_paginated(request, accounts, AccountSerializer)
+
+    def update(self, request, *args, **kwargs):
+        account = get_object_or_404(Account, pk=kwargs.get('pk'))
+        value = request.data.get('balance')
+        if value:
+            account.update_balance(value=value)
+        serializer = AccountSerializer(account, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MeterViewSet(BaseModelViewSet):

@@ -81,6 +81,15 @@ def calccharges(cooperative=None):
                 total += value
         charge.total = total
         charge.save()
+        present_balance = account.get_present_balance()
+        if present_balance:
+            present_balance.delete()
+        present_balance = account.create_present_balance()
+        balance = account.get_previous_balance()
+        if not balance:
+            balance = account.create_previous_balance()
+        present_balance.value = balance.value - total
+        present_balance.save()
 
     return created_charges
 

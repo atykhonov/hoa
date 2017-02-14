@@ -89,6 +89,21 @@ mod.controller(
         }).then($scope.getAccounts);
       }
 
+      $scope.editBalance = function (event, account) {
+
+        event.stopPropagation();
+
+        $mdDialog.show({
+          clickOutsideToClose: true,
+          controller: 'BalanceController',
+          controllerAs: 'ctrl',
+          focusOnOpen: true,
+          targetEvent: event,
+          locals: { account: account },
+          templateUrl: 'account/edit-account-balance-dialog.html',
+        }).then($scope.getAccounts);
+      }
+
       function success(accounts) {
         $scope.accounts = accounts;
       }
@@ -209,6 +224,25 @@ mod.controller(
       $scope.account = JSON.parse(JSON.stringify(account));
 
       this.saveFullname = function () {
+        var deferred = $resources.accounts.update({ id: account.id }, $scope.account);
+        deferred.$promise.then(function () {
+          $mdDialog.hide(account);
+        });
+        return deferred.$promise;
+      }
+
+    }]);
+
+mod.controller(
+  'BalanceController',
+  ['account', '$mdDialog', '$resources', '$scope', '$q',
+    function (account, $mdDialog, $resources, $scope, $q) {
+
+      this.cancel = $mdDialog.cancel;
+
+      $scope.account = JSON.parse(JSON.stringify(account));
+
+      this.saveBalance = function () {
         var deferred = $resources.accounts.update({ id: account.id }, $scope.account);
         deferred.$promise.then(function () {
           $mdDialog.hide(account);

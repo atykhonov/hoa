@@ -47,6 +47,7 @@
           <th md-column md-string>Особовий рахунок</th>
           <th md-column md-string>Адреса</th>
           <th md-column md-string md-order-by="last_name">Прізвище, ім’я</th>
+          <th md-column md-numeric>Баланс</th>
         </tr>
       </thead>
       <tbody md-body>
@@ -55,6 +56,9 @@
           <td md-cell>{{account.address}}</td>
           <td md-cell ng-click="editFullname($event, account)" ng-class="{'md-placeholder': !account.full_name}">
             {{account.full_name || 'Змінити'}}
+          </td>
+          <td md-cell ng-click="editBalance($event, account)" ng-class="{'md-placeholder': !account.balance}">
+            {{account.balance}}
           </td>
         </tr>
       </tbody>
