@@ -3,10 +3,10 @@
 angular.module('myApp.house', ['ngRoute'])
 
   .config(['$routeProvider', function ($routeProvider) {
-    // $routeProvider.when('/associations/:id/houses', {
-    //   templateUrl: 'house/house.html',
-    //   controller: 'HouseCtrl'
-    // });
+    $routeProvider.when('/associations/:cooperative_id/houses', {
+      templateUrl: 'house/house.html',
+      controller: 'HouseCtrl'
+    });
     $routeProvider.when('/houses', {
       templateUrl: 'house/house.html',
       controller: 'HouseCtrl'
@@ -15,8 +15,8 @@ angular.module('myApp.house', ['ngRoute'])
 
   .controller(
   'HouseCtrl',
-  ['$mdDialog', '$resources', '$scope', '$location', 'auth',
-    function ($mdDialog, $resources, $scope, $location, auth) {
+  ['$mdDialog', '$resources', '$scope', '$location', 'auth', '$routeParams',
+    function ($mdDialog, $resources, $scope, $location, auth, $routeParams) {
 
       var self = this;
 
@@ -89,9 +89,18 @@ angular.module('myApp.house', ['ngRoute'])
 
       $scope.getHouses = function () {
         var query = $scope.query;
-        query['cooperative_id'] = associationId;
-        $scope.promise = $resources.assoc_houses.get(
-          $scope.query, success).$promise;
+        if ($routeParams.cooperative_id !== undefined) {
+          query['cooperative_id'] = $routeParams.cooperative_id;
+          $scope.promise = $resources.assoc_houses.get(
+            $scope.query, success).$promise;
+        } else if (associationId) {
+          query['cooperative_id'] = associationId;
+          $scope.promise = $resources.assoc_houses.get(
+            $scope.query, success).$promise;
+        } else {
+          $scope.promise = $resources.houses.get(
+            $scope.query, success).$promise;
+        }
       };
 
       $scope.removeFilter = function () {

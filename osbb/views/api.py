@@ -648,9 +648,14 @@ class UserAPIView(APIView):
         """
         Return a list of all units.
         """
-        cooperative = request.user.cooperative
-        if request.user.cooperative:
-            return Response({
-                'cooperative_id': cooperative.id,
-                'cooperative_name': cooperative.name,
-            })
+        user = request.user
+        resp = {
+            'email': user.email,
+            }
+        cooperative = user.cooperative
+        if cooperative:
+            resp['cooperative_id'] = cooperative.id
+            resp['cooperative_name'] = cooperative.name
+        elif user.is_superuser:
+            resp['is_superuser'] = user.is_superuser
+        return Response(resp)

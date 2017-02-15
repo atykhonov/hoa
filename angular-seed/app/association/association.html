@@ -40,4 +40,78 @@
     </div>
   </md-toolbar>
 
+  <!-- exact table from live demo -->
+  <md-table-container>
+    <table md-table md-row-select multiple ng-model="selected" md-progress="promise">
+      <thead md-head md-order="query.order" md-on-reorder="getAssociations">
+        <tr md-row>
+          <th md-column md-order-by="name"><span>Назва</span></th>
+          <th md-column md-string><span>ІПН/ЄДРПОУ/Свідоцтво</span></th>
+          <th md-column md-string>Юридична адреса</th>
+          <th md-column md-string>Фізична адреса</th>
+          <th md-column md-string>Телефон</th>
+          <th md-column md-string>Працівники</th>
+          <th md-column md-string>Рахунки</th>
+          <th md-column>Послуги</th>
+          <th md-column>Будинки</th>
+        </tr>
+      </thead>
+      <tbody md-body>
+        <tr md-row md-select="association" md-select-id="id" md-auto-select ng-repeat="association in associations.data">
+          <td md-cell>{{association.name}}</td>
+          <td md-cell>
+            <div ng-if="association.individual_tax_number">
+              {{association.individual_tax_number}}
+            </div>
+            <div ng-if="!association.individual_tax_number">
+              -
+            </div>
+            <div ng-if="association.edrpou">
+              {{association.edrpou}}
+            </div>
+            <div ng-if="!association.edrpou">
+              -
+            </div>
+            <div ng-if="association.certificate">
+              {{association.certificate}}
+            </div>
+            <div ng-if="!association.certificate">
+              -
+            </div>
+          </td>
+          <td md-cell>{{association.legal_address}}</td>
+          <td md-cell>{{association.physical_address}}</td>
+          <td md-cell>{{association.phone_number}}</td>
+          <td md-cell>
+            <md-button ng-click="editServices($event, association.id)" class="nav-btn">
+              <md-icon class="md-default-theme" class="material-icons">people</md-icon>
+            </md-button>
+          </td>
+          <td md-cell></td>
+          <td md-cell>
+            <md-button ng-click="editServices($event, association.id)" class="nav-btn">
+              <md-icon class="md-default-theme" class="material-icons">layers</md-icon>
+            </md-button>
+          </td>
+          <td md-cell>
+            <md-button ng-click="viewHouses($event, association.id)" class="nav-btn">
+              <a href="#!/associations/{{association.id}}/houses/">
+                <md-icon class="md-default-theme" class="material-icons">location_city</md-icon>
+              </a>
+            </md-button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </md-table-container>
+
+      <md-table-pagination
+          md-limit="query.limit"
+          md-limit-options="[5, 10, 15]"
+          md-page="query.page"
+          md-total="{{associations.count}}"
+          md-on-paginate="getAssociations"
+          md-page-select>
+      </md-table-pagination>
+
 </md-card>

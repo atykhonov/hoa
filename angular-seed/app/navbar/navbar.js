@@ -7,13 +7,26 @@ mod.controller(
   ['$scope', '$location', 'auth',
     function ($scope, $location, auth) {
 
-      $scope.show = function () {
+      $scope.showAssociationName = function () {
+        return auth.isAuthed() && $scope.associationName;
+      }
+
+      $scope.showAdmin = function () {
+        return auth.isAuthed() && $scope.isSuperAdmin == true;
+      }
+
+      $scope.showMenu = function () {
         return auth.isAuthed();
       }
 
       var userInfo = auth.getUserInfo();
       if (userInfo) {
         $scope.associationName = userInfo['cooperative_name'];
+        $scope.isSuperAdmin = userInfo['is_superuser'];
+      }
+
+      this.isSuperAdmin = function () {
+        return $scope.isSuperAdmin;
       }
 
       this.gotoAssociations = function () {

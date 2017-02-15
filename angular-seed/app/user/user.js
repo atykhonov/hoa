@@ -16,9 +16,18 @@ mod.controller(
 
       var self = this;
 
-      $scope.email = 'manager@osbb.org';
+      $scope.email = '';
 
-      $scope.password = 'tBZZdar4';
+      $scope.password = '';
+
+      $scope.user = {};
+
+      if (auth.isAuthed()) {
+        var userInfo = auth.getUserInfo();
+        $scope.user = {
+          'email': userInfo['email']
+        }
+      }
 
       function handleRequest(res) {
         var token = res.data ? res.data.token : null;
@@ -37,7 +46,7 @@ mod.controller(
       }
 
       $scope.login = function () {
-        user.login($scope.email, $scope.password)
+        user.login($scope.user.email, $scope.user.password)
           .then(handleRequest, handleRequest)
       }
 

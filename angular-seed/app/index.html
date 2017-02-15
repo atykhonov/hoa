@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>My AngularJS App</title>
+  <title>Об'єднання співвласників багатоквартирного будинку</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" /> -->
@@ -30,18 +30,38 @@
           <md-icon style="color: rgba(255,255,255,0.87);">account_balance</md-icon>
         </md-button>
         <h2>
-          <span>
-            ОСББ <span ng-if="show()">«{{associationName}}»</span>
+          <span ng-if="showAssociationName()">
+            ОСББ «{{associationName}}»
+          </span>
+          <span ng-if="showAdmin()">
+            ОСББ: Адмінка
+          </span>
+          <span ng-if="!showAssociationName() && !showAdmin()">
+            ОСББ
           </span>
         </h2>
         <span flex></span>
-        <md-button class="md-icon-button" aria-label="More" ng-click="nbc.gotoLogin()">
-          <md-icon>menu</md-icon>
-        </md-button>
+        <md-menu>
+          <md-button ng-click="$mdMenu.open($event)" class="md-icon-button">
+            <md-icon>menu</md-icon>
+          </md-button>
+          <md-menu-content>
+            <md-menu-item>
+              <md-button ng-click="nbc.gotoLogin()">
+                Увійти
+              </md-button>
+            </md-menu-item>
+            <md-menu-item ng-if="nbc.isSuperAdmin()">
+              <md-button ng-click="nbc.gotoAdminArea()">
+                Адмінка
+              </md-button>
+            </md-menu-item>
+          </md-menu-content>
+        </md-menu>
       </div>
     </md-toolbar>
     
-    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar" ng-if="show()">
+    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links" class="navigation-bar" ng-if="showMenu()">
       <md-nav-item md-nav-click="nbc.gotoAssociations()" name="associations">
         <md-icon class="md-default-theme" class="material-icons" style="font-size: 20px;">account_balance</md-icon> ОСББ
       </md-nav-item>

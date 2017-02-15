@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
     '192.168.0.2',
     '192.168.0.3',
     '192.168.0.7',
+    '192.168.0.4',
 ]
 
 # Local time zone for this installation. Choices can be found here:

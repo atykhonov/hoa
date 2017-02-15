@@ -22,8 +22,6 @@ mod.controller(
   ['$mdDialog', '$resources', '$scope', '$location', '$rootScope',
     function ($mdDialog, $resources, $scope, $location, $rootScope) {
 
-      $scope.test = 'best';
-
       var bookmark;
 
       $scope.selected = [];
@@ -285,6 +283,10 @@ mod.controller(
       var userInfo = auth.getUserInfo();
       if (userInfo === undefined) {
         $location.path('/login');
+      }
+      if (userInfo['is_superuser']) {
+        $location.path('/associations');
+        return;
       }
       var associationId = userInfo['cooperative_id'];
 
