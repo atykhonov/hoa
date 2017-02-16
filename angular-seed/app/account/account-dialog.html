@@ -2,7 +2,12 @@
   <md-dialog add-item-dialog>
     <md-dialog-content class="md-dialog-content">
       
-      <h2 class="md-title">Змінити прізвище та ім’я</h2>
+      <h2 class="md-title">Особовий рахунок</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
 
       <div layout="row" class="input-row">
         <md-input-container flex>
@@ -15,6 +20,13 @@
         <md-input-container flex>
           <label>Ім’я</label>
           <input name="first_name" ng-model="account.first_name" md-maxlength="20" required>
+        </md-input-container>
+      </div>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Баланс</label>
+          <input name="balance" ng-model="account.balance" md-numeric required>
         </md-input-container>
       </div>
 

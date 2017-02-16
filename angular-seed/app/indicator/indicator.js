@@ -128,7 +128,6 @@ app.controller(
           placeholder: 'Введіть показник',
           save: function (input) {
             indicator.value = input.$modelValue;
-            console.log('The value has been saved!');
             self.saveIndicator(indicator);
           },
           targetEvent: event
@@ -232,6 +231,29 @@ app.controller(
           $mdDialog.hide(house);
         });
         return deferred.$promise;
+      }
+
+    }]);
+
+app.controller(
+  'IndicatorDialogCtrl',
+  ['indicator', '$mdDialog', '$resources', '$scope',
+    function (indicator, $mdDialog, $resources, $scope) {
+
+      this.cancel = $mdDialog.cancel;
+
+      $scope.indicator = JSON.parse(JSON.stringify(indicator));
+
+      this.saveIndicator = function () {
+        var data = {
+          'value': $scope.indicator.value,
+        };
+        $scope.promise = $resources.indicators.update(
+          { 'indicator_id': $scope.indicator.id },
+          data,
+          function (indicator) {
+            $mdDialog.hide(indicator);
+          }).$promise;
       }
 
     }]);

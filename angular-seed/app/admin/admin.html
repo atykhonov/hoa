@@ -1,0 +1,171 @@
+<md-content>
+
+  <div flex-xs flex-gt-xs="100" layout="column">
+    <md-card>
+      <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedAssociations.length">
+        <div class="md-toolbar-tools">
+          <h2 class="md-title">ОСББ</h2>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="addAssociation($event)">
+            <md-icon>add_circle_outline</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-toolbar class="md-table-toolbar alternate" ng-show="selectedAssociations.length">
+        <div class="md-toolbar-tools">
+          <div>{{selectedAssociations.length}} {{selectedAssociations.length > 1 ? 'items' : 'item'}} selected</div>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="deleteAssociation($event)">
+            <md-icon>delete</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-table-container>
+        <table md-table md-row-select multiple ng-model="selectedAssociations" md-progress="associationsPromise">
+          <thead md-head md-order="associationQuery.order" md-on-reorder="getAssociations">
+            <tr md-row>
+              <th md-column md-order-by="name">
+                Назва
+              </th>
+              <th md-column md-string>Телефон</th>
+            </tr>
+          </thead>
+          <tbody md-body>
+            <tr md-row md-select="association" md-select-id="id" md-auto-select ng-repeat="association in associations.data">
+              <td md-cell>
+                <a ng-click="viewAssociationDetails($event, association)">
+                  {{association.name}}
+                </a>
+              </td>
+              <td md-cell>{{association.phone_number}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </md-table-container>
+
+      <md-table-pagination
+          md-limit="associationQuery.limit"
+          md-limit-options="[5, 10, 15]"
+          md-page="associationQuery.page"
+          md-total="{{associations.count}}"
+          md-on-paginate="getAssociations"
+          md-page-select>
+      </md-table-pagination>
+    </md-card>
+  </div>
+
+  <div flex-xs flex-gt-xs="100" layout="row">
+    <div flex-xs flex-gt-xs="100" layout="column">
+      <md-card>
+        <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedUsers.length">
+          <div class="md-toolbar-tools">
+            <h2 class="md-title">Користувачі</h2>
+            <div flex></div>
+            <md-button class="md-icon-button" ng-click="addUser($event)">
+              <md-icon>add_circle_outline</md-icon>
+            </md-button>
+          </div>
+        </md-toolbar>
+
+        <md-toolbar class="md-table-toolbar alternate" ng-show="selectedUsers.length">
+          <div class="md-toolbar-tools">
+            <div>{{selectedUsers.length}} {{selectedUsers.length > 1 ? 'items' : 'item'}} selected</div>
+            <div flex></div>
+            <md-button class="md-icon-button" ng-click="deleteUser($event)">
+              <md-icon>delete</md-icon>
+            </md-button>
+          </div>
+        </md-toolbar>
+
+        <md-table-container>
+          <table md-table md-row-select multiple ng-model="selectedUsers" md-progress="usersPromise">
+            <thead md-head md-order="userQuery.order" md-on-reorder="getUsers">
+              <tr md-row>
+                <th md-column md-order-by="email">
+                  Email
+                </th>
+                <th md-column md-string>Адмін</th>
+              </tr>
+            </thead>
+            <tbody md-body>
+              <tr md-row md-select="user" md-select-id="id" md-auto-select ng-repeat="user in users.data">
+                <td md-cell>{{user.email}}</td>
+                <td md-cell>
+                  <span ng-if="user.is_superuser">
+                    Так
+                  </span>
+                  <span ng-if="!user.is_superuser">
+                    Ні
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+
+        <md-table-pagination
+            md-limit="userQuery.limit"
+            md-limit-options="[5, 10, 15]"
+            md-page="userQuery.page"
+            md-total="{{users.count}}"
+            md-on-paginate="getUsers"
+            md-page-select>
+        </md-table-pagination>
+      </md-card>
+
+    </div>
+
+    <div flex-xs flex-gt-xs="100" layout="column">
+
+      <md-card>
+        <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedServices.length">
+          <div class="md-toolbar-tools">
+            <h2 class="md-title">Послуги</h2>
+            <!-- <div flex></div>
+                 <md-button class="md-icon-button" ng-click="addService($event)">
+                 <md-icon>add_circle_outline</md-icon>
+                 </md-button> -->
+          </div>
+        </md-toolbar>
+
+        <md-toolbar class="md-table-toolbar alternate" ng-show="selectedServices.length">
+          <div class="md-toolbar-tools">
+            <div>{{selectedServices.length}} {{selectedServices.length > 1 ? 'items' : 'item'}} selected</div>
+            <div flex></div>
+            <md-button class="md-icon-button" ng-click="deleteService($event)">
+              <md-icon>delete</md-icon>
+            </md-button>
+          </div>
+        </md-toolbar>
+
+        <md-table-container>
+          <table md-table md-row-select multiple ng-model="selectedServices" md-progress="servicesPromise">
+            <thead md-head md-order="serviceQuery.order" md-on-reorder="getServices">
+              <tr md-row>
+                <th md-column md-order-by="name" md-string>Назва</th>
+                <th md-column md-string>Одиниці вимірювання</th>
+              </tr>
+            </thead>
+            <tbody md-body>
+              <tr md-row md-select="service" md-select-id="id" md-auto-select ng-repeat="service in services.data">
+                <td md-cell>{{service.name}}</td>
+                <td md-cell ng-bind-html="service.unit_translated | trust"></td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+
+        <md-table-pagination
+            md-limit="serviceQuery.limit"
+            md-limit-options="[5, 10, 15]"
+            md-page="serviceQuery.page"
+            md-total="{{services.count}}"
+            md-on-paginate="getServices"
+            md-page-select>
+        </md-table-pagination>
+      </md-card> 
+    </div>
+  </div>
+</md-content>

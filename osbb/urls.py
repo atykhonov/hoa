@@ -11,6 +11,7 @@ from osbb.views.login import LoginPageView, LogoutPageView
 from osbb.views.api import (
     AccountViewSet,
     ApartmentViewSet,
+    BreadcrumbAPIView,
     ChargeViewSet,
     HouseViewSet,
     HousingCooperativeViewSet,
@@ -19,6 +20,7 @@ from osbb.views.api import (
     ServiceViewSet,
     UnitAPIView,
     UserAPIView,
+    UserViewSet,
 )
 
 
@@ -31,6 +33,7 @@ router.register(r'services', ServiceViewSet, 'service')
 router.register(r'meters', MeterViewSet, 'meter')
 router.register(r'indicators', MeterIndicatorViewSet, 'indicator')
 router.register(r'charges', ChargeViewSet, 'charge')
+router.register(r'users', UserViewSet, 'user')
 
 
 urlpatterns = [
@@ -43,5 +46,6 @@ urlpatterns = [
     url(r'^api-token-refresh/', refresh_jwt_token, name='api-token-refresh'),
     url(r'^api/v1/units/', UnitAPIView.as_view()),
     url(r'^api/v1/user-info/', UserAPIView.as_view()),
+    url(r'^api/v1/breadcrumb/', BreadcrumbAPIView.as_view()),
     url(r'^api/v1/', include(router.urls)),
 ]

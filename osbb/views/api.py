@@ -25,9 +25,9 @@ from osbb.models import (
     HousingCooperativeService as HCService,
     Meter,
     MeterIndicator,
-    Account,
     Service,
     UNITS,
+    User,
 )
 from osbb.permissions import (
     IsManager,
@@ -43,6 +43,7 @@ from osbb.serializers import (
     MeterSerializer,
     MeterIndicatorSerializer,
     ServiceSerializer,
+    UserSerializer,
 )
 from osbb.utils import calccharges
 
@@ -329,6 +330,37 @@ class HouseViewSet(BaseModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @detail_route(methods=['get'])
+    def indicators(self, request, pk):
+        """
+        Return all indicators which belongs to the house.
+        """
+        house = House.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(house):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            period = parse(request.query_params.get('period'))
+            indicators = MeterIndicator.objects.filter(
+                meter__apartment__house=house,
+                period=period
+                )
+            return self.list_paginated(
+                request, indicators, MeterIndicatorSerializer)
+
+    @detail_route(methods=['get'])
+    def accounts(self, request, pk):
+        """
+        Return all accounts which belongs to the house.
+        """
+        house = House.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(house):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            accounts = Account.objects.filter(apartment__house=house)
+            return self.list_paginated(request, accounts, AccountSerializer)
+
 
 class ApartmentViewSet(BaseModelViewSet):
     """
@@ -418,6 +450,24 @@ class ApartmentViewSet(BaseModelViewSet):
 
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['get'])
+    def indicators(self, request, pk):
+        """
+        Return all indicators which belongs to the apartment.
+        """
+        apartment = Apartment.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(apartment):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            period = parse(request.query_params.get('period'))
+            indicators = MeterIndicator.objects.filter(
+                meter__apartment=apartment,
+                period=period
+                )
+            return self.list_paginated(
+                request, indicators, MeterIndicatorSerializer)
 
 
 class ServiceViewSet(BaseModelViewSet):
@@ -590,7 +640,6 @@ class MeterIndicatorViewSet(BaseModelViewSet):
 
 
 class ChargeViewSet(BaseModelViewSet):
-
     """
     API endpoint that allows charge to be viewed or edited.
     """
@@ -637,6 +686,28 @@ class UnitAPIView(APIView):
         return Response({'data': units})
 
 
+class UserViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows user to be viewed or edited.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        user = self.request.user
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+        return (NoPermissions(), )
+
+    def list(self, request):
+        return self.list_paginated(request, self.queryset, UserSerializer)
+
+    def create(self, request):
+        if not request.user.is_superuser:
+            return self._get_permission_denied_response()
+        return super(UserViewSet, self).create(request)
+
+
 class UserAPIView(APIView):
     """
     API endpoint that allows user's info to be viewed.
@@ -659,3 +730,61 @@ class UserAPIView(APIView):
         elif user.is_superuser:
             resp['is_superuser'] = user.is_superuser
         return Response(resp)
+
+
+class BreadcrumbAPIView(APIView):
+    """
+    API endpoint that allows breadcrumbs to be viewed.
+    """
+    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        """
+        Return a list of all units.
+        """
+        def cooperative_label(cooperative, active=False):
+            return {
+                'label': cooperative.name,
+                'active': active,
+                'uri': '/#!/associations/{0}/'.format(cooperative.id),
+                }
+
+        def house_label(house, active=False):
+            prefix = _('house')
+            prefix = prefix[0].upper() + prefix[1:]
+            return {
+                'label': '{} {}'.format(
+                    prefix, house.address.house.number),
+                'active': active,
+                'uri': '/#!/houses/{0}/'.format(house.id),
+                }
+
+        def apartment_label(house, active=False):
+            prefix = _('apartment')
+            prefix = prefix[0].upper() + prefix[1:]
+            return {
+                'label': '{} {}'.format(
+                    prefix, apartment.address.apartment.number),
+                'active': active,
+                'uri': '/#!/apartments/{0}/'.format(apartment.id),
+                }
+
+        params = request.query_params
+        if params.get('association_id'):
+           hc = HousingCooperative.objects.get(pk=params.get('association_id'))
+           return Response([cooperative_label(hc, True)])
+        if params.get('houseId'):
+            house = House.objects.get(pk=params.get('houseId'))
+            return Response([
+                    cooperative_label(house.cooperative),
+                    house_label(house, True),
+                ])
+        if params.get('apartmentId'):
+            apartment = Apartment.objects.get(pk=params.get('apartmentId'))
+            return Response([
+                    cooperative_label(apartment.house.cooperative),
+                    house_label(apartment.house),
+                    apartment_label(apartment, True)
+                ])            
+        return Response({})

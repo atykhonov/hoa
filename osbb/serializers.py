@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from decimal import Decimal
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
@@ -28,16 +29,39 @@ class UserSerializer(serializers.ModelSerializer):
 
     full_name = serializers.SerializerMethodField()
 
+    email = serializers.EmailField()
+
+    password = serializers.CharField(write_only=True)
+
+    first_name = serializers.CharField()
+
+    last_name = serializers.CharField()
+
+    is_superuser = serializers.NullBooleanField(default=False)
+
+    cooperative = serializers.PrimaryKeyRelatedField(
+        default=None, queryset=HousingCooperative.objects.all())
+
     class Meta:
 
-        model = User
+        model = get_user_model()
 
         fields = (
             'id',
+            'email',
+            'password',
+            'is_superuser',
             'first_name',
             'last_name',
             'full_name',
+            'cooperative',
             )
+
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+                },
+            }
 
     def get_full_name(self, instance):
         if instance.first_name and instance.last_name:
@@ -47,6 +71,21 @@ class UserSerializer(serializers.ModelSerializer):
         elif instance.last_name:
             return instance.last_name
         return ''
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            is_superuser=validated_data['is_superuser'],
+            cooperative=validated_data.get('cooperative')
+        )
+        user.set_password(validated_data['password'])
+        if user.cooperative:
+            user.is_staff = True
+        user.save()
+        return user
 
 
 class ServiceChargeSerializer(serializers.ModelSerializer):
@@ -138,6 +177,8 @@ class AccountSerializer(serializers.ModelSerializer):
             'balance',
             )
 
+        depth = 3
+
     def get_pid(self, instance):
         return instance.get_pid()
 
@@ -188,7 +229,7 @@ class MeterIndicatorSerializer(serializers.ModelSerializer):
             'value',
             )
 
-        depth = 3
+        depth = 4
 
     def get_account(self, obj):
         """Return the account to which the meter belongs to."""

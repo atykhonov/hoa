@@ -1,0 +1,164 @@
+<md-content>
+
+  <div flex-xs flex-gt-xs="100" layout="column">
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">ОСББ «{{association.name}}»</span>
+        </md-card-title-text>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="changeInformation($event)">
+          <md-icon>mode_edit</md-icon>
+        </md-button>
+      </md-card-title>
+      <md-card-content>
+        <md-table-container>
+          <table md-table md-progress="cooperatives_promise">
+            <tbody md-body>
+              <tr md-row>
+                <td md-cell>ІПН:</td>
+                <td md-cell>{{association.individual_tax_number || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>ЄДРПОУ:</td>
+                <td md-cell>{{association.edrpou || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Свідоцтво:</td>
+                <td md-cell>{{association.certificate || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Юридична адреса:</td>
+                <td md-cell>{{association.legal_address || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Фізична адреса:</td>
+                <td md-cell>{{association.physical_address || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Телефон:</td>
+                <td md-cell>{{association.phone_number || '—'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+      </md-card-content>
+    </md-card>
+  </div>
+  
+  <div flex-xs flex-gt-xs="100" layout="column">
+    <md-card>
+      <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedHouses.length">
+        <div class="md-toolbar-tools">
+          <h2 class="md-title">Будинки</h2>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="addHouse($event)">
+            <md-icon>add_circle_outline</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-toolbar class="md-table-toolbar alternate" ng-show="selectedHouses.length">
+        <div class="md-toolbar-tools">
+          <div>{{selectedHouses.length}} {{selectedHouses.length > 1 ? 'items' : 'item'}} selected</div>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="deleteHouse($event)">
+            <md-icon>delete</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-table-container>
+        <table md-table md-row-select multiple ng-model="selectedHouses" md-progress="housesPromise">
+          <thead md-head md-order="houseQuery.order" md-on-reorder="getHouses">
+            <tr md-row>
+              <th md-column md-string md-order-by="address">Адреса</th>
+              <th md-column md-numeric>Тариф</th>
+              <th md-column md-numeric>К-ть квартир</th>
+            </tr>
+          </thead>
+          <tbody md-body>
+            <tr md-row md-select="house" md-select-id="id" md-auto-select ng-repeat="house in houses.data">
+              <td md-cell>
+                <a ng-click="viewHouseDetails($event, house)">
+                  {{house.address.medium}}
+                </a>
+              </td>
+              <td md-cell>{{house.tariff || "—"}}</td>
+              <td md-cell>{{house.apartments_count}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </md-table-container>
+
+      <md-table-pagination
+          md-limit="houseQuery.limit"
+          md-limit-options="[5, 10, 15]"
+          md-page="houseQuery.page"
+          md-total="{{houses.count}}"
+          md-on-paginate="getHouses"
+          md-page-select>
+      </md-table-pagination>
+    </md-card>
+  </div>
+  
+  <div flex-flex-gt-xs="100" layout="row">
+
+    <div flex-xs flex-gt-xs="50" layout="column">
+      <md-card>
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-headline">Послуги</span>
+          </md-card-title-text>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="changeServices($event)">
+            <md-icon>mode_edit</md-icon>
+          </md-button>
+        </md-card-title>
+        <md-card-content>
+          <table md-table multiple ng-model="selected" md-progress="services_promise">
+            <tbody md-body>
+              <tr md-row ng-repeat="item in services.data">
+                <td md-cell>{{item.service.name}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-card-content>
+      </md-card>
+    </div>
+
+    <div flex-xs flex-gt-xs="50" layout="column">
+      <md-card>
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-headline">Працівники</span>
+          </md-card-title-text>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="changeEmployees($event)">
+            <md-icon>mode_edit</md-icon>
+          </md-button>
+        </md-card-title>
+        <md-card-content>
+          <md-table-container>
+            <table md-table>
+              <tbody md-body>
+                <tr md-row>
+                  <td md-cell>Керівник:</td>
+                  <td md-cell>{{association.manager.full_name || '—'}}</td>
+                </tr>
+                <tr md-row>
+                  <td md-cell>Бухгалтер:</td>
+                  <td md-cell>{{association.buhgalter || '—'}}</td>
+                </tr>
+                <tr md-row>
+                  <td md-cell>Паспортист:</td>
+                  <td md-cell>{{association.pasportyst || '—'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </md-table-container>
+        </md-card-content>
+      </md-card>
+    </div>
+  </div>
+</md-content>

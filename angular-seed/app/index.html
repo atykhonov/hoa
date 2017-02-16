@@ -16,13 +16,13 @@
 
   <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
   <link href="bower_components/angular-material-data-table/dist/md-data-table.min.css" rel="stylesheet" type="text/css"/>
-  <link rel="stylesheet" href="app.css">
   <link rel="stylesheet" href="icons.css">
   <link rel="stylesheet" href="bower_components/angular-modal-progress-bar/dist/angular-modal-progress-bar.css">
+  <link rel="stylesheet" href="app.css">
 </head>
-<body layout="column">
+<body layout="column" ng-cloak>
 
-  <md-content ng-controller="NavbarCtrl as nbc" ng-cloak>
+  <md-content ng-controller="NavbarCtrl as nbc">
 
     <md-toolbar class="md-hue-2" flex="100">
       <div class="md-toolbar-tools">
@@ -86,6 +86,22 @@
     </md-nav-bar>
   </md-content>
 
+  <md-card ng-controller="BreadcrumbCtrl">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a class="breadcrumb-material-icons home-icon" href="/#!/admin"></a>
+      </li>
+      <li class="breadcrumb-item" ng-repeat="item in items">
+        <a href="{{item.uri}}" class="link" ng-if="!item.active">
+          {{item.label}}
+        </a>
+        <span ng-if="item.active" class="active">
+          {{item.label}}
+        </span>
+      </li>
+    </ol>
+  </md-card>
+
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
@@ -102,6 +118,7 @@
   <script src="view2/view2.js"></script>
   <script src="mdtable/mdtable.js"></script>
   <script src="user/user.js"></script>
+  <script src="admin/admin.js"></script>
   <script src="association/association.js"></script>
   <script src="house/house.js"></script>
   <script src="apartment/apartment.js"></script>
@@ -111,6 +128,7 @@
   <script src="meter/meter.js"></script>
   <script src="indicator/indicator.js"></script>
   <script src="navbar/navbar.js"></script>
+  <script src="breadcrumb/breadcrumb.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>
   <script src="components/version/interpolate-filter.js"></script>

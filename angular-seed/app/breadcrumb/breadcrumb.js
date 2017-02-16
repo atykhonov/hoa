@@ -1,11 +1,25 @@
 'use strict';
 
-var mod = angular.module('myApp.navbar', ['ngRoute'])
+var mod = angular.module('myApp.breadcrumb', ['ngRoute'])
 
 mod.controller(
-  'NavbarCtrl',
-  ['$scope', '$location', 'auth',
-    function ($scope, $location, auth) {
+  'BreadcrumbCtrl',
+  ['$rootScope', '$scope', '$location', 'auth', '$routeParams', 'breadcrumb',
+    function ($rootScope, $scope, $location, auth, $routeParams, breadcrumb) {
+
+      $scope.$on('breadcrumb:updated', function (event, data) {
+        $scope.items = data;
+      });
+
+      var associationId = $routeParams.association_id;
+      if (associationId != undefined) {
+        // $scope.items.push(
+        //   {
+        //     'active': false,
+        //     'label': 'ОСББ «На козельницькій»',
+        //     'uri': '/#!/associations/73/'
+        //   });
+      }
 
       $scope.showAssociationName = function () {
         return auth.isAuthed() && $scope.associationName;

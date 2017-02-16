@@ -1,0 +1,238 @@
+<md-content>
+
+  <div flex-xs flex-gt-xs="100" layout="column">
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Будинок {{house.number}}</span>
+        </md-card-title-text>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="editHouse($event, house)">
+          <md-icon>mode_edit</md-icon>
+        </md-button>
+      </md-card-title>
+      <md-card-content>
+        <md-table-container>
+          <table md-table md-progress="housePromise">
+            <tbody md-body>
+              <tr md-row>
+                <td md-cell>Адреса:</td>
+                <td md-cell>{{house.address.medium || '—'}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Тариф:</td>
+                <td md-cell>{{house.tariff || "—"}}</td>
+              </tr>
+              <tr md-row>
+                <td md-cell>Кількість квартир:</td>
+                <td md-cell>{{house.apartments_count || "—"}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </md-table-container>
+      </md-card-content>
+    </md-card>
+  </div>
+  
+  <md-card>
+
+    <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedApartments.length">
+      <div class="md-toolbar-tools">
+        <h2 class="md-title">Квартири</h2>
+      </div>
+    </md-toolbar>
+
+    <md-toolbar class="md-table-toolbar alternate" ng-show="selectedApartments.length">
+      <div class="md-toolbar-tools">
+        <div>{{selectedApartments.length}} {{selectedApartments.length > 1 ? 'items' : 'item'}} selected</div>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="editApartment($event)">
+          <md-icon>edit</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-table-container>
+      <table md-table md-row-select ng-model="selectedApartments" md-progress="apartmentsPromise" class="md-data-table">
+        <thead md-head md-order="apartmentsQuery.order" md-on-reorder="getApartments">
+          <tr md-row>
+            <th md-column md-order-by="number"><span>Номер</span></th>
+            <th md-column>Тариф</th>
+            <th md-column md-string>Власник</th>
+          </tr>
+        </thead>
+        <tbody md-body>
+          <tr md-row md-select="apartment" md-select-id="id" md-auto-select ng-repeat="apartment in apartments.data">
+            <td md-cell>
+              <a ng-click="viewApartmentDetails($event, apartment)"">
+                {{apartment.address.apartment.number}}
+              </a>
+            </td>
+            <td md-cell>{{apartment.tariff || '—'}}</td>
+            <td md-cell>
+              <div ng-if="apartment.account.first_name == '' && apartment.account.last_name == ''">
+                <md-button ng-click="editAccount($event, apartment.id)">
+                  <md-icon>account_circle</md-icon>
+                </md-button>
+              </div>
+              <div ng-if="apartment.account.first_name != '' || apartment.account.last_name != ''">
+                {{apartment.account.first_name}} {{apartment.account.last_name}}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </md-table-container>
+
+    <md-table-pagination
+        md-limit="apartmentsQuery.limit"
+        md-limit-options="[5, 10, 15]"
+        md-page="apartmentsQuery.page"
+        md-total="{{apartments.count}}"
+        md-on-paginate="getApartments"
+        md-page-select>
+    </md-table-pagination>
+  </md-card>
+
+  <md-card>
+
+      <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedIndicators.length">
+        <div class="md-toolbar-tools">
+          <h2 class="md-title">
+            Показники лічильників за <input
+                                         id="period"
+                                         type="month"
+                                         name="period"
+                                         ng-model="indicatorsQuery.period"
+                                         placeholder="yyyy-MM"
+                                         min="2017-01"
+                                         max="2020-12"
+                                         required /> р.
+          </h2>
+        </div>
+      </md-toolbar>
+
+      <md-toolbar class="md-table-toolbar alternate" ng-show="selectedIndicators.length">
+        <div class="md-toolbar-tools">
+          <div>{{selectedIndicators.length}} {{selectedIndicators.length > 1 ? 'items' : 'item'}} selected</div>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="editIndicator($event)">
+            <md-icon>edit</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-toolbar class="md-table-toolbar md-default" ng-show="filter.show">
+        <div class="md-toolbar-tools">
+          <md-icon>date_range</md-icon>
+          <form flex name="filter.form">
+            <div layout="row" class="input-row">
+              <label>Виберіть дату:</label>&nbsp;
+              <input id="period" type="month" name="period" ng-model="query.period"
+                     placeholder="yyyy-MM" min="2017-01" max="2020-12" required />
+            </div>
+          </form>
+          <div flex></div>
+          <md-button class="md-icon-button" ng-click="removeFilter()">
+            <md-icon>close</md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+
+      <md-table-container>
+        <table md-table md-row-select ng-model="selectedIndicators" md-progress="indicatorsPromise" class="md-data-table">
+          <thead md-head md-order="indicatorsQuery.order" md-on-reorder="getIndicators">
+            <tr md-row>
+              <th md-column md-string>Квартира</th>
+              <th md-column md-string>Лічильник</th>
+              <th md-column md-numeric>Показник</th>
+            </tr>
+          </thead>
+          <tbody md-body>
+            <tr md-row md-select="indicator" md-select-id="id" md-auto-select ng-repeat="indicator in indicators.data">
+              <td md-cell>
+                <a ng-click="viewApartmentDetails($event, indicator.meter.apartment)"">
+                  {{indicator.meter.apartment.address.apartment.number}}
+                </a>
+              </td>
+              <td md-cell>
+                <!-- <a ng-click="viewMeter(indicator.meter, $event)"> -->
+                  {{indicator.meter.service.name || '—'}}
+                <!-- </a> -->
+              </td>
+              <td md-cell ng-click="editIndicatorInline($event, indicator)" ng-class="{'md-placeholder': !indicator.value}">
+                {{indicator.value || 'Ввести показник'}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </md-table-container>
+
+      <md-table-pagination
+          md-limit="indicatorsQuery.limit"
+          md-limit-options="[5, 10, 15]"
+          md-page="indicatorsQuery.page"
+          md-total="{{indicators.count}}"
+          md-on-paginate="getIndicators"
+          md-page-select>
+      </md-table-pagination>
+  </md-card>
+
+  <md-card>
+    <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedAccounts.length">
+      <div class="md-toolbar-tools">
+        <h2 class="md-title">Особові Рахунки</h2>
+      </div>
+    </md-toolbar>
+
+    <md-toolbar class="md-table-toolbar alternate" ng-show="selectedAccounts.length">
+      <div class="md-toolbar-tools">
+        <div>{{selectedAccounts.length}} {{selectedAccounts.length > 1 ? 'items' : 'item'}} selected</div>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="editAccount($event)">
+          <md-icon>edit</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-table-container>
+      <table md-table md-row-select ng-model="selectedAccounts" md-progress="accountsPromise" class="md-data-table">
+        <thead md-head md-order="accountsQuery.order" md-on-reorder="getAccounts">
+          <tr md-row>
+            <th md-column md-string>Особовий рахунок</th>
+            <th md-column md-string>Квартира</th>
+            <th md-column md-string md-order-by="last_name">Прізвище, ім’я</th>
+            <th md-column md-numeric>Баланс</th>
+          </tr>
+        </thead>
+        <tbody md-body>
+          <tr md-row md-select="account" md-select-id="id" md-auto-select ng-repeat="account in accounts.data">
+            <td md-cell>{{account.pid}}</td>
+            <td md-cell>
+              <a ng-click="viewApartmentDetails($event, account.apartment)"">
+                {{account.apartment.address.apartment.number}}
+              </a>
+            </td>
+            <td md-cell ng-click="editFullname($event, account)" ng-class="{'md-placeholder': !account.full_name}">
+              {{account.full_name || 'Змінити'}}
+            </td>
+            <td md-cell ng-click="editBalance($event, account)" ng-class="{'md-placeholder': !account.balance}">
+              {{account.balance || 'Змінити'}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </md-table-container>
+
+    <md-table-pagination
+        md-limit="accountsQuery.limit"
+        md-limit-options="[5, 10, 15]"
+        md-page="accountsQuery.page"
+        md-total="{{accounts.count}}"
+        md-on-paginate="getAccounts"
+        md-page-select>
+    </md-table-pagination>
+
+  </md-card>
+
+</md-content>

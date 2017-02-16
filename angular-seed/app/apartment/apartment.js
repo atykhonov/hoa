@@ -11,6 +11,10 @@ angular.module('myApp.apartment', ['ngRoute'])
       templateUrl: 'apartment/apartment.html',
       controller: 'ApartmentCtrl'
     });
+    $routeProvider.when('/apartments/:apartmentId/', {
+      templateUrl: 'apartment/apartment-details.html',
+      controller: 'ApartmentDetailsCtrl'
+    });
   }])
 
   .controller(
@@ -224,4 +228,268 @@ angular.module('myApp.apartment', ['ngRoute'])
         return deferred.$promise;
       }
 
-    }]);
+    }])
+
+  .controller(
+  'ApartmentDialogCtrl',
+  ['apartment', '$scope', '$resources', '$mdDialog',
+    function (apartment, $scope, $resources, $mdDialog) {
+
+      this.edit = true;
+
+      this.cancel = $mdDialog.cancel;
+
+      $scope.apartment = JSON.parse(JSON.stringify(apartment));
+
+      this.saveApartment = function () {
+        var deferred = $resources.apartments.update({ id: apartment.id }, $scope.apartment);
+        deferred.$promise.then(function () {
+          $mdDialog.hide(apartment);
+        });
+        return deferred.$promise;
+      }
+    }])
+
+  .controller(
+  'ApartmentDetailsCtrl',
+  ['$scope', '$resources', '$routeParams', '$mdDialog', 'moment', '$mdEditDialog', 'breadcrumb',
+    function ($scope, $resources, $routeParams, $mdDialog, moment, $mdEditDialog, breadcrumb) {
+
+      breadcrumb.init($routeParams);
+
+      var apartmentBlock = function (apartmentId) {
+        $scope.apartmentPromise = $resources.apartments.get(
+          { id: apartmentId },
+          function (apartment) {
+            $scope.apartment = apartment;
+          }
+        ).$promise;
+
+        $scope.editApartment = function (event, apartment) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'ApartmentModalCtrl',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { apartment: apartment },
+            templateUrl: 'apartment/apartment-dialog.html',
+          }).then(function () {
+            apartmentBlock(apartment.id);
+          });
+        };
+      }
+
+      var accountBlock = function (apartmentId) {
+        $scope.editAccount = function (event, account) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'AccountDialogCtrl',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { account: account },
+            templateUrl: 'account/account-dialog.html',
+          }).then(function () {
+            apartmentBlock(apartmentId);
+          });
+        };
+      }
+
+      var indicatorsBlock = function (apartmentId) {
+
+        $scope.selectedIndicators = [];
+
+        $scope.filter = {
+          options: {
+            debounce: 500
+          }
+        };
+
+        $scope.indicatorsQuery = {
+          filter: '',
+          limit: '5',
+          order: 'id',
+          page: 1,
+          period: new Date(moment({ day: 1 }).format("YYYY-MM-DD")),
+        };
+
+        $scope.getIndicators = function () {
+          var query = $scope.indicatorsQuery;
+          query['apartment_id'] = apartmentId;
+          $scope.indicatorsPromise = $resources.apartment_indicators.get(
+            query,
+            function (indicators) {
+              $scope.indicators = indicators;
+            }
+          ).$promise;
+        };
+
+        $scope.$watch(
+          'indicatorsQuery.period',
+          function (newValue, oldValue) {
+            $scope.getIndicators();
+          }
+        );
+
+        $scope.editIndicator = function (event) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'IndicatorDialogCtrl',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { indicator: $scope.selectedIndicators[0] },
+            templateUrl: 'indicator/indicator-dialog.html',
+          }).then($scope.getIndicators);
+        };
+
+        $scope.editIndicatorInline = function (event, indicator) {
+
+          self = this;
+
+          event.stopPropagation();
+
+          this.saveIndicator = function (indicator) {
+            var data = {
+              'value': indicator.value,
+            };
+            $scope.promise = $resources.indicators.update(
+              { 'indicator_id': indicator.id },
+              data,
+              function (indicator) {
+                $mdDialog.hide(indicator);
+              }).$promise;
+          }
+
+          var promise = $mdEditDialog.large({
+            'title': 'Показник',
+            'cancel': 'Відмінити',
+            'ok': 'Зберегти',
+            messages: {
+              test: ' '
+            },
+            'type': 'number',
+            modelValue: indicator.value,
+            placeholder: 'Введіть показник',
+            save: function (input) {
+              indicator.value = input.$modelValue;
+              self.saveIndicator(indicator);
+            },
+            targetEvent: event
+          });
+
+          promise.then(function (ctrl) {
+            var input = ctrl.getInput();
+
+            input.$viewChangeListeners.push(function () {
+              input.$setValidity('test', input.$modelValue !== 'test');
+            });
+          });
+        }
+      }
+
+      var chargesBlock = function (apartmentId) {
+
+        $scope.filter = {
+          options: {
+            debounce: 500
+          }
+        };
+
+        $scope.chargesQuery = {
+          filter: '',
+          limit: '5',
+          order: 'id',
+          page: 1
+        };
+
+        function success(response) {
+          var charges = [];
+          angular.forEach(response.data, function (charge, id) {
+            var item = {
+              'id': charge.id,
+              'pid': charge.pid,
+              'address': charge.address,
+              'service_charges': [],
+              'total': charge.total
+            };
+            angular.forEach($scope.services, function (service) {
+              var service_charge_value = 0;
+              angular.forEach(charge.services, function (service_charge, id) {
+                if (service_charge.service.id == service.id) {
+                  service_charge_value = service_charge.value;
+                }
+              });
+              item['service_charges'].push({
+                'value': service_charge_value
+              });
+            });
+            charges.push(item);
+          });
+          charges.count = response.count;
+          $scope.charges = charges;
+        }
+
+        function success_services(response) {
+          var services = [];
+          angular.forEach(response.data, function (assoc_service, id) {
+            services.push({
+              'id': assoc_service.service.id,
+              'name': assoc_service.service.name
+            });
+          });
+          $scope.services = services;
+          $scope.getCharges();
+        }
+
+        $scope.getCharges = function () {
+          var query = $scope.query;
+          $scope.chargesPromise = $resources.charges.get($scope.query, success).$promise;
+        };
+
+        $scope.getServices = function () {
+          $scope.services_promise = $resources.cooperative_services.get(
+            { cooperative_id: associationId }, success_services).$promise;
+        }
+      }
+
+      var apartmentId = $routeParams.apartmentId;
+      apartmentBlock(apartmentId);
+      accountBlock(apartmentId);
+      indicatorsBlock(apartmentId);
+      chargesBlock(apartmentId);
+
+    }])
+
+  .controller(
+  'ApartmentModalCtrl', [
+    'apartment', '$mdDialog', '$resources', '$scope', 'auth',
+    function (apartment, $mdDialog, $resources, $scope, auth) {
+
+      this.cancel = $mdDialog.cancel;
+
+      if ('id' in apartment) {
+        $scope.apartment = JSON.parse(JSON.stringify(apartment));
+      } else {
+        $scope.apartment = {};
+      }
+
+      this.addApartment = function () {
+        $scope.apartment['house_id'] = apartment['houseId'];
+        $scope.promise = $resources.assoc_houses.create(
+          $scope.apartment,
+          function (apartment) {
+            $mdDialog.hide(apartment);
+          }
+        ).$promise;
+      }
+
+      this.saveApartment = function () {
+        var deferred = $resources.apartments.update({ id: apartment.id }, $scope.apartment);
+        deferred.$promise.then(function (apartment) {
+          $mdDialog.hide(apartment);
+        });
+        return deferred.$promise;
+      }
+    }])

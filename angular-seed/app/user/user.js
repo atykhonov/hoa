@@ -65,3 +65,54 @@ mod.controller(
       }
 
     }]);
+
+mod.controller(
+  'UserDialogCtrl',
+  ['associations', '$mdDialog', '$resources', '$scope',
+    function (associations, $mdDialog, $resources, $scope) {
+
+      self = this;
+
+      this.add = true;
+
+      this.cancel = $mdDialog.cancel;
+
+      this.associations = [];
+
+      angular.forEach(associations.data, function (item) {
+        self.associations.push({ id: item.id, name: item.name });
+      });
+
+      this.saveUser = function () {
+        $scope.promise = $resources.users.create(
+          $scope.user,
+          function (user) {
+            $mdDialog.hide(user);
+          }
+        ).$promise;
+      }
+    }]);
+
+mod.controller(
+  'UserConfirmDialogCtrl',
+  ['users', '$mdDialog', '$resources', '$scope', '$q',
+    function (users, $mdDialog, $resources, $scope, $q) {
+
+      this.cancel = $mdDialog.cancel;
+
+      this.deletionConfirmed = function () {
+        $q.all(users.forEach(deleteUser)).then(onComplete);
+      }
+
+      function deleteUser(user, index) {
+        var deferred = $resources.users.delete({ id: user.id });
+        deferred.$promise.then(function () {
+          users.splice(index, 1);
+        });
+        return deferred.$promise;
+      }
+
+      function onComplete() {
+        $mdDialog.hide();
+      }
+    }]);

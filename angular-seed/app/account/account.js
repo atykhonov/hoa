@@ -251,3 +251,21 @@ mod.controller(
       }
 
     }]);
+
+mod.controller(
+  'AccountDialogCtrl',
+  ['account', '$mdDialog', '$resources', '$scope',
+    function (account, $mdDialog, $resources, $scope) {
+
+      this.cancel = $mdDialog.cancel;
+
+      $scope.account = JSON.parse(JSON.stringify(account));
+
+      this.saveAccount = function () {
+        var deferred = $resources.accounts.update({ id: account.id }, $scope.account);
+        deferred.$promise.then(function () {
+          $mdDialog.hide(account);
+        });
+        return deferred.$promise;
+      }
+    }]);

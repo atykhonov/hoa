@@ -1,0 +1,56 @@
+<form name="item.form" ng-submit="ctrl.saveUser()">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Додати користувача</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Email</label>
+          <input name="email" ng-model="user.email" md-maxlength="255" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Пароль</label>
+          <input type="password" name="password" ng-model="user.password" md-maxlength="255" required>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Ім’я</label>
+          <input name="first_name" ng-model="user.first_name" md-maxlength="255" required>
+        </md-input-container>
+        <md-input-container flex>
+          <label>Прізвище</label>
+          <input name="last_name" ng-model="user.last_name" md-maxlength="255" required>
+        </md-input-container>
+      </div>
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <md-checkbox ng-model="user.is_superuser">
+            Адмін
+          </md-checkbox>
+        </md-input-container>
+        <md-input-container class="md-block" flex-gt-sm>
+          <label>Керівник ОСББ</label>
+          <md-select ng-model="user.cooperative">
+            <md-option ng-repeat="association in ctrl.associations" value="{{ association.id }}">
+              <span>{{association.name}}</span>
+            </md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" class="md-primary"
+                 ng-disabled="item.form.$invalid">Додати</md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+    </div>
+    
+  </md-dialog>
+</form>

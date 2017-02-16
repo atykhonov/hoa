@@ -77,3 +77,9 @@ msgstr "кв"
 
 msgid "hs"
 msgstr "буд"
+
+msgid "house"
+msgstr "будинок"
+
+msgid "apartment"
+msgstr "квартира"

@@ -75,6 +75,32 @@ function userService($http, API, auth) {
   }
 }
 
+function BreadcrumbService($rootScope, $http, API) {
+
+  var self = this;
+
+  self.items = [];
+
+  this.addItem = function (item) {
+    self.items.push(item);
+  }
+
+  this.setItems = function (items) {
+    self.items = items;
+  }
+
+  this.getItems = function () {
+    return self.items;
+  }
+
+  this.init = function (params) {
+    $http.get(API + 'api/v1/breadcrumb/', { params: params }).then(function (response) {
+      self.setItems(response);
+      $rootScope.$broadcast('breadcrumb:updated', response.data);
+    });
+  }
+}
+
 // Declare app level module which depends on views, and components
 var app = angular.module('myApp', [
   'ngResource',
@@ -84,10 +110,12 @@ var app = angular.module('myApp', [
   'angularMoment',
   'ngRoute',
   'angular-jwt',
+  'myApp.root',
   'myApp.view1',
   'myApp.view2',
   'myApp.version',
   'myApp.mdtable',
+  'myApp.admin',
   'myApp.user',
   'myApp.association',
   'myApp.house',
@@ -97,28 +125,44 @@ var app = angular.module('myApp', [
   'myApp.charge',
   'myApp.meter',
   'myApp.indicator',
-  'myApp.navbar'
+  'myApp.navbar',
+  'myApp.breadcrumb'
 ]);
 
 app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   return {
     cooperatives: $resource(APIV1 + 'cooperatives/:id/'),
+    associations: $resource(APIV1 + 'cooperatives/:id/'),
     assoc_houses: $resource(APIV1 + 'cooperatives/:cooperative_id/houses/',
       // TODO: user just a simple id instead of cooperative_id or house_id.
       { cooperative_id: '@cooperative_id' }),
     houses: $resource(APIV1 + 'houses/:id/'),
-    house_apartments: $resource(APIV1 + 'houses/:house_id/apartments/',
+    house_apartments: $resource(
+      APIV1 + 'houses/:house_id/apartments/',
+      { house_id: '@house_id' }),
+    house_accounts: $resource(
+      APIV1 + 'houses/:house_id/accounts/',
       { house_id: '@house_id' }),
     apartments: $resource(APIV1 + 'apartments/:id/'),
     apartment_account: $resource(APIV1 + 'apartments/:id/account/'),
     accounts: $resource(APIV1 + 'accounts/:id/'),
     services: $resource(APIV1 + 'services/:id/'),
+    users: $resource(APIV1 + 'users/:id/'),
     cooperative_services: $resource(
+      APIV1 + 'cooperatives/:cooperative_id/services/',
+      { cooperative_id: '@cooperative_id' }),
+    assoc_services: $resource(
       APIV1 + 'cooperatives/:cooperative_id/services/',
       { cooperative_id: '@cooperative_id' }),
     units: $resource(APIV1 + 'units/'),
     cooperative_indicators: $resource(
       APIV1 + 'cooperatives/:cooperative_id/indicators/'),
+    house_indicators: $resource(
+      APIV1 + 'houses/:house_id/indicators/',
+      { house_id: '@house_id' }),
+    apartment_indicators: $resource(
+      APIV1 + 'apartments/:apartment_id/indicators/',
+      { apartment_id: '@apartment_id' }),
     cooperative_recalccharges: $resource(
       APIV1 + 'cooperatives/:cooperative_id/recalccharges/',
       { cooperative_id: '@cooperative_id' }),
@@ -128,10 +172,12 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   };
 }]);
 
-var API_URL = 'http://192.168.0.4:8080/';
+var API_URL = 'http://192.168.0.3:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);
+app.service('breadcrumb', BreadcrumbService);
+
 app.constant('API', API_URL);
 app.constant('APIV1', API_URL + 'api/v1/');
 
@@ -184,10 +230,6 @@ app.run(
     }
   ]
 );
-
-app.controller('RootController', ['$scope', function ($scope, $state) {
-  $scope.currentNavItem = 'associations';
-}])
 
 app.filter('trust', ['$sce', function ($sce) {
   return function (htmlCode) {
@@ -255,3 +297,27 @@ app.factory(
       return authInterceptor;
 
     }]);
+
+angular.module("myApp.root", [], function ($routeProvider) {
+  $routeProvider.when('/', {
+    resolve: {
+      controller: 'RootCtrl'
+    }
+  });
+});
+
+app.factory('RootCtrl', ['$location', 'auth', function ($location, auth) {
+
+  var userInfo = auth.getUserInfo();
+
+  if (userInfo === undefined) {
+    $location.path('/login');
+  }
+
+  if (userInfo['is_superuser']) {
+    $location.path('/admin');
+  } else {
+    $location.path('/association');
+  }
+
+}]);

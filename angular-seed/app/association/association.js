@@ -3,15 +3,11 @@
 var mod = angular.module('myApp.association', ['ngRoute']);
 
 mod.config(['$routeProvider', function ($routeProvider) {
-  $routeProvider.when('/', {
-    templateUrl: 'association/association-manager.html',
-    controller: 'AssociationManagerCtrl'
-  });
   $routeProvider.when('/associations/', {
     templateUrl: 'association/association.html',
     controller: 'AssociationCtrl'
   });
-  $routeProvider.when('/associations/:id/', {
+  $routeProvider.when('/associations/:association_id/', {
     templateUrl: 'association/association-details.html',
     controller: 'AssociationDetailsCtrl'
   });
@@ -190,10 +186,115 @@ mod.controller(
 
 mod.controller(
   'AssociationDetailsCtrl',
-  ['$mdDialog', '$resources', '$scope', '$location',
-    function ($mdDialog, $resources, $scope, $location) {
+  ['$mdDialog', '$resources', '$scope', '$location', '$routeParams', 'breadcrumb',
+    function ($mdDialog, $resources, $scope, $location, $routeParams, breadcrumb) {
 
+      // var params = {
+      //   association_id: $routeParams.association_id
+      // };
 
+      breadcrumb.init($routeParams);
+
+      this.cancel = $mdDialog.cancel;
+
+      var housesBlock = function (associationId) {
+
+        $scope.selectedHouses = [];
+
+        $scope.houseQuery = {
+          filter: '',
+          limit: '5',
+          order: 'id',
+          page: 1
+        };
+
+        $scope.getHouses = function () {
+          $scope.housesPromise = $resources.houses.get(
+            $scope.query,
+            function (houses) {
+              $scope.houses = houses;
+            }
+          ).$promise;
+        };
+
+        $scope.getHouses();
+
+        $scope.addHouse = function (event) {
+          var house = {
+            'associationId': associationId
+          };
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'HouseModalCtrl',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { house: house },
+            templateUrl: 'house/house-dialog.html',
+          }).then($scope.getHouses);
+        };
+
+        $scope.viewHouseDetails = function (event, house) {
+          event.stopPropagation();
+          $location.path('/houses/' + house.id + '/');
+        };
+      }
+
+      var associationBlock = function (associationId) {
+        $scope.cooperatives_promise = $resources.associations.get(
+          { id: associationId },
+          function (association) {
+            $scope.association = association;
+          }
+        ).$promise;
+      }
+
+      var servicesBlock = function (associationId) {
+
+        function services_succcess(services) {
+          $scope.services = services;
+        }
+
+        $scope.getAssocServices = function () {
+          $scope.services_promise = $resources.assoc_services.get(
+            { cooperative_id: associationId, limit: 50 }, services_succcess).$promise;
+        }
+        $scope.getAssocServices();
+
+        $scope.changeInformation = function (event) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'ChangeInformationController',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { association: $scope.association },
+            templateUrl: 'association/change-association-dialog.html',
+          }).then($scope.getAssociations);
+        };
+
+        $scope.changeServices = function (event) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'ChangeAssociationServicesController',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: {
+              association: $scope.association,
+              assoc_services: $scope.services.data
+            },
+            templateUrl: 'association/change-association-services-dialog.html',
+          }).then(function () {
+            $scope.getAssocServices();
+          });
+        }
+      }
+
+      var associationId = $routeParams.association_id;
+      housesBlock(associationId);
+      associationBlock(associationId);
+      servicesBlock(associationId);
     }]);
 
 mod.controller(
@@ -334,5 +435,49 @@ mod.controller(
         }).then(function () {
           $scope.getAssocServices();
         });
+      }
+    }]);
+
+mod.controller(
+  'AssociationDialogCtrl',
+  ['$mdDialog', '$resources', '$scope',
+    function ($mdDialog, $resources, $scope) {
+
+      this.add = true;
+
+      this.cancel = $mdDialog.cancel;
+
+      this.addAssociation = function () {
+        $scope.promise = $resources.associations.create(
+          $scope.association,
+          function (association) {
+            $mdDialog.hide(association);
+          }
+        ).$promise;
+      }
+
+    }]);
+
+mod.controller(
+  'AssociationConfirmDialogController',
+  ['associations', '$mdDialog', '$resources', '$scope', '$q',
+    function (associations, $mdDialog, $resources, $scope, $q) {
+
+      this.cancel = $mdDialog.cancel;
+
+      this.deletionConfirmed = function () {
+        $q.all(associations.forEach(deleteAssociation)).then(onComplete);
+      }
+
+      function deleteAssociation(association, index) {
+        var deferred = $resources.associations.delete({ id: association.id });
+        deferred.$promise.then(function () {
+          associations.splice(index, 1);
+        });
+        return deferred.$promise;
+      }
+
+      function onComplete() {
+        $mdDialog.hide();
       }
     }]);
