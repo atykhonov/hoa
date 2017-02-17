@@ -9,8 +9,10 @@ mod.config(['$routeProvider', function ($routeProvider) {
 
 mod.controller(
   'AdminCtrl',
-  ['$scope', '$location', '$resources', '$mdDialog', 'auth',
-    function ($scope, $location, $resources, $mdDialog, auth) {
+  ['$scope', '$location', '$resources', '$mdDialog', 'auth', 'breadcrumb',
+    function ($scope, $location, $resources, $mdDialog, auth, breadcrumb) {
+
+      breadcrumb.init({});
 
       var associationsBlock = function () {
 
@@ -48,7 +50,7 @@ mod.controller(
         $scope.deleteAssociation = function (event) {
           $mdDialog.show({
             clickOutsideToClose: true,
-            controller: 'AssociationConfirmDialogController',
+            controller: 'AssociationConfirmDialogCtrl',
             controllerAs: 'ctrl',
             focusOnOpen: false,
             targetEvent: event,

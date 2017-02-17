@@ -100,7 +100,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 
-class HousingCooperativeViewSet(BaseModelViewSet):
+class CooperativeServicesMixin():
+
+    def process_services_get_request(self, request, cooperative):
+        hc_services = HCService.objects.filter(cooperative=cooperative)
+        return self.list_paginated(
+            request, hc_services, HCServiceSerializer)
+
+    def process_charges_get_request(self, request, queryset):
+        return self.list_paginated(request, queryset, ChargeSerializer)
+
+    def process_recalc_charges(self, request, cooperative):
+        charges = calccharges(cooperative=cooperative)
+        context = {
+            'request': request,
+        }
+        serializer = ChargeSerializer(charges, many=True, context=context)
+        return Response(serializer.data)
+
+
+class HousingCooperativeViewSet(BaseModelViewSet, CooperativeServicesMixin):
     """
     API endpoint that allows cooperatives to be viewed or edited.
     """
@@ -162,16 +181,14 @@ class HousingCooperativeViewSet(BaseModelViewSet):
     @detail_route(methods=['get', 'post', 'delete', 'patch', ])
     def services(self, request, pk):
         """
-        Return the houses of the cooperative or create a new house.
+        Return the services of the cooperative.
         """
         cooperative = HousingCooperative.objects.get(pk=pk)
         user = request.user
         # if not user.is_superuser:
         #     return self._get_permission_denied_response()
         if request.method == 'GET':
-            hc_services = HCService.objects.filter(cooperative=pk)
-            return self.list_paginated(
-                request, hc_services, HCServiceSerializer)
+            return self.process_services_get_request(request, cooperative)
         elif request.method == 'PATCH':
             saved_service_ids = []
             assoc_service_ids = []
@@ -226,12 +243,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
     @detail_route(methods=['post'])
     def recalccharges(self, request, pk=None):
         cooperative = HousingCooperative.objects.get(pk=pk)
-        charges = calccharges(cooperative=cooperative)
-        context = {
-            'request': request,
-        }
-        serializer = ChargeSerializer(charges, many=True, context=context)
-        return Response(serializer.data)
+        return self.process_recalc_charges(request, )
 
     @detail_route(methods=['get'])
     def indicators(self, request, pk):
@@ -252,7 +264,7 @@ class HousingCooperativeViewSet(BaseModelViewSet):
                 request, indicators, MeterIndicatorSerializer)
 
 
-class HouseViewSet(BaseModelViewSet):
+class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
     """
     API endpoint that allows houses to be viewed or edited.
     """
@@ -305,7 +317,7 @@ class HouseViewSet(BaseModelViewSet):
         """
         house = House.objects.get(pk=pk)
         user = request.user
-        if not user.can_manage(house):
+        if not user.can_manage(house.cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             apartments = Apartment.objects.filter(house=pk)
@@ -337,7 +349,7 @@ class HouseViewSet(BaseModelViewSet):
         """
         house = House.objects.get(pk=pk)
         user = request.user
-        if not user.can_manage(house):
+        if not user.can_manage(house.cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             period = parse(request.query_params.get('period'))
@@ -355,14 +367,33 @@ class HouseViewSet(BaseModelViewSet):
         """
         house = House.objects.get(pk=pk)
         user = request.user
-        if not user.can_manage(house):
+        if not user.can_manage(house.cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             accounts = Account.objects.filter(apartment__house=house)
             return self.list_paginated(request, accounts, AccountSerializer)
 
+    @detail_route(methods=['get'])
+    def services(self, request, pk):
+        house = House.objects.get(pk=pk)
+        return self.process_services_get_request(request, house.cooperative)
 
-class ApartmentViewSet(BaseModelViewSet):
+    @detail_route(methods=['get'])
+    def charges(self, request, pk):
+        """
+        Return the charges of the house.
+        """
+        house = House.objects.get(pk=pk)
+        queryset = Charge.objects.filter(account__apartment__house=house)
+        return self.process_charges_get_request(request, queryset)
+
+    @detail_route(methods=['post'])
+    def recalccharges(self, request, pk=None):
+        house = House.objects.get(pk=pk)
+        return self.process_recalc_charges(request, house.cooperative)
+
+
+class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
     """
     API endpoint that allows apartments to be viewed or edited.
     """
@@ -458,7 +489,7 @@ class ApartmentViewSet(BaseModelViewSet):
         """
         apartment = Apartment.objects.get(pk=pk)
         user = request.user
-        if not user.can_manage(apartment):
+        if not user.can_manage(apartment.house.cooperative):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             period = parse(request.query_params.get('period'))
@@ -468,6 +499,21 @@ class ApartmentViewSet(BaseModelViewSet):
                 )
             return self.list_paginated(
                 request, indicators, MeterIndicatorSerializer)
+
+    @detail_route(methods=['get'])
+    def services(self, request, pk):
+        apartment = Apartment.objects.get(pk=pk)
+        return self.process_services_get_request(
+            request, apartment.house.cooperative)
+
+    @detail_route(methods=['get'])
+    def charges(self, request, pk):
+        """
+        Return the charges of the house.
+        """
+        apartment = Apartment.objects.get(pk=pk)
+        queryset = Charge.objects.filter(account__apartment=apartment)
+        return self.process_charges_get_request(request, queryset)
 
 
 class ServiceViewSet(BaseModelViewSet):

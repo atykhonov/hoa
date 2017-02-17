@@ -1,0 +1,53 @@
+<div flex-xs flex-gt-xs="100" layout="column">
+  <md-card>
+    <md-card-title>
+      <md-card-title-text>
+        <span class="md-headline">Квартира {{apartment.number}}</span>
+      </md-card-title-text>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="editApartment($event, apartment)">
+        <md-icon>mode_edit</md-icon>
+      </md-button>
+    </md-card-title>
+    <md-card-content>
+      <md-table-container>
+        <table md-table md-progress="apartmentPromise">
+          <tbody md-body>
+            <tr md-row>
+              <td md-cell>Адреса:</td>
+              <td md-cell>{{apartment.address.medium || '—'}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Тариф:</td>
+              <td md-cell>{{apartment.tariff || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Під’їзд</td>
+              <td md-cell>{{apartment.entrance || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Поверх:</td>
+              <td md-cell>{{apartment.floor || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Кількість кімнат:</td>
+              <td md-cell>{{apartment.room_number || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Загальна площа:</td>
+              <td md-cell>{{apartment.total_area || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Житлова площа:</td>
+              <td md-cell>{{apartment.dwelling_space || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Опалювальна площа:</td>
+              <td md-cell>{{apartment.heating_area || "—"}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </md-table-container>
+    </md-card-content>
+  </md-card>
+</div>

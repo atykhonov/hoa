@@ -1,0 +1,33 @@
+<div flex-xs flex-gt-xs="100" layout="column">
+  <md-card>
+    <md-card-title>
+      <md-card-title-text>
+        <span class="md-headline">Особовий рахунок</span>
+      </md-card-title-text>
+      <div flex></div>
+      <md-button class="md-icon-button" ng-click="editAccount($event, account)">
+        <md-icon>mode_edit</md-icon>
+      </md-button>
+    </md-card-title>
+    <md-card-content>
+      <md-table-container>
+        <table md-table>
+          <tbody md-body>
+            <tr md-row>
+              <td md-cell>Особовий рахунок:</td>
+              <td md-cell>{{account.pid || '—'}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Власник</td>
+              <td md-cell>{{account.full_name || "—"}}</td>
+            </tr>
+            <tr md-row>
+              <td md-cell>Баланс:</td>
+              <td md-cell>{{account.balance || "—"}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </md-table-container>
+    </md-card-content>
+  </md-card>
+</div>

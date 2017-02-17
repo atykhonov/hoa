@@ -5,7 +5,7 @@ var app = angular.module('myApp.charge', ['ngRoute'])
 app.config([
   '$routeProvider',
   function ($routeProvider) {
-    $routeProvider.when('/charges', {
+    $routeProvider.when('/charges/:cooperativeId/', {
       templateUrl: 'charge/charge.html',
       controller: 'ChargeCtrl'
     });
@@ -19,7 +19,7 @@ app.controller(
       var bookmark;
 
       var userInfo = auth.getUserInfo();
-      var associationId = userInfo['cooperative_id'];
+      var associationId = $routeParams.cooperativeId;  // userInfo['cooperative_id'];
 
       $scope.months = {
         1: 'січень',
@@ -102,7 +102,7 @@ app.controller(
       };
 
       $scope.getServices = function () {
-        $scope.services_promise = $resources.cooperative_services.get(
+        $scope.servicesPromise = $resources.cooperative_services.get(
           { cooperative_id: associationId }, success_services).$promise;
       }
 
@@ -143,8 +143,111 @@ app.controller(
         if (!newValue) {
           $scope.query.page = bookmark;
         }
-
-        $scope.getServices();
       });
 
+      $scope.getServices();
+
     }]);
+
+app.directive('charges', function () {
+  return {
+    scope: {
+      resource: '=',
+      servicesResource: '=',
+      recalcChargesResource: '=',
+      queryParams: '=',
+      showPersonalAccount: '@showPersonalAccount'
+    },
+    templateUrl: 'charge/charges-directive.html',
+    controller: ['$scope', '$resources', '$mdDialog', '$mdEditDialog', '$location',
+      function ($scope, $resources, $mdDialog, $mdEditDialog, $location) {
+
+        $scope.filter = {
+          options: {
+            debounce: 500
+          }
+        };
+
+        $scope.query = {
+          filter: '',
+          limit: '5',
+          order: 'id',
+          page: 1
+        };
+
+        angular.extend($scope.query, $scope.queryParams);
+
+        function success(response) {
+          var charges = [];
+          angular.forEach(response.data, function (charge, id) {
+            var item = {
+              'id': charge.id,
+              'pid': charge.pid,
+              'address': charge.address,
+              'service_charges': [],
+              'total': charge.total,
+              'apartment_id': charge.account.apartment.id
+            };
+            angular.forEach($scope.services, function (service) {
+              var service_charge_value = 0;
+              angular.forEach(charge.services, function (service_charge, id) {
+                if (service_charge.service.id == service.id) {
+                  service_charge_value = service_charge.value;
+                }
+              });
+              item['service_charges'].push({
+                'value': service_charge_value
+              });
+            });
+            charges.push(item);
+          });
+          charges.count = response.count;
+          $scope.charges = charges;
+        }
+
+        function success_services(response) {
+          var services = [];
+          angular.forEach(response.data, function (assoc_service, id) {
+            services.push({
+              'id': assoc_service.service.id,
+              'name': assoc_service.service.name
+            });
+          });
+          $scope.services = services;
+          $scope.getCharges();
+        }
+
+        $scope.getCharges = function () {
+          $scope.promise = $scope.resource.get($scope.query, success).$promise;
+        };
+
+        $scope.getServices = function () {
+          $scope.promise = $scope.servicesResource.get(
+            $scope.query, success_services).$promise;
+        }
+
+        $scope.calcCharges = function (event) {
+          var confirm = $mdDialog.confirm()
+            .title('Перерахувати нарахування?')
+            .textContent('Усі нарахування за поточний місяць будуть перераховані!')
+            .targetEvent(event)
+            .ok('Перерахувати')
+            .cancel('Скасувати');
+
+          $mdDialog.show(confirm).then(function () {
+            $scope.promise = $scope.recalcChargesResource.recalc($scope.query, function () {
+              $scope.getServices();
+            });
+          }, function () {
+          });
+        };
+
+        $scope.viewAccountDetails = function (event, apartmentId) {
+          event.stopPropagation();
+          $location.path('/apartments/' + apartmentId + '/account/');
+        }
+
+        $scope.getServices();
+      }]
+  }
+});

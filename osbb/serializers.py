@@ -116,7 +116,7 @@ class ChargeSerializer(serializers.ModelSerializer):
             'pid',
             'account',
             'address',
-            'period',
+            # 'period',
             'services',
             'total',
         )

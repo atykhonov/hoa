@@ -11,8 +11,8 @@ mod.config(['$routeProvider', function ($routeProvider) {
 
 mod.controller(
   'UserCtrl',
-  ['$scope', 'user', 'auth', '$rootScope', '$window',
-    function ($scope, user, auth, $rootScope, $window) {
+  ['$scope', 'user', 'auth', '$rootScope', '$window', '$location',
+    function ($scope, user, auth, $rootScope, $window, $location) {
 
       var self = this;
 
@@ -47,11 +47,14 @@ mod.controller(
 
       $scope.login = function () {
         user.login($scope.user.email, $scope.user.password)
-          .then(handleRequest, handleRequest)
+          .then(function (response) {
+            handleRequest(response);
+            $location.path('/');
+          }, handleRequest)
       }
 
       $scope.logout = function () {
-        auth.logout && auth.logout()
+        auth.logout && auth.logout();
       }
 
       $scope.refreshToken = function () {

@@ -1,6 +1,6 @@
 <form
     name="item.form"
-    ng-submit="(apartment.id && ctrl.saveApartment()) && ctrl.addApartment()"
+    ng-submit="(apartment.id && ctrl.saveApartment()) || ctrl.addApartment()"
     flex="50">
   <md-dialog add-item-dialog>
     <md-dialog-content class="md-dialog-content">

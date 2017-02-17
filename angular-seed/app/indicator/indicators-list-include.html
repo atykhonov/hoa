@@ -1,0 +1,74 @@
+<md-toolbar class="md-table-toolbar md-default" ng-hide="selectedIndicators.length">
+  <div class="md-toolbar-tools">
+    <h2 class="md-title">
+      Показники за <input
+                       id="period"
+                       type="month"
+                       name="period"
+                       ng-model="indicatorsQuery.period"
+                       placeholder="yyyy-MM"
+                       min="2017-01"
+                       max="2020-12"
+                       required />
+    </h2>
+  </div>
+</md-toolbar>
+
+<md-toolbar class="md-table-toolbar alternate" ng-show="selectedIndicators.length">
+  <div class="md-toolbar-tools">
+    <div>{{selectedIndicators.length}} {{selectedIndicators.length > 1 ? 'items' : 'item'}} selected</div>
+    <div flex></div>
+    <md-button class="md-icon-button" ng-click="editIndicator($event)">
+      <md-icon>edit</md-icon>
+    </md-button>
+  </div>
+</md-toolbar>
+
+<md-toolbar class="md-table-toolbar md-default" ng-show="filter.show">
+  <div class="md-toolbar-tools">
+    <md-icon>date_range</md-icon>
+    <form flex name="filter.form">
+      <div layout="row" class="input-row">
+        <label>Виберіть дату:</label>&nbsp;
+        <input id="period" type="month" name="period" ng-model="query.period"
+               placeholder="yyyy-MM" min="2017-01" max="2020-12" required />
+      </div>
+    </form>
+    <div flex></div>
+    <md-button class="md-icon-button" ng-click="removeFilter()">
+      <md-icon>close</md-icon>
+    </md-button>
+  </div>
+</md-toolbar>
+
+<md-table-container>
+  <table md-table md-row-select ng-model="selectedIndicators" md-progress="indicatorsPromise" class="md-data-table">
+    <thead md-head md-order="indicatorsQuery.order" md-on-reorder="getIndicators">
+      <tr md-row>
+        <th md-column md-string>Лічильник</th>
+        <th md-column md-numeric>Показник</th>
+      </tr>
+    </thead>
+    <tbody md-body>
+      <tr md-row md-select="indicator" md-select-id="id" md-auto-select ng-repeat="indicator in indicators.data">
+        <td md-cell>
+          <!-- <a ng-click="viewMeter(indicator.meter, $event)"> -->
+          {{indicator.meter.service.name || '—'}}
+          <!-- </a> -->
+        </td>
+        <td md-cell ng-click="editIndicatorInline($event, indicator)" ng-class="{'md-placeholder': !indicator.value}">
+          {{indicator.value || 'Ввести показник'}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</md-table-container>
+
+<md-table-pagination
+    md-limit="indicatorsQuery.limit"
+    md-limit-options="[5, 10, 15]"
+    md-page="indicatorsQuery.page"
+    md-total="{{indicators.count}}"
+    md-on-paginate="getIndicators"
+    md-page-select>
+</md-table-pagination>

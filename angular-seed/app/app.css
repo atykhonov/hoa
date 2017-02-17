@@ -253,3 +253,10 @@ md-dialog[add-item-dialog] > md-dialog-content > form > .input-row > md-input-co
     display:block;
     height:10px;
 }
+
+/* .association-houses .md-checkbox-column, */
+/* .association-houses .md-checkbox-cell, */
+/* .house-apartments .md-checkbox-column, */
+/* .house-apartments .md-checkbox-cell { */
+/*     display: none; */
+/* } */

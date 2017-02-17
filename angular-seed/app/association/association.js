@@ -189,10 +189,6 @@ mod.controller(
   ['$mdDialog', '$resources', '$scope', '$location', '$routeParams', 'breadcrumb',
     function ($mdDialog, $resources, $scope, $location, $routeParams, breadcrumb) {
 
-      // var params = {
-      //   association_id: $routeParams.association_id
-      // };
-
       breadcrumb.init($routeParams);
 
       this.cancel = $mdDialog.cancel;
@@ -256,7 +252,7 @@ mod.controller(
         }
 
         $scope.getAssocServices = function () {
-          $scope.services_promise = $resources.assoc_services.get(
+          $scope.servicesPromise = $resources.assoc_services.get(
             { cooperative_id: associationId, limit: 50 }, services_succcess).$promise;
         }
         $scope.getAssocServices();
@@ -292,6 +288,7 @@ mod.controller(
       }
 
       var associationId = $routeParams.association_id;
+
       housesBlock(associationId);
       associationBlock(associationId);
       servicesBlock(associationId);
@@ -403,7 +400,7 @@ mod.controller(
         { id: associationId }, cooperatives_success).$promise;
 
       $scope.getAssocServices = function () {
-        $scope.services_promise = $resources.cooperative_services.get(
+        $scope.servicesPromise = $resources.cooperative_services.get(
           { cooperative_id: associationId, limit: 50 }, services_succcess).$promise;
       }
       $scope.getAssocServices();
@@ -459,7 +456,7 @@ mod.controller(
     }]);
 
 mod.controller(
-  'AssociationConfirmDialogController',
+  'AssociationConfirmDialogCtrl',
   ['associations', '$mdDialog', '$resources', '$scope', '$q',
     function (associations, $mdDialog, $resources, $scope, $q) {
 

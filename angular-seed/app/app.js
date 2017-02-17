@@ -51,6 +51,7 @@ function authService($window, store) {
 
   self.logout = function () {
     store.set('jwt', null);
+    store.set('info', null);
   }
 }
 
@@ -151,6 +152,18 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
     cooperative_services: $resource(
       APIV1 + 'cooperatives/:cooperative_id/services/',
       { cooperative_id: '@cooperative_id' }),
+    house_services: $resource(
+      APIV1 + 'houses/:house_id/services/',
+      { house_id: '@house_id' }),
+    house_charges: $resource(
+      APIV1 + 'houses/:house_id/charges/',
+      { house_id: '@house_id' }),
+    apartment_services: $resource(
+      APIV1 + 'apartments/:apartment_id/services/',
+      { apartment_id: '@apartment_id' }),
+    apartment_charges: $resource(
+      APIV1 + 'apartments/:apartment_id/charges/',
+      { apartment_id: '@apartment_id' }),
     assoc_services: $resource(
       APIV1 + 'cooperatives/:cooperative_id/services/',
       { cooperative_id: '@cooperative_id' }),
@@ -166,6 +179,9 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
     cooperative_recalccharges: $resource(
       APIV1 + 'cooperatives/:cooperative_id/recalccharges/',
       { cooperative_id: '@cooperative_id' }),
+    house_recalccharges: $resource(
+      APIV1 + 'houses/:house_id/recalccharges/',
+      { house_id: '@house_id' }, { query: { method: 'POST', isArray: true } }),
     indicators: $resource(
       APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' }),
     charges: $resource(APIV1 + 'charges/')
@@ -210,7 +226,8 @@ app.config(['$resourceProvider', function ($resourceProvider) {
     get: { method: 'GET' },
     getAll: { method: 'GET', isArray: true },
     update: { method: 'PATCH' },
-    delete: { method: 'DELETE' }
+    delete: { method: 'DELETE' },
+    recalc: { method: 'POST', isArray: true },
   };
 }]);
 
@@ -317,7 +334,7 @@ app.factory('RootCtrl', ['$location', 'auth', function ($location, auth) {
   if (userInfo['is_superuser']) {
     $location.path('/admin');
   } else {
-    $location.path('/association');
+    $location.path('/associations/' + userInfo['cooperative_id'] + '/');
   }
 
 }]);

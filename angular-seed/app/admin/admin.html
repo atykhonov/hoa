@@ -23,7 +23,7 @@
       </md-toolbar>
 
       <md-table-container>
-        <table md-table md-row-select multiple ng-model="selectedAssociations" md-progress="associationsPromise">
+        <table md-table md-row-select ng-model="selectedAssociations" md-progress="associationsPromise">
           <thead md-head md-order="associationQuery.order" md-on-reorder="getAssociations">
             <tr md-row>
               <th md-column md-order-by="name">
@@ -80,7 +80,7 @@
         </md-toolbar>
 
         <md-table-container>
-          <table md-table md-row-select multiple ng-model="selectedUsers" md-progress="usersPromise">
+          <table md-table md-row-select ng-model="selectedUsers" md-progress="usersPromise">
             <thead md-head md-order="userQuery.order" md-on-reorder="getUsers">
               <tr md-row>
                 <th md-column md-order-by="email">
@@ -141,7 +141,7 @@
         </md-toolbar>
 
         <md-table-container>
-          <table md-table md-row-select multiple ng-model="selectedServices" md-progress="servicesPromise">
+          <table md-table md-row-select ng-model="selectedServices" md-progress="servicesPromise">
             <thead md-head md-order="serviceQuery.order" md-on-reorder="getServices">
               <tr md-row>
                 <th md-column md-order-by="name" md-string>Назва</th>
