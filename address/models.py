@@ -59,7 +59,7 @@ class Street(BaseModel):
 
 class House(BaseModel):
     street = models.ForeignKey(Street, related_name='houses')
-    number = models.CharField(max_length=3)
+    number = models.IntegerField()
     index = models.CharField(max_length=1)
 
     class Meta:
@@ -68,7 +68,7 @@ class House(BaseModel):
 
 class Apartment(BaseModel):
     house = models.ForeignKey(House, related_name='apartments')
-    number = models.CharField(max_length=3)
+    number = models.IntegerField()
     index = models.CharField(max_length=1)
 
     class Meta:
