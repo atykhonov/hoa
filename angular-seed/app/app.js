@@ -76,7 +76,7 @@ function userService($http, API, auth) {
   }
 }
 
-function BreadcrumbService($rootScope, $http, API) {
+function BreadcrumbService($rootScope, $http, API, auth) {
 
   var self = this;
 
@@ -95,6 +95,8 @@ function BreadcrumbService($rootScope, $http, API) {
   }
 
   this.init = function (params) {
+    var userInfo = auth.getUserInfo();
+    params['is_superuser'] = userInfo['is_superuser'];
     $http.get(API + 'api/v1/breadcrumb/', { params: params }).then(function (response) {
       self.setItems(response);
       $rootScope.$broadcast('breadcrumb:updated', response.data);
@@ -112,30 +114,31 @@ var app = angular.module('myApp', [
   'ngRoute',
   'angular-jwt',
   'myApp.root',
-  'myApp.view1',
-  'myApp.view2',
   'myApp.version',
-  'myApp.mdtable',
   'myApp.admin',
   'myApp.user',
   'myApp.association',
   'myApp.house',
   'myApp.apartment',
   'myApp.account',
-  'myApp.service',
   'myApp.charge',
-  'myApp.meter',
   'myApp.indicator',
   'myApp.navbar',
-  'myApp.breadcrumb'
+  'myApp.breadcrumb',
+  'myApp.service',
+  'myApp.bankAccount'
 ]);
 
 app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
   return {
     cooperatives: $resource(APIV1 + 'cooperatives/:id/'),
     associations: $resource(APIV1 + 'cooperatives/:id/'),
-    assoc_houses: $resource(APIV1 + 'cooperatives/:cooperative_id/houses/',
+    assoc_houses: $resource(
+      APIV1 + 'cooperatives/:cooperative_id/houses/',
       // TODO: user just a simple id instead of cooperative_id or house_id.
+      { cooperative_id: '@cooperative_id' }),
+    assoc_bank_accounts: $resource(
+      APIV1 + 'cooperatives/:cooperative_id/bank_accounts/',
       { cooperative_id: '@cooperative_id' }),
     houses: $resource(APIV1 + 'houses/:id/'),
     house_apartments: $resource(
@@ -179,16 +182,20 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
     cooperative_recalccharges: $resource(
       APIV1 + 'cooperatives/:cooperative_id/recalccharges/',
       { cooperative_id: '@cooperative_id' }),
+    apartment_recalccharges: $resource(
+      APIV1 + 'apartments/:apartment_id/recalccharges/',
+      { apartment_id: '@apartment_id' }),
     house_recalccharges: $resource(
       APIV1 + 'houses/:house_id/recalccharges/',
       { house_id: '@house_id' }, { query: { method: 'POST', isArray: true } }),
     indicators: $resource(
       APIV1 + 'indicators/:indicator_id/', { indicator_id: '@indicator_id' }),
-    charges: $resource(APIV1 + 'charges/')
+    charges: $resource(APIV1 + 'charges/'),
+    bank_accounts: $resource(APIV1 + 'bank-accounts/:id/')
   };
 }]);
 
-var API_URL = 'http://192.168.0.3:8080/';
+var API_URL = 'http://192.168.0.4:8080/';
 
 app.service('user', userService);
 app.service('auth', authService);

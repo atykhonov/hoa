@@ -20,8 +20,10 @@
                 <td md-cell>{{house.address.medium || '—'}}</td>
               </tr>
               <tr md-row>
-                <td md-cell>Тариф:</td>
-                <td md-cell>{{house.tariff || "—"}}</td>
+                <td md-cell>Тариф квартплати:</td>
+                <td md-cell>
+                  {{house.tariff || "—"}} <span ng-if="house.tariff">грн / м<sup>2</sup></span>
+                </td>
               </tr>
               <tr md-row>
                 <td md-cell>Кількість квартир:</td>
@@ -56,29 +58,25 @@
       <table md-table md-row-select ng-model="selectedApartments" md-progress="apartmentsPromise" class="house-apartments">
         <thead md-head md-order="apartmentsQuery.order" md-on-reorder="getApartments">
           <tr md-row>
-            <th md-column md-order-by="number"><span>Номер</span></th>
-            <th md-column>Тариф</th>
+            <th md-column md-order-by="address__apartment__number"><span>Номер</span></th>
             <th md-column md-string>Власник</th>
+            <th md-column md-numeric>Тариф квартплати, грн / м<sup>2</sup></th>
           </tr>
         </thead>
         <tbody md-body>
           <tr md-row md-select="apartment" md-select-id="id" md-auto-select ng-repeat="apartment in apartments.data">
-            <td md-cell ng-click="viewApartmentDetails($event, apartment)">
-              <a href>
-                {{apartment.address.apartment.number}}
-              </a>
+            <td md-cell>
+              <md-button class="md-icon-button" ng-click="viewApartmentDetails($event, apartment)">
+                <a href>
+                  {{apartment.address.apartment.number}}
+                </a>
+              </md-button>
+            </td>
+            <td md-cell ng-click="editFullname($event, apartment.account)"
+                ng-class="{'md-placeholder': !apartment.account.full_name}">
+              {{apartment.account.full_name || 'Змінити'}}
             </td>
             <td md-cell>{{apartment.tariff || '—'}}</td>
-            <td md-cell>
-              <div ng-if="apartment.account.first_name == '' && apartment.account.last_name == ''">
-                <md-button ng-click="editAccount($event, apartment.id)">
-                  <md-icon>account_circle</md-icon>
-                </md-button>
-              </div>
-              <div ng-if="apartment.account.first_name != '' || apartment.account.last_name != ''">
-                {{apartment.account.first_name}} {{apartment.account.last_name}}
-              </div>
-            </td>
           </tr>
         </tbody>
       </table>
@@ -119,23 +117,23 @@
       <table md-table md-row-select ng-model="selectedAccounts" md-progress="accountsPromise" class="md-data-table">
         <thead md-head md-order="accountsQuery.order" md-on-reorder="getAccounts">
           <tr md-row>
+            <th md-column md-string md-order-by="apartment__address__apartment__number">Квартира</th>
             <th md-column md-string>Особовий рахунок</th>
-            <th md-column md-string>Квартира</th>
             <th md-column md-string md-order-by="last_name">Прізвище, ім’я</th>
-            <th md-column md-numeric>Баланс</th>
+            <th md-column md-numeric>Баланс, грн.</th>
           </tr>
         </thead>
         <tbody md-body>
           <tr md-row md-select="account" md-select-id="id" md-auto-select ng-repeat="account in accounts.data">
-            <td md-cell ng-click="viewAccountDetails($event, account.apartment)">
-              <a href>
-                {{account.pid}}
-              </a>
+            <td md-cell>
+              <md-button class="md-icon-button" ng-click="viewApartmentDetails($event, account.apartment)">
+                <a href>
+                  {{account.apartment.address.apartment.number}}
+                </a>
+              </md-button>
             </td>
-            <td md-cell ng-click="viewApartmentDetails($event, account.apartment)">
-              <a href>
-                {{account.apartment.address.apartment.number}}
-              </a>
+            <td md-cell>
+              {{account.pid}}
             </td>
             <td md-cell ng-click="editFullname($event, account)" ng-class="{'md-placeholder': !account.full_name}">
               {{account.full_name || 'Змінити'}}
@@ -162,6 +160,7 @@
   <charges resource="chargesResource"
            services-resource="servicesResource"
            recalc-charges-resource="recalcChargesResource"
+           recalc-charges-callback="recalcChargesCallback"
            query-params="chargesQueryParams"
            show-personal-account="showPersonalAccount"></charges>
 

@@ -1,0 +1,39 @@
+<form
+    name="item.form"
+    ng-submit="(apartment.id && ctrl.saveApartment()) || ctrl.addApartment()"
+    flex="50">
+  <md-dialog add-item-dialog>
+    <md-dialog-content class="md-dialog-content">
+      
+      <h2 class="md-title">Змінити квартиру</h2>
+      
+      <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
+        <i class="material-icons">error_outline</i>
+        <span>&nbsp; All fields are required.</span>
+      </p>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Тариф квартплати</label>
+          <input name="tariff" ng-model="apartment.tariff">
+        </md-input-container>
+      </div>
+
+    </md-dialog-content>
+    
+    <div class="md-actions">
+      <md-button type="submit" ng-if="!apartment.id"
+                 class="md-primary" ng-disabled="item.form.$invalid">
+        Додати
+      </md-button>
+      <md-button type="submit" ng-if="apartment.id"
+                 class="md-primary"
+                 ng-disabled="item.form.$invalid">
+        Зберегти
+      </md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">
+        Скасувати
+      </md-button>
+    </div>
+  </md-dialog>
+</form>

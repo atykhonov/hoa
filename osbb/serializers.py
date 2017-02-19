@@ -12,6 +12,7 @@ from osbb.models import (
     Account,
     AccountBalance,
     Apartment,
+    BankAccount,
     Charge,
     House,
     HousingCooperative,
@@ -272,6 +273,7 @@ class ServiceSerializer(serializers.ModelSerializer):
             'unit',
             'unit_translated',
             'required',
+            'tariff',
             )
 
     def get_unit_translated(self, obj):
@@ -434,3 +436,17 @@ class HousingCooperativeSerializer(serializers.ModelSerializer):
             cooperative=cooperative, service=service)
         hc_service.save()
         return cooperative
+
+
+class BankAccountSerializer(serializers.ModelSerializer):
+
+    cooperative = serializers.PrimaryKeyRelatedField(
+        queryset=HousingCooperative.objects.all())
+
+    class Meta:
+        model = BankAccount
+        fields = (
+            'id',
+            'cooperative',
+            'info',
+            )

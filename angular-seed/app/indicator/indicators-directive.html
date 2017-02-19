@@ -46,17 +46,21 @@
     <table md-table md-row-select ng-model="selected" md-progress="promise" class="md-data-table">
       <thead md-head md-order="query.order" md-on-reorder="getIndicators">
         <tr md-row>
-          <th md-column md-string ng-if="showApartmentNumber">Квартира</th>
+          <th md-column md-string md-order-by="meter__apartment__address__apartment__number" ng-if="showApartmentNumber">
+            Квартира
+          </th>
           <th md-column md-string>Лічильник</th>
           <th md-column md-numeric>Показник</th>
         </tr>
       </thead>
       <tbody md-body>
         <tr md-row md-select="indicator" md-select-id="id" md-auto-select ng-repeat="indicator in indicators.data">
-          <td md-cell ng-if="showApartmentNumber" ng-click="viewApartmentDetails($event, indicator.meter.apartment)">
-            <a href>
-              {{indicator.meter.apartment.address.apartment.number}}
-            </a>
+          <td md-cell ng-if="showApartmentNumber">
+            <md-button class="md-icon-button" ng-click="viewApartmentDetails($event, indicator.meter.apartment)">
+              <a href>
+                {{indicator.meter.apartment.address.apartment.number}}
+              </a>
+            </md-button>
           </td>
           <td md-cell>
             <!-- <a ng-click="viewMeter(indicator.meter, $event)"> -->

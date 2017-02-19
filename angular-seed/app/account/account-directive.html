@@ -18,12 +18,14 @@
               <td md-cell>{{account.pid || '—'}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Власник</td>
+              <td md-cell>Власник:</td>
               <td md-cell>{{account.full_name || "—"}}</td>
             </tr>
             <tr md-row>
               <td md-cell>Баланс:</td>
-              <td md-cell>{{account.balance || "—"}}</td>
+              <td md-cell>
+                {{account.balance || "—"}} <span ng-if="account.balance">грн.</span>
+              </td>
             </tr>
           </tbody>
         </table>

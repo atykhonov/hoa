@@ -9,13 +9,17 @@ from django.core.management.base import BaseCommand
 from osbb.models import Account, Charge, Meter, MeterIndicator, ServiceCharge
 
 
-def calccharges(cooperative=None):
+def calccharges(apartment=None, house=None):
     """
-    Calculate the charges for the current month.
+    Calculate the charges for the current month. Calculate charges for
+    all accounts of the given `apartment` or `house`. If neither
+    `apartment` nor `house` is specified, then calculate the charges
+    for all existing accounts.
     """
-    if cooperative:
-        accounts = Account.objects.filter(
-            apartment__house__cooperative=cooperative)
+    if house:
+        accounts = Account.objects.filter(apartment__house=house)
+    elif apartment:
+        accounts = Account.objects.filter(apartment=apartment)
     else:
         accounts = Account.objects.all()
 

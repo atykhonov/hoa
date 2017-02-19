@@ -4,7 +4,9 @@
     <md-card>
       <md-card-title>
         <md-card-title-text>
-          <span class="md-headline">ОСББ «{{association.name}}»</span>
+          <span class="md-headline">
+            ОСББ <span ng-if="association.name">«{{association.name}}»</span>
+          </span>
         </md-card-title-text>
         <div flex></div>
         <md-button class="md-icon-button" ng-click="changeInformation($event)">
@@ -73,7 +75,7 @@
           <thead md-head md-order="houseQuery.order" md-on-reorder="getHouses">
             <tr md-row>
               <th md-column md-string md-order-by="address">Адреса</th>
-              <th md-column md-numeric>Тариф</th>
+              <th md-column md-numeric>Тариф квартплати, грн / м<sup>2</sup></th>
               <th md-column md-numeric>К-ть квартир</th>
             </tr>
           </thead>
@@ -133,10 +135,6 @@
           <md-card-title-text>
             <span class="md-headline">Працівники</span>
           </md-card-title-text>
-          <div flex></div>
-          <md-button class="md-icon-button" ng-click="changeEmployees($event)">
-            <md-icon>mode_edit</md-icon>
-          </md-button>
         </md-card-title>
         <md-card-content>
           <md-table-container>
@@ -161,4 +159,49 @@
       </md-card>
     </div>
   </div>
+
+  <md-card>
+    <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedBankAccounts.length">
+      <div class="md-toolbar-tools">
+        <h2 class="md-title">Банківські рахунки</h2>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="addBankAccount($event)">
+          <md-icon>add_circle_outline</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-toolbar class="md-table-toolbar alternate" ng-show="selectedBankAccounts.length">
+      <div class="md-toolbar-tools">
+        <div>{{selectedBankAccounts.length}} {{selectedBankAccounts.length > 1 ? 'items' : 'item'}} selected</div>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="editBankAccount($event)">
+          <md-icon>edit</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-click="deleteBankAccount($event)">
+          <md-icon>delete</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-table-container>
+      <table md-table md-row-select ng-model="selectedBankAccounts" md-progress="bankAccountsPromise">
+        <tbody md-body>
+          <tr md-row md-select="bankAccount" md-select-id="id" md-auto-select ng-repeat="bankAccount in bankAccounts.data">
+            <td md-cell>{{bankAccount.info}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </md-table-container>
+
+    <md-table-pagination
+        md-limit="bankAccountsQuery.limit"
+        md-limit-options="[5, 10, 15]"
+        md-page="bankAccountsQuery.page"
+        md-total="{{bankAccounts.count}}"
+        md-on-paginate="getBankAccounts"
+        md-page-select>
+    </md-table-pagination>
+  </md-card>
+  
 </md-content>

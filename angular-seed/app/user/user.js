@@ -36,6 +36,7 @@ mod.controller(
         var userInfo = undefined;
         user.getInfo().then(function (response) {
           auth.saveUserInfo(response.data);
+          $location.path('/');
         });
       }
 
@@ -49,7 +50,6 @@ mod.controller(
         user.login($scope.user.email, $scope.user.password)
           .then(function (response) {
             handleRequest(response);
-            $location.path('/');
           }, handleRequest)
       }
 

@@ -18,11 +18,13 @@
               <td md-cell>{{apartment.address.medium || '—'}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Тариф:</td>
-              <td md-cell>{{apartment.tariff || "—"}}</td>
+              <td md-cell>Тариф квартплати:</td>
+              <td md-cell>
+                {{apartment.tariff || "—"}} <span ng-if="apartment.tariff">грн / м<sup>2</sup></span>
+              </td>
             </tr>
             <tr md-row>
-              <td md-cell>Під’їзд</td>
+              <td md-cell>Під’їзд:</td>
               <td md-cell>{{apartment.entrance || "—"}}</td>
             </tr>
             <tr md-row>
@@ -35,15 +37,21 @@
             </tr>
             <tr md-row>
               <td md-cell>Загальна площа:</td>
-              <td md-cell>{{apartment.total_area || "—"}}</td>
+              <td md-cell>
+                {{apartment.total_area || "—"}} <span ng-if="apartment.total_area">м<sup>2</sup></span>
+              </td>
             </tr>
             <tr md-row>
               <td md-cell>Житлова площа:</td>
-              <td md-cell>{{apartment.dwelling_space || "—"}}</td>
+              <td md-cell>
+                {{apartment.dwelling_space || "—"}} <span ng-if="apartment.dwelling_space">м<sup>2</sup></span>
+              </td>
             </tr>
             <tr md-row>
               <td md-cell>Опалювальна площа:</td>
-              <td md-cell>{{apartment.heating_area || "—"}}</td>
+              <td md-cell>
+                {{apartment.heating_area || "—"}} <span ng-if="apartment.heating_area">м<sup>2</sup></span>
+              </td>
             </tr>
           </tbody>
         </table>

@@ -384,3 +384,8 @@ class AccountBalance(BaseModel):
 
     class Meta:
         ordering = ['period']
+
+
+class BankAccount(BaseModel):
+    cooperative = models.ForeignKey(HousingCooperative)
+    info = models.CharField(max_length=100)

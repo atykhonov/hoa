@@ -132,6 +132,19 @@ mod.controller(
           ).$promise;
         };
 
+        $scope.editService = function (event) {
+          event.stopPropagation();
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: 'ServiceDialogCtrl',
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { service: $scope.selectedServices[0] },
+            templateUrl: 'service/service-dialog.html',
+          }).then($scope.getServices);
+        }
+
         $scope.getServices();
       };
 

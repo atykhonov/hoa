@@ -19,6 +19,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from osbb.models import (
     Account,
     Apartment,
+    BankAccount,
     Charge,
     House,
     HousingCooperative,
@@ -36,6 +37,7 @@ from osbb.permissions import (
 from osbb.serializers import (
     AccountSerializer,
     ApartmentSerializer,
+    BankAccountSerializer,
     ChargeSerializer,
     HouseSerializer,
     HousingCooperativeSerializer as HCSerializer,
@@ -110,8 +112,8 @@ class CooperativeServicesMixin():
     def process_charges_get_request(self, request, queryset):
         return self.list_paginated(request, queryset, ChargeSerializer)
 
-    def process_recalc_charges(self, request, cooperative):
-        charges = calccharges(cooperative=cooperative)
+    def process_recalc_charges(self, request, house=None, apartment=None):
+        charges = calccharges(house=house, apartment=apartment)
         context = {
             'request': request,
         }
@@ -240,11 +242,6 @@ class HousingCooperativeViewSet(BaseModelViewSet, CooperativeServicesMixin):
             hc_service.delete()
             return Response({}, status=status.HTTP_204_NO_CONTENT)
 
-    @detail_route(methods=['post'])
-    def recalccharges(self, request, pk=None):
-        cooperative = HousingCooperative.objects.get(pk=pk)
-        return self.process_recalc_charges(request, )
-
     @detail_route(methods=['get'])
     def indicators(self, request, pk):
         """
@@ -262,6 +259,27 @@ class HousingCooperativeViewSet(BaseModelViewSet, CooperativeServicesMixin):
                 )
             return self.list_paginated(
                 request, indicators, MeterIndicatorSerializer)
+
+    @detail_route(methods=['get', 'post'])
+    def bank_accounts(self, request, pk):
+        """
+        Return bank accounts of the cooperative.
+        """
+        cooperative = HousingCooperative.objects.get(pk=pk)
+        user = request.user
+        if not user.can_manage(cooperative):
+            return self._get_permission_denied_response()
+        if request.method == 'GET':
+            bank_accounts = BankAccount.objects.filter(cooperative=cooperative)
+            return self.list_paginated(
+                request, bank_accounts, BankAccountSerializer)
+        elif request.method == 'POST':
+            request.data['cooperative'] = cooperative.id
+            serializer = BankAccountSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED)
 
 
 class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
@@ -302,6 +320,7 @@ class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
         street_name = request.data.get('street', address.street.name)
         house_number = request.data.get('number', address.house.number)
         address.street.name = street_name
+        address.street.type = address.street.get_default_type()
         address.street.save()
         address.house.number = house_number
         address.house.save()
@@ -390,7 +409,7 @@ class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
     @detail_route(methods=['post'])
     def recalccharges(self, request, pk=None):
         house = House.objects.get(pk=pk)
-        return self.process_recalc_charges(request, house.cooperative)
+        return self.process_recalc_charges(request, house=house)
 
 
 class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
@@ -514,6 +533,11 @@ class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
         apartment = Apartment.objects.get(pk=pk)
         queryset = Charge.objects.filter(account__apartment=apartment)
         return self.process_charges_get_request(request, queryset)
+
+    @detail_route(methods=['post'])
+    def recalccharges(self, request, pk=None):
+        apartment = Apartment.objects.get(pk=pk)
+        return self.process_recalc_charges(request, apartment=apartment)
 
 
 class ServiceViewSet(BaseModelViewSet):
@@ -816,21 +840,45 @@ class BreadcrumbAPIView(APIView):
                 'uri': '/#!/apartments/{0}/'.format(apartment.id),
                 }
 
+        items = []
         params = request.query_params
-        if params.get('association_id'):
+        if params.get('association_id') and params.get('is_superuser'):
            hc = HousingCooperative.objects.get(pk=params.get('association_id'))
            return Response([cooperative_label(hc, True)])
         if params.get('houseId'):
             house = House.objects.get(pk=params.get('houseId'))
-            return Response([
-                    cooperative_label(house.cooperative),
-                    house_label(house, True),
-                ])
+            if params.get('is_superuser'):
+                items.append(cooperative_label(house.cooperative))
+            items.append(house_label(house, True))
+            return Response(items)
         if params.get('apartmentId'):
             apartment = Apartment.objects.get(pk=params.get('apartmentId'))
-            return Response([
-                    cooperative_label(apartment.house.cooperative),
-                    house_label(apartment.house),
-                    apartment_label(apartment, True)
-                ])            
+            if params.get('is_superuser'):
+                items.append(cooperative_label(apartment.house.cooperative))
+            items.append(house_label(apartment.house))
+            items.append(apartment_label(apartment, True))
+            return Response(items)
         return Response({})
+
+
+class BankAccountViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows houses to be viewed or edited.
+    """
+    queryset = BankAccount.objects.all()
+    serializer_class = BankAccountSerializer
+
+    def get_permissions(self):
+        """
+        Admin is granted to add/change/delete a bank account
+        """
+        user = self.request.user
+
+        if user.is_superuser:
+            return (IsAuthenticated(), )
+
+        allowed_methods = ('PUT', 'PATCH', 'GET', 'POST', 'DELETE', )
+        if user.is_staff and self.request.method in allowed_methods:
+            return (IsManager(), )
+
+        return (NoPermissions(), )
