@@ -136,7 +136,7 @@ mod.controller(
         $scope.bankAccountsQuery = {
           filter: '',
           limit: '5',
-          order: 'info',
+          order: 'name',
           page: 1
         };
 

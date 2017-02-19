@@ -448,5 +448,7 @@ class BankAccountSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'cooperative',
-            'info',
+            'mfo',
+            'name',
+            'address',
             )

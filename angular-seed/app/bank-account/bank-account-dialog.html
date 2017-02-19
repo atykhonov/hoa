@@ -14,8 +14,22 @@
 
       <div layout="row" class="input-row">
         <md-input-container flex>
-          <label>Рахунок</label>
-          <input name="info" ng-model="bankAccount.info">
+          <label>МФО</label>
+          <input name="mfo" ng-model="bankAccount.mfo" md-maxlength="6" required>
+        </md-input-container>
+      </div>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Назва</label>
+          <input name="name" ng-model="bankAccount.name" md-maxlength="100" required>
+        </md-input-container>
+      </div>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Адреса</label>
+          <input name="address" ng-model="bankAccount.address" md-maxlength="100" required>
         </md-input-container>
       </div>
 

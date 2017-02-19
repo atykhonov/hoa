@@ -388,4 +388,6 @@ class AccountBalance(BaseModel):
 
 class BankAccount(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative)
-    info = models.CharField(max_length=100)
+    mfo = models.CharField(max_length=6)
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)

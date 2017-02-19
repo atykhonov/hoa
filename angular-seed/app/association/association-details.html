@@ -186,9 +186,18 @@
 
     <md-table-container>
       <table md-table md-row-select ng-model="selectedBankAccounts" md-progress="bankAccountsPromise">
+        <thead md-head md-order="bankAccountsQuery.order" md-on-reorder="getBankAccounts">
+          <tr md-row>
+            <th md-column md-string md-order-by="mfo">МФО</th>
+            <th md-column md-string md-order-by="name">Назва</th>
+            <th md-column md-string md-order-by="address">Адреса</th>
+          </tr>
+        </thead>
         <tbody md-body>
           <tr md-row md-select="bankAccount" md-select-id="id" md-auto-select ng-repeat="bankAccount in bankAccounts.data">
-            <td md-cell>{{bankAccount.info}}</td>
+            <td md-cell>{{bankAccount.mfo}}</td>
+            <td md-cell>{{bankAccount.name}}</td>
+            <td md-cell>{{bankAccount.address}}</td>
           </tr>
         </tbody>
       </table>
