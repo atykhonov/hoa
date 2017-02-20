@@ -94,7 +94,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         qset = queryset.all()
         if order_by:
             qset = qset.order_by(order_by)
-        qset = qset[offset:limit]
+        if limit:
+            qset = qset[offset:limit]
         serializer = serializer_class(qset, many=True)
         data = {
             'data': serializer.data,

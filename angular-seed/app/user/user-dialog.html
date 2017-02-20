@@ -34,15 +34,14 @@
           <md-radio-button value="user">Мешканець</md-radio-button>
           <div layout="row" class="input-row">
             <md-input-container class="md-block" flex>
-              <label>ОСББ</label>
+              <label>Обліковий запис</label>
               <md-select ng-model="user.account" ng-disabled="!user.group || user.group == 'manager' || user.group == 'superuser'">
-                <md-option ng-repeat="account in ctrl.accounts" value="{{ account.id }}">
+                <md-option ng-repeat="account in ctrl.accounts" value="{{ account.id }}" ng-if="account.full_name">
                   <span>{{account.full_name}}</span>
                 </md-option>
               </md-select>
             </md-input-container>
           </div>
-          <md-radio-button value="superuser">Адмін</md-radio-button>
           <md-radio-button value="manager">
             Керівник ОСББ
           </md-radio-button>
@@ -56,6 +55,7 @@
               </md-select>
             </md-input-container>
           </div>
+          <md-radio-button value="superuser">Адмін</md-radio-button>
         </md-radio-group>
       </div>
     </md-dialog-content>
