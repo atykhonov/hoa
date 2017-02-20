@@ -5,7 +5,7 @@
         <span class="md-headline">Квартира {{apartment.number}}</span>
       </md-card-title-text>
       <div flex></div>
-      <md-button class="md-icon-button" ng-click="editApartment($event, apartment)">
+      <md-button ng-show="apartmentEditable" class="md-icon-button" ng-click="editApartment($event, apartment)">
         <md-icon>mode_edit</md-icon>
       </md-button>
     </md-card-title>

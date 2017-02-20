@@ -31,6 +31,7 @@ from osbb.models import (
     User,
 )
 from osbb.permissions import (
+    IsInhabitant,
     IsManager,
     NoPermissions,
 )
@@ -430,6 +431,9 @@ class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
+        if user.account:
+            return (IsInhabitant(), )
+
         return (NoPermissions(), )
 
     def list(self, request):
@@ -508,7 +512,8 @@ class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
         """
         apartment = Apartment.objects.get(pk=pk)
         user = request.user
-        if not user.can_manage(apartment.house.cooperative):
+        if (not user.can_manage(apartment.house.cooperative)
+             and not user.is_owner(apartment)):
             return self._get_permission_denied_response()
         if request.method == 'GET':
             period = parse(request.query_params.get('period'))
@@ -690,6 +695,9 @@ class MeterIndicatorViewSet(BaseModelViewSet):
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
+        if user.account:
+            return (IsInhabitant(), )
+
         return (NoPermissions(), )
 
     def update(self, request, *args, **kwargs):
@@ -792,13 +800,21 @@ class UserAPIView(APIView):
         user = request.user
         resp = {
             'email': user.email,
+            'manager': False,
+            'superuser': False,
+            'inhabitant': False,
             }
         cooperative = user.cooperative
         if cooperative:
             resp['cooperative_id'] = cooperative.id
             resp['cooperative_name'] = cooperative.name
+            resp['manager'] = True
         elif user.is_superuser:
-            resp['is_superuser'] = user.is_superuser
+            resp['superuser'] = True
+        elif user.account:
+            resp['account_id'] = user.account.id
+            resp['apartment_id'] = user.account.apartment.id
+            resp['inhabitant'] = True
         return Response(resp)
 
 
@@ -842,20 +858,26 @@ class BreadcrumbAPIView(APIView):
 
         items = []
         params = request.query_params
-        if params.get('association_id') and params.get('is_superuser'):
+        if params.get('association_id') and params.get('superuser') == 'true':
            hc = HousingCooperative.objects.get(pk=params.get('association_id'))
            return Response([cooperative_label(hc, True)])
-        if params.get('houseId'):
-            house = House.objects.get(pk=params.get('houseId'))
-            if params.get('is_superuser'):
-                items.append(cooperative_label(house.cooperative))
-            items.append(house_label(house, True))
-            return Response(items)
-        if params.get('apartmentId'):
+        if (params.get('superuser') == 'true'
+             or params.get('manager') == 'true'):
+            if params.get('houseId'):
+                house = House.objects.get(pk=params.get('houseId'))
+                if params.get('superuser') == 'true':
+                    items.append(cooperative_label(house.cooperative))
+                items.append(house_label(house, True))
+                return Response(items)
+            if params.get('apartmentId'):
+                apartment = Apartment.objects.get(pk=params.get('apartmentId'))
+                if params.get('superuser') == 'true':
+                    items.append(cooperative_label(apartment.house.cooperative))
+                items.append(house_label(apartment.house))
+                items.append(apartment_label(apartment, True))
+                return Response(items)
+        if params.get('inhabitant') == 'true' and params.get('apartmentId'):
             apartment = Apartment.objects.get(pk=params.get('apartmentId'))
-            if params.get('is_superuser'):
-                items.append(cooperative_label(apartment.house.cooperative))
-            items.append(house_label(apartment.house))
             items.append(apartment_label(apartment, True))
             return Response(items)
         return Response({})

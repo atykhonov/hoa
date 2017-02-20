@@ -102,6 +102,12 @@ class User(AbstractUser):
         if self.is_staff and self.cooperative.id == cooperative.id:
             return True
 
+    def is_owner(self, apartment):
+        """
+        Return true if the user is owner of the given `apartment`.
+        """
+        return self.account == apartment.account
+
 
 class Service(BaseModel):
     name = models.CharField(max_length=50)
@@ -157,7 +163,7 @@ class Apartment(BaseModel):
 
 class Account(BaseModel):
     apartment = models.OneToOneField(Apartment)
-    owner = models.OneToOneField(User, null=True)
+    owner = models.OneToOneField(User, null=True, related_name='account')
     first_name = models.CharField(
         blank=True, max_length=30, verbose_name='first name')
     last_name = models.CharField(

@@ -83,8 +83,8 @@ mod.directive('apartment', function () {
       model: '='
     },
     templateUrl: 'apartment/apartment-directive.html',
-    controller: ['$scope', '$resources', '$mdDialog',
-      function ($scope, $resources, $mdDialog) {
+    controller: ['$scope', '$resources', '$mdDialog', 'auth',
+      function ($scope, $resources, $mdDialog, auth) {
 
         $scope.$watch(
           'model',
@@ -94,6 +94,12 @@ mod.directive('apartment', function () {
             }
           }
         );
+
+        var userInfo = auth.getUserInfo();
+        $scope.apartmentEditable = false;
+        if (userInfo['superuser'] || userInfo['manager']) {
+          $scope.apartmentEditable = true;
+        }
 
         $scope.editApartment = function (event, apartment) {
           $mdDialog.show({

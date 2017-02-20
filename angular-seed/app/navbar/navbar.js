@@ -23,7 +23,7 @@ mod.controller(
       var userInfo = auth.getUserInfo();
       if (userInfo) {
         $scope.associationName = userInfo['cooperative_name'];
-        $scope.isSuperAdmin = userInfo['is_superuser'];
+        $scope.isSuperAdmin = userInfo['superuser'];
       }
 
       this.isSuperAdmin = function () {

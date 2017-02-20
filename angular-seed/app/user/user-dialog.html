@@ -6,7 +6,7 @@
       
       <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
         <i class="material-icons">error_outline</i>
-        <span>&nbsp; All fields are required.</span>
+        <span ng-if="user.group == 'manager' && !user.cooperative && cooperative_is_required">&nbsp; Не вибране ОСББ для керівника.</span>
       </p>
 
       <div layout="row" class="input-row">
@@ -30,19 +30,33 @@
         </md-input-container>
       </div>
       <div layout="row" class="input-row">
-        <md-input-container flex>
-          <md-checkbox ng-model="user.is_superuser">
-            Адмін
-          </md-checkbox>
-        </md-input-container>
-        <md-input-container class="md-block" flex-gt-sm>
-          <label>Керівник ОСББ</label>
-          <md-select ng-model="user.cooperative">
-            <md-option ng-repeat="association in ctrl.associations" value="{{ association.id }}">
-              <span>{{association.name}}</span>
-            </md-option>
-          </md-select>
-        </md-input-container>
+        <md-radio-group ng-model="user.group">
+          <md-radio-button value="user">Мешканець</md-radio-button>
+          <div layout="row" class="input-row">
+            <md-input-container class="md-block" flex>
+              <label>ОСББ</label>
+              <md-select ng-model="user.account" ng-disabled="!user.group || user.group == 'manager' || user.group == 'superuser'">
+                <md-option ng-repeat="account in ctrl.accounts" value="{{ account.id }}">
+                  <span>{{account.full_name}}</span>
+                </md-option>
+              </md-select>
+            </md-input-container>
+          </div>
+          <md-radio-button value="superuser">Адмін</md-radio-button>
+          <md-radio-button value="manager">
+            Керівник ОСББ
+          </md-radio-button>
+          <div layout="row" class="input-row">
+            <md-input-container class="md-block" flex>
+              <label>ОСББ</label>
+              <md-select ng-model="user.cooperative" ng-disabled="!user.group || user.group == 'user' || user.group == 'superuser'">
+                <md-option ng-repeat="association in ctrl.associations" value="{{ association.id }}">
+                  <span>{{association.name}}</span>
+                </md-option>
+              </md-select>
+            </md-input-container>
+          </div>
+        </md-radio-group>
       </div>
     </md-dialog-content>
     

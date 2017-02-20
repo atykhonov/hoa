@@ -61,8 +61,8 @@ mod.directive('account', function () {
       model: '='
     },
     templateUrl: 'account/account-directive.html',
-    controller: ['$scope', '$resources', '$mdDialog',
-      function ($scope, $resources, $mdDialog) {
+    controller: ['$scope', '$resources', '$mdDialog', 'auth',
+      function ($scope, $resources, $mdDialog, auth) {
 
         $scope.$watch(
           'model',
@@ -72,6 +72,12 @@ mod.directive('account', function () {
             }
           }
         );
+
+        $scope.accountEditable = false;
+        var userInfo = auth.getUserInfo();
+        if (userInfo['manager'] || userInfo['superuser']) {
+          $scope.accountEditable = true;
+        }
 
         $scope.editAccount = function (event, account) {
           $mdDialog.show({

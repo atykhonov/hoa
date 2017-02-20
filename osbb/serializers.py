@@ -26,6 +26,64 @@ from osbb.models import (
 )
 
 
+class AccountSerializer(serializers.ModelSerializer):
+
+    pid = serializers.SerializerMethodField()
+
+    address = serializers.SerializerMethodField()
+
+    full_name = serializers.SerializerMethodField()
+
+    balance = serializers.SerializerMethodField()
+
+    class Meta:
+
+        model = Account
+
+        fields = (
+            'id',
+            'pid',
+            'apartment',
+            'owner',
+            'first_name',
+            'last_name',
+            'full_name',
+            'address',
+            'balance',
+            )
+
+        depth = 3
+
+    def get_pid(self, instance):
+        return instance.get_pid()
+
+    def get_address(self, instance):
+        """
+        Return the address of the account.
+        """
+        return instance.apartment.address.medium()
+
+    def get_full_name(self, instance):
+        if instance.first_name and instance.last_name:
+            return '{0} {1}'.format(instance.last_name, instance.first_name)
+        elif instance.first_name:
+            return instance.first_name
+        elif instance.last_name:
+            return instance.last_name
+        return ''
+
+    def get_balance(self, instance):
+        """
+        Get balance of the account.
+        """
+        balance = instance.get_present_balance()
+        if not balance:
+            balance = instance.get_previous_balance()
+            if not balance:
+                return Decimal(0)
+        return balance.value
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     full_name = serializers.SerializerMethodField()
@@ -40,8 +98,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     is_superuser = serializers.NullBooleanField(default=False)
 
+    is_staff = serializers.NullBooleanField(default=False)
+
     cooperative = serializers.PrimaryKeyRelatedField(
         default=None, queryset=HousingCooperative.objects.all())
+
+    account = serializers.PrimaryKeyRelatedField(
+        default=None, queryset=Account.objects.all())
 
     class Meta:
 
@@ -52,10 +115,12 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'password',
             'is_superuser',
+            'is_staff',
             'first_name',
             'last_name',
             'full_name',
             'cooperative',
+            'account',
             )
 
         extra_kwargs = {
@@ -80,12 +145,18 @@ class UserSerializer(serializers.ModelSerializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             is_superuser=validated_data['is_superuser'],
-            cooperative=validated_data.get('cooperative')
+            cooperative=validated_data.get('cooperative'),
+            account=validated_data.get('account')
         )
+        import pdb
+        pdb.set_trace()
         user.set_password(validated_data['password'])
         if user.cooperative:
             user.is_staff = True
         user.save()
+        if user.account:
+            user.account.owner = user
+            user.account.save()
         return user
 
 
@@ -150,64 +221,6 @@ class AccountBalanceSerializer(serializers.ModelSerializer):
             'period',
             'value',
             )
-
-
-class AccountSerializer(serializers.ModelSerializer):
-
-    pid = serializers.SerializerMethodField()
-
-    address = serializers.SerializerMethodField()
-
-    full_name = serializers.SerializerMethodField()
-
-    balance = serializers.SerializerMethodField()
-
-    class Meta:
-
-        model = Account
-
-        fields = (
-            'id',
-            'pid',
-            'apartment',
-            'owner',
-            'first_name',
-            'last_name',
-            'full_name',
-            'address',
-            'balance',
-            )
-
-        depth = 3
-
-    def get_pid(self, instance):
-        return instance.get_pid()
-
-    def get_address(self, instance):
-        """
-        Return the address of the account.
-        """
-        return instance.apartment.address.medium()
-
-    def get_full_name(self, instance):
-        if instance.first_name and instance.last_name:
-            return '{0} {1}'.format(instance.last_name, instance.first_name)
-        elif instance.first_name:
-            return instance.first_name
-        elif instance.last_name:
-            return instance.last_name
-        return ''
-
-    def get_balance(self, instance):
-        """
-        Get balance of the account.
-        """
-        balance = instance.get_present_balance()
-        if not balance:
-            balance = instance.get_previous_balance()
-            if not balance:
-                return Decimal(0)
-        return balance.value
 
 
 class MeterIndicatorSerializer(serializers.ModelSerializer):

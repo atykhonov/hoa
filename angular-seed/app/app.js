@@ -96,7 +96,9 @@ function BreadcrumbService($rootScope, $http, API, auth) {
 
   this.init = function (params) {
     var userInfo = auth.getUserInfo();
-    params['is_superuser'] = userInfo['is_superuser'];
+    params['superuser'] = userInfo['superuser'];
+    params['manager'] = userInfo['manager'];
+    params['inhabitant'] = userInfo['inhabitant'];
     $http.get(API + 'api/v1/breadcrumb/', { params: params }).then(function (response) {
       self.setItems(response);
       $rootScope.$broadcast('breadcrumb:updated', response.data);
@@ -338,10 +340,12 @@ app.factory('RootCtrl', ['$location', 'auth', function ($location, auth) {
     $location.path('/login');
   }
 
-  if (userInfo['is_superuser']) {
+  if (userInfo['superuser']) {
     $location.path('/admin');
-  } else {
+  } else if (userInfo['manager']) {
     $location.path('/associations/' + userInfo['cooperative_id'] + '/');
+  } else {
+    $location.path('/apartments/' + userInfo['apartment_id'] + '/');
   }
 
 }]);

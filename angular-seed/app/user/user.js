@@ -82,15 +82,43 @@ mod.controller(
 
       this.associations = [];
 
+      $scope.user = {};
+
+      $scope.user.group = 'user';
+
       angular.forEach(associations.data, function (item) {
         self.associations.push({ id: item.id, name: item.name });
       });
 
+      $scope.accounts = $resources.accounts.get(
+        { limit: 100 },
+        function (accounts) {
+          self.accounts = accounts.data;
+        }
+      ).$promise;
+
       this.saveUser = function () {
+        console.log('User: ');
+        console.log($scope.user);
+        if ($scope.user.group == 'superuser') {
+          $scope.user.is_staff = false;
+          $scope.user.is_superuser = true;
+        } else if ($scope.user.group == 'manager') {
+          $scope.user.is_staff = true;
+          $scope.user.is_superuser = false;
+          if (!$scope.user.cooperative) {
+            $scope.item.form.$invalid = true;
+            $scope.cooperative_is_required = true;
+            return;
+          }
+        } else {
+          $scope.user.is_staff = false;
+          $scope.user.is_superuser = false;
+        }
         $scope.promise = $resources.users.create(
           $scope.user,
-          function (user) {
-            $mdDialog.hide(user);
+          function (response) {
+            $mdDialog.hide(response);
           }
         ).$promise;
       }

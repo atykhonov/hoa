@@ -13,8 +13,8 @@ app.directive('charges', function () {
       showPersonalAccount: '@showPersonalAccount'
     },
     templateUrl: 'charge/charges-directive.html',
-    controller: ['$scope', '$resources', '$mdDialog', '$mdEditDialog', '$location',
-      function ($scope, $resources, $mdDialog, $mdEditDialog, $location) {
+    controller: ['$scope', '$resources', '$mdDialog', '$mdEditDialog', '$location', 'auth',
+      function ($scope, $resources, $mdDialog, $mdEditDialog, $location, auth) {
 
         $scope.filter = {
           options: {
@@ -28,6 +28,12 @@ app.directive('charges', function () {
           order: 'account__id',
           page: 1
         };
+
+        var userInfo = auth.getUserInfo();
+        $scope.recalculatable = false;
+        if (userInfo['superuser'] || userInfo['manager']) {
+          $scope.recalculatable = true;
+        }
 
         $scope.servicesQuery = {
         };
