@@ -76,7 +76,6 @@
             <tr md-row>
               <th md-column md-string md-order-by="address">Адреса</th>
               <th md-column md-numeric>Тариф квартплати, грн / м<sup>2</sup></th>
-              <th md-column md-numeric>К-ть квартир</th>
             </tr>
           </thead>
           <tbody md-body>
@@ -87,7 +86,6 @@
                 </a>
               </td>
               <td md-cell>{{house.tariff || "—"}}</td>
-              <td md-cell>{{house.apartments_count}}</td>
             </tr>
           </tbody>
         </table>

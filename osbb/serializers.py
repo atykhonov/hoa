@@ -148,13 +148,11 @@ class UserSerializer(serializers.ModelSerializer):
             cooperative=validated_data.get('cooperative'),
             account=validated_data.get('account')
         )
-        import pdb
-        pdb.set_trace()
         user.set_password(validated_data['password'])
         if user.cooperative:
             user.is_staff = True
         user.save()
-        if user.account:
+        if validated_data.get('account') and user.account:
             user.account.owner = user
             user.account.save()
         return user
@@ -314,13 +312,15 @@ class HousingCooperativeServiceSerializer(serializers.ModelSerializer):
 
 class ApartmentSerializer(serializers.ModelSerializer):
 
+    house = serializers.PrimaryKeyRelatedField(queryset=House.objects.all())
+
     meters = MeterSerializer(many=True, read_only=True)
 
     account = AccountSerializer(read_only=True)
 
     address = AddressSerializer(read_only=True)
 
-    number = serializers.CharField(write_only=True)
+    number = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
 
@@ -343,6 +343,32 @@ class ApartmentSerializer(serializers.ModelSerializer):
             )
 
         depth = 1
+
+    def create(self, validated_data):
+        """
+        Create an apartment with the data taken from `validated_data`.
+        """
+        apartment_number = validated_data.pop('number', '')
+        if not apartment_number:
+            raise serializers.ValidationError('Field "number" is required.')
+
+        house = validated_data.get('house')
+        address = Address.objects.create_apartment_address(
+            house.address, apartment_number)
+
+        apartment = Apartment.objects.create(address=address, **validated_data)
+        apartment.save()
+
+        coop_services = house.cooperative.services.filter(
+            service__requires_meter=True)
+        for coop_service in coop_services:
+            meter = Meter.objects.create(
+                apartment=apartment, service=coop_service.service)
+            meter.create_indicators()
+        account = Account.objects.create(apartment=apartment)
+        account.create_balance()
+
+        return apartment
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -368,7 +394,6 @@ class HouseSerializer(serializers.ModelSerializer):
             'number',
             'apartments',
             'tariff',
-            'apartments_count',
             )
 
         depth = 2
@@ -394,25 +419,12 @@ class HouseSerializer(serializers.ModelSerializer):
         if msg:
             raise serializers.ValidationError(msg)
 
-        address = Address.objects.create_address(street_name, house_number)
+        address = Address.objects.create_house_address(
+            street_name, house_number)
 
         house = House.objects.create(address=address, **validated_data)
         house.save()
 
-        coop_services = house.cooperative.services.filter(
-            service__requires_meter=True)
-        if house.apartments_count:
-            for n in range(house.apartments_count):
-                address = Address.objects.create_address(
-                    street_name, house_number, n+1)
-                apartment = Apartment.objects.create(
-                    house=house, address=address)
-                for coop_service in coop_services:
-                    meter = Meter.objects.create(
-                        apartment=apartment, service=coop_service.service)
-                    meter.create_indicators()
-                account = Account.objects.create(apartment=apartment)
-                account.create_balance()
         return house
 
 

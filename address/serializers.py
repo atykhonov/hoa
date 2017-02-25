@@ -33,10 +33,6 @@ class StreetSerializer(serializers.ModelSerializer):
             'type',
         )
 
-    def create(self, validated_data):
-        import pdb
-        pdb.set_trace()
-
 
 class HouseSerializer(serializers.ModelSerializer):
 
@@ -53,10 +49,6 @@ class HouseSerializer(serializers.ModelSerializer):
             'number',
             'index',
         )
-
-    def create(self, validated_data):
-        import pdb
-        pdb.set_trace()
 
 
 class ApartmentSerializer(serializers.ModelSerializer):

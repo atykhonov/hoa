@@ -130,7 +130,6 @@ class House(BaseModel):
     address = models.OneToOneField(Address, related_name='house_address')
     tariff = models.DecimalField(
         max_digits=10, decimal_places=2, default=None, null=True)
-    apartments_count = models.IntegerField(null=True)
 
     def get_cooperative(self):
         """
@@ -138,21 +137,26 @@ class House(BaseModel):
         """
         return self.cooperative
 
+    def delete(self, *args, **kwargs):
+        self.address.delete()
+        return super().delete(*args, **kwargs)
+
 
 class Apartment(BaseModel):
     house = models.ForeignKey(House, related_name='apartments')
-    address = models.OneToOneField(Address, related_name='apartment_address')
-    floor = models.IntegerField(null=True)
-    entrance = models.IntegerField(null=True)
-    room_number = models.IntegerField(null=True)
+    address = models.OneToOneField(
+        Address, on_delete=models.CASCADE, related_name='apartment_address')
+    floor = models.IntegerField(null=True, default=None)
+    entrance = models.IntegerField(null=True, default=None)
+    room_number = models.IntegerField(null=True, default=None)
     total_area = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
+        max_digits=10, decimal_places=2, null=True, default=None)
     dwelling_space = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
+        max_digits=10, decimal_places=2, null=True, default=None)
     heating_area = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
+        max_digits=10, decimal_places=2, null=True, default=None)
     tariff = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
+        max_digits=10, decimal_places=2, null=True, default=None)
 
     def get_cooperative(self):
         """
@@ -160,10 +164,15 @@ class Apartment(BaseModel):
         """
         return self.house.cooperative
 
+    def delete(self, *args, **kwargs):
+        self.address.delete()
+        return super().delete(*args, **kwargs)
+
 
 class Account(BaseModel):
     apartment = models.OneToOneField(Apartment)
-    owner = models.OneToOneField(User, null=True, related_name='account')
+    owner = models.OneToOneField(
+        User, on_delete=models.SET_NULL, null=True, related_name='account')
     first_name = models.CharField(
         blank=True, max_length=30, verbose_name='first name')
     last_name = models.CharField(

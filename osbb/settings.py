@@ -115,7 +115,7 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'osbb7',
+        'NAME': 'osbb8',
         'USER': 'osbbadmindb',
         'PASSWORD': 'URi2QE',
         'PORT': '',

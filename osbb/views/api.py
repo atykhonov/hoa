@@ -345,23 +345,16 @@ class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
             return self.list_paginated(
                 request, apartments, ApartmentSerializer)
         elif request.method == 'POST':
+            data = request.data
+            data['house'] = pk
             serializer = ApartmentSerializer(data=request.data)
-            if serializer.is_valid():
-                apartment = Apartment.objects.create(
-                    house=house, **serializer.validated_data)
-                for service in Service.objects.filter(requires_meter=True):
-                    meter = Meter.objects.create(
-                        apartment=apartment, service=service)
-                    meter.create_indicators()
-                account = Account.objects.create(apartment=apartment)
-                account.create_balance()
-                response_data = serializer.validated_data
-                response_data['id'] = apartment.id
-                return Response(
-                    response_data, status=status.HTTP_201_CREATED)
-
+            serializer.is_valid(raise_exception=True)
+            apartment = serializer.save()
+            response_data = serializer.validated_data
+            response_data['house'] = apartment.house.id
+            response_data['id'] = apartment.id
             return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                response_data, status=status.HTTP_201_CREATED)
 
     @detail_route(methods=['get'])
     def indicators(self, request, pk):
@@ -432,7 +425,7 @@ class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
         if user.is_staff and self.request.method in allowed_methods:
             return (IsManager(), )
 
-        if user.account:
+        if not user.is_anonymous() and user.account:
             return (IsInhabitant(), )
 
         return (NoPermissions(), )

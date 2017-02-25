@@ -149,6 +149,40 @@ mod.controller(
            templateUrl: 'apartment/apartment-brief-dialog.html',
          }).then($scope.getApartments);
        };
+
+       $scope.deleteApartment = function (event) {
+         $mdDialog.show({
+           clickOutsideToClose: true,
+           controller: 'ApartmentConfirmDialogCtrl',
+           controllerAs: 'ctrl',
+           focusOnOpen: false,
+           targetEvent: event,
+           locals: { apartment: $scope.selectedApartments[0] },
+           templateUrl: 'apartment/delete-dialog.html',
+         }).then(function () {
+           $scope.getApartments();
+           $scope.selectedApartments = [];
+         });
+       };
+
+       $scope.addApartment = function (event) {
+         var apartment = {
+           houseId: houseId
+         };
+         $mdDialog.show({
+           clickOutsideToClose: true,
+           controller: 'ApartmentDialogCtrl',
+           controllerAs: 'ctrl',
+           focusOnOpen: true,
+           targetEvent: event,
+           locals: { apartment: apartment },
+           templateUrl: 'apartment/apartment-dialog.html'
+         }).then(function () {
+           $scope.getApartments();
+           $scope.getAccounts();
+           $scope.refreshIndicators();
+         });
+       }
      }
 
      var accountsBlock = function (houseId) {

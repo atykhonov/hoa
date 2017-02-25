@@ -41,6 +41,10 @@
     <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedApartments.length">
       <div class="md-toolbar-tools">
         <h2 class="md-title">Квартири</h2>
+        <div flex></div>
+        <md-button class="md-icon-button" ng-click="addApartment($event)">
+          <md-icon>add_circle_outline</md-icon>
+        </md-button>
       </div>
     </md-toolbar>
 
@@ -50,6 +54,9 @@
         <div flex></div>
         <md-button class="md-icon-button" ng-click="editApartment($event)">
           <md-icon>edit</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" ng-click="deleteApartment($event)">
+          <md-icon>delete</md-icon>
         </md-button>
       </div>
     </md-toolbar>
@@ -94,6 +101,7 @@
 
   <indicators resource="indicatorsResource"
               query-params="indicatorsQueryParams"
+              refresh="refreshIndicators"
               show-apartment-number="true"></indicators>
 
   <md-card>

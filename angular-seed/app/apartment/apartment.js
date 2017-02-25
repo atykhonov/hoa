@@ -55,12 +55,24 @@ mod.controller(
       if ('id' in apartment) {
         $scope.apartment = JSON.parse(JSON.stringify(apartment));
       } else {
-        $scope.apartment = {};
+        $scope.apartment = {
+          'address': {
+            'apartment': {}
+          }
+        };
+      }
+
+      $scope.apartment.apartment_number = function (number) {
+        if (arguments.length) {
+          $scope.apartment.number = number;
+          $scope.apartment.address.apartment.number = number;
+        }
+        return $scope.apartment.address.apartment.number;
       }
 
       this.addApartment = function () {
         $scope.apartment['house_id'] = apartment['houseId'];
-        $scope.promise = $resources.assoc_houses.create(
+        $scope.promise = $resources.house_apartments.create(
           $scope.apartment,
           function (apartment) {
             $mdDialog.hide(apartment);
@@ -117,3 +129,26 @@ mod.directive('apartment', function () {
       }]
   }
 });
+
+mod.controller(
+  'ApartmentConfirmDialogCtrl',
+  ['apartment', '$mdDialog', '$resources', '$scope', '$q',
+    function (apartment, $mdDialog, $resources, $scope, $q) {
+
+      self = this;
+
+      this.cancel = $mdDialog.cancel;
+
+      this.deleteApartment = function(apartment) {
+        var deferred = $resources.apartments.delete({ id: apartment.id });
+        deferred.$promise.then(function () {
+        });
+        return deferred.$promise;
+      }
+
+      this.deletionConfirmed = function () {
+        self.deleteApartment(apartment).then(function() {
+          $mdDialog.hide();
+        });
+      }
+    }]);

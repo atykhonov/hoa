@@ -77,9 +77,10 @@ class Apartment(BaseModel):
 
 class AddressManager(models.Manager):
 
-    def create_address(self, street, house, apartment=None):
+    def create_house_address(self, street, house):
         """
-        Create the address with the given street, house and apartment.
+        Create the address with the given street name and house
+        number.
         """
         city = City.get_default_city()
         street_type = Street.get_default_type()
@@ -93,17 +94,30 @@ class AddressManager(models.Manager):
             house_obj = House.objects.get(street=street_obj, number=house)
         except House.DoesNotExist:
             house_obj = House.objects.create(street=street_obj, number=house)
-        apartment_obj = None
-        if apartment:
-            apartment_obj = Apartment.objects.create(
-                house=house_obj, number=apartment)
         address = self.create(
             city=city,
             street=street_obj,
             house=house_obj,
-            apartment=apartment_obj
             )
         return address
+
+    def create_apartment_address(self, house_address, apartment_number):
+        """
+        Create apartment address based on the given `house_address` with
+        the given `apartment_number`.
+        """
+        try:
+            apartment = Apartment.objects.get(
+                house=house_address.house, number=apartment_number)
+        except Apartment.DoesNotExist:
+            apartment = Apartment.objects.create(
+                house=house_address.house, number=apartment_number)
+        return self.create(
+            city=house_address.city,
+            street=house_address.street,
+            house=house_address.house,
+            apartment=apartment,
+            )
 
 
 class Address(BaseModel):

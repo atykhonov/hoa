@@ -30,7 +30,8 @@ app.directive('indicators', function () {
     scope: {
       resource: '=',
       queryParams: '=',
-      showApartmentNumber: '@showApartmentNumber'
+      showApartmentNumber: '@showApartmentNumber',
+      refresh: '='
     },
     templateUrl: 'indicator/indicators-directive.html',
     controller: ['$scope', '$resources', '$mdDialog', '$mdEditDialog', 'moment', '$location',
@@ -54,6 +55,10 @@ app.directive('indicators', function () {
 
         angular.extend($scope.query, $scope.queryParams);
 
+        $scope.refresh = function () {
+          $scope.getIndicators();
+        }
+
         $scope.getIndicators = function () {
           $scope.promise = $scope.resource.get(
             $scope.query,
@@ -66,7 +71,7 @@ app.directive('indicators', function () {
         $scope.$watch(
           'query.period',
           function (newValue, oldValue) {
-            $scope.getIndicators();
+            $scope.refresh();
           }
         );
 
@@ -84,7 +89,7 @@ app.directive('indicators', function () {
             targetEvent: event,
             locals: { indicator: $scope.selected[0] },
             templateUrl: 'indicator/indicator-dialog.html',
-          }).then($scope.getIndicators);
+          }).then($scope.refresh);
         };
 
         $scope.editIndicatorInline = function (event, indicator) {
