@@ -11,3 +11,7 @@ DATABASES = {
 ALLOWED_HOSTS = [
     'api.hoa.com.ua',
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    'hoa.com.ua',
+)

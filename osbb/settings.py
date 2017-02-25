@@ -196,16 +196,6 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
         'django.contrib.auth.hashers.MD5PasswordHasher',
     )
 
-CORS_ORIGIN_WHITELIST = (
-    'localhost:3000',
-    '127.0.0.1:3000',
-    '127.0.0.1:8000',
-    'localhost:8000',
-    '192.168.10.42:8000',
-    '192.168.10.43:8000',
-    '192.168.0.3:8000',
-)
-
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=15*60),
