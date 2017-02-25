@@ -16,11 +16,6 @@ import sys
 
 from django.utils.translation import ugettext_lazy as _
 
-try:
-    from osbb.dev_settings import *
-except ImportError:
-    from osbb.test_settings import *
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,18 +33,6 @@ SECRET_KEY = '#7ue+68l_spdkrr9@#_ruc#kwb80j=2_9h9+drwdmt$4mj%28u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '192.168.10.42',
-    '192.168.10.43',
-    '192.168.0.2',
-    '192.168.0.3',
-    '192.168.0.7',
-    '192.168.0.4',
-    '192.168.0.6',
-]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -227,3 +210,8 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=15*60),
 }
+
+try:
+    from osbb.dev_settings import *
+except ImportError:
+    from osbb.test_settings import *

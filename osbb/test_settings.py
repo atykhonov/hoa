@@ -7,3 +7,7 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+ALLOWED_HOSTS = [
+    'api.hoa.com.ua',
+]
