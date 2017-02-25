@@ -1,14 +1,17 @@
-.PHONY: all test clean activate-virtual-env update-test-server
+.PHONY: all test clean activate-test-virtual-env update-test-server
 
 test:
 	./manage.py test -w test/osbb -s
 
-activate-virtual-env:
-	export WORKON_HOME=/var/www/.virtualenvs
-	source /usr/bin/virtualenvwrapper.sh
-	workon hoa
+activate-test-virtual-env:
+	( \
+		export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python; \
+		export WORKON_HOME=/var/www/.virtualenvs; \
+		. /usr/bin/virtualenvwrapper.sh; \
+		workon hoa; \
+	)
 
-update-test-server: activate-virtual-env
+update-test-server: activate-test-virtual-env
 	git pull
 	pip install -r requirements.txt
 	pip install -r dev-requirements.txt
