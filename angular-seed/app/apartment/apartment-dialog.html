@@ -17,11 +17,11 @@
           <label>Номер</label>
           <input name="number" ng-model="apartment.apartment_number"
                  ng-model-options="{ getterSetter: true }"
-                 ng-disabled="apartment.id" required>
+                 ng-disabled="apartment.id" required md-autofocus="{{apartment.id === undefined}}">
         </md-input-container>
         <md-input-container flex>
           <label>Поверх</label>
-          <input name="floor" ng-model="apartment.floor">
+          <input name="floor" ng-model="apartment.floor" md-autofocus="{{apartment.id !== undefined}}">
         </md-input-container>
         <md-input-container flex>
           <label>Під’їзд</label>

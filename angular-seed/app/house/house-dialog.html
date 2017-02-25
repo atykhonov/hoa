@@ -6,8 +6,8 @@
   <md-dialog add-item-dialog>
     <md-dialog-content class="md-dialog-content">
       
-      <h2 class="md-title" ng-if="ctrl.add == true">Додати будинок</h2>
-      <h2 class="md-title" ng-if="ctrl.edit == true">Змінити будинок</h2>
+      <h2 class="md-title" ng-if="!house.id">Додати будинок</h2>
+      <h2 class="md-title" ng-if="house.id">Змінити будинок</h2>
       
       <p ng-if="item.form.$submitted && item.form.$invalid" class="md-warn" layout="row" layout-align="start center">
         <i class="material-icons">error_outline</i>
@@ -18,7 +18,7 @@
         <md-input-container flex>
           <label>Вулиця</label>
           <input name="street" ng-model="house.street_name" ng-model-options="{ getterSetter: true }"
-                 md-maxlength="20" required>
+                 md-maxlength="20" required md-autofocus>
         </md-input-container>
         <md-input-container flex>
           <label>Номер</label>
