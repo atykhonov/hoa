@@ -16,6 +16,11 @@ import sys
 
 from django.utils.translation import ugettext_lazy as _
 
+try:
+    from osbb.dev_settings import *
+except ImportError:
+    from osbb.test_settings import *
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -107,21 +112,6 @@ TEMPLATES = [
 ]
 
 # WSGI_APPLICATION = 'osbb.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'osbb8',
-        'USER': 'osbbadmindb',
-        'PASSWORD': 'URi2QE',
-        'PORT': '',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators

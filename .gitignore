@@ -79,3 +79,5 @@ bower_components/
 tmp
 .DS_Store
 .idea
+
+osbb/dev_settings.py
