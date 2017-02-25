@@ -5,6 +5,7 @@ test:
 
 update-test-server:
 	git pull
+	workon hoa
 	pip install -r requirements.txt
 	pip install -r dev-requirements.txt
 	pip install -r test-requirements.txt
