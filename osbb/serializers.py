@@ -36,6 +36,10 @@ class AccountSerializer(serializers.ModelSerializer):
 
     balance = serializers.SerializerMethodField()
 
+    amount = serializers.IntegerField(write_only=True)
+
+    comment = serializers.CharField(write_only=True)
+
     class Meta:
 
         model = Account
@@ -50,6 +54,8 @@ class AccountSerializer(serializers.ModelSerializer):
             'full_name',
             'address',
             'balance',
+            'amount',
+            'comment',
             )
 
         depth = 3
@@ -76,12 +82,17 @@ class AccountSerializer(serializers.ModelSerializer):
         """
         Get balance of the account.
         """
-        balance = instance.get_present_balance()
-        if not balance:
-            balance = instance.get_previous_balance()
-            if not balance:
-                return Decimal(0)
-        return balance.value
+        return instance.get_balance()
+
+    def update(self, instance, validated_data):
+        amount = validated_data.pop('amount', None)
+        if amount:
+            comment = validated_data.pop('comment', None)
+            if not comment:
+                raise serializers.ValidationError(
+                    'Field "comment" is required.')
+            instance.override_balance(amount, comment)
+        return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -365,8 +376,6 @@ class ApartmentSerializer(serializers.ModelSerializer):
             meter = Meter.objects.create(
                 apartment=apartment, service=coop_service.service)
             meter.create_indicators()
-        account = Account.objects.create(apartment=apartment)
-        account.create_balance()
 
         return apartment
 

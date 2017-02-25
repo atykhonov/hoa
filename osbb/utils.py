@@ -32,6 +32,10 @@ def calccharges(apartment=None, house=None):
     for account in accounts:
         charges = account.charges.filter(period=period)
         for charge in charges:
+            for service_charge in charge.services.all():
+                balances = service_charge.balances.filter(rollback=False)
+                for balance in balances:
+                    balance.rollback_balance()
             charge.delete()
         apartment = account.apartment
         hc_services = apartment.house.cooperative.services
@@ -69,6 +73,9 @@ def calccharges(apartment=None, house=None):
                         value=value
                         )
                     service_charge.save()
+                    if value:
+                        account.update_balance(
+                            0 - value, 'Charge', service_charge)
                     total += value
             else:
                 tariff = account.get_tariff()
@@ -82,18 +89,12 @@ def calccharges(apartment=None, house=None):
                     value=value
                     )
                 service_charge.save()
+                if value:
+                    account.update_balance(
+                        0 - value, 'Charge', service_charge)
                 total += value
         charge.total = total
         charge.save()
-        present_balance = account.get_present_balance()
-        if present_balance:
-            present_balance.delete()
-        present_balance = account.create_present_balance()
-        balance = account.get_previous_balance()
-        if not balance:
-            balance = account.create_previous_balance()
-        present_balance.value = balance.value - total
-        present_balance.save()
 
     return created_charges
 

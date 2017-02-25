@@ -30,6 +30,7 @@ from osbb.models import (
     UNITS,
     User,
 )
+from osbb.period import Period
 from osbb.permissions import (
     IsInhabitant,
     IsManager,
@@ -397,8 +398,10 @@ class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
         """
         Return the charges of the house.
         """
+        period = Period()
         house = House.objects.get(pk=pk)
-        queryset = Charge.objects.filter(account__apartment__house=house)
+        queryset = Charge.objects.filter(
+            account__apartment__house=house, period=period.present())
         return self.process_charges_get_request(request, queryset)
 
     @detail_route(methods=['post'])
@@ -606,16 +609,10 @@ class AccountViewSet(BaseModelViewSet):
 
     def update(self, request, *args, **kwargs):
         account = get_object_or_404(Account, pk=kwargs.get('pk'))
-        value = request.data.get('balance')
-        if value:
-            account.update_balance(value=value)
         serializer = AccountSerializer(account, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class MeterViewSet(BaseModelViewSet):

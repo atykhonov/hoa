@@ -7,8 +7,16 @@
       <div layout="row" class="input-row">
         <md-input-container flex>
           <label>Баланс</label>
-          <input name="balance" ng-model="account.balance"
-                 md-maxlength="20" required md-autofocus>
+          <input name="amount" ng-model="account.amount"
+                 md-numeric required md-autofocus>
+        </md-input-container>
+      </div>
+
+      <div layout="row" class="input-row">
+        <md-input-container flex>
+          <label>Коментар</label>
+          <input name="comment" ng-model="account.comment"
+                 md-maxlength="100" required>
         </md-input-container>
       </div>
 
