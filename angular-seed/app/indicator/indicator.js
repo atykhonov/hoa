@@ -31,7 +31,7 @@ app.directive('indicators', function () {
       resource: '=',
       queryParams: '=',
       showApartmentNumber: '@showApartmentNumber',
-      refresh: '='
+      refresh: '=?'
     },
     templateUrl: 'indicator/indicators-directive.html',
     controller: ['$scope', '$resources', '$mdDialog', '$mdEditDialog', 'moment', '$location',
