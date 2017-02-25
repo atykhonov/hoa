@@ -16,7 +16,8 @@
         <md-input-container flex>
           <label>Номер</label>
           <input name="number" ng-model="apartment.apartment_number"
-                 ng-model-options="{ getterSetter: true }" required>
+                 ng-model-options="{ getterSetter: true }"
+                 ng-disabled="apartment.id" required>
         </md-input-container>
         <md-input-container flex>
           <label>Поверх</label>
