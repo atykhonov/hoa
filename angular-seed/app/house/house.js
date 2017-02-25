@@ -146,7 +146,7 @@ mod.controller(
            focusOnOpen: true,
            targetEvent: event,
            locals: { apartment: $scope.selectedApartments[0] },
-           templateUrl: 'apartment/apartment-brief-dialog.html',
+           templateUrl: 'apartment/apartment-dialog.html',
          }).then($scope.getApartments);
        };
 
