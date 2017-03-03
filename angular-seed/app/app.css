@@ -260,3 +260,7 @@ md-dialog[add-item-dialog] > md-dialog-content > form > .input-row > md-input-co
 /* .house-apartments .md-checkbox-cell { */
 /*     display: none; */
 /* } */
+
+.hoa-cell-50 {
+    width: 50%;
+}

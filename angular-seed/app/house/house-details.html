@@ -16,18 +16,8 @@
           <table md-table md-progress="housePromise">
             <tbody md-body>
               <tr md-row>
-                <td md-cell>Адреса:</td>
-                <td md-cell>{{house.address.medium || '—'}}</td>
-              </tr>
-              <tr md-row>
-                <td md-cell>Тариф квартплати:</td>
-                <td md-cell>
-                  {{house.tariff || "—"}} <span ng-if="house.tariff">грн / м<sup>2</sup></span>
-                </td>
-              </tr>
-              <tr md-row>
-                <td md-cell>Кількість квартир:</td>
-                <td md-cell>{{house.apartments_count || "—"}}</td>
+                <td md-cell class="hoa-cell-50">Адреса:</td>
+                <td md-cell class="hoa-cell-50">{{house.address.medium || '—'}}</td>
               </tr>
             </tbody>
           </table>

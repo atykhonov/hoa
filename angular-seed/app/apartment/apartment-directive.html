@@ -14,42 +14,36 @@
         <table md-table md-progress="apartmentPromise">
           <tbody md-body>
             <tr md-row>
-              <td md-cell>Адреса:</td>
-              <td md-cell>{{apartment.address.medium || '—'}}</td>
+              <td md-cell class="hoa-cell-50">Адреса:</td>
+              <td md-cell class="hoa-cell-50">{{apartment.address.medium || '—'}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Тариф квартплати:</td>
-              <td md-cell>
-                {{apartment.tariff || "—"}} <span ng-if="apartment.tariff">грн / м<sup>2</sup></span>
-              </td>
+              <td md-cell class="hoa-cell-50">Під’їзд:</td>
+              <td md-cell class="hoa-cell-50">{{apartment.entrance || "—"}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Під’їзд:</td>
-              <td md-cell>{{apartment.entrance || "—"}}</td>
+              <td md-cell class="hoa-cell-50">Поверх:</td>
+              <td md-cell class="hoa-cell-50">{{apartment.floor || "—"}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Поверх:</td>
-              <td md-cell>{{apartment.floor || "—"}}</td>
+              <td md-cell class="hoa-cell-50">Кількість кімнат:</td>
+              <td md-cell class="hoa-cell-50">{{apartment.room_number || "—"}}</td>
             </tr>
             <tr md-row>
-              <td md-cell>Кількість кімнат:</td>
-              <td md-cell>{{apartment.room_number || "—"}}</td>
-            </tr>
-            <tr md-row>
-              <td md-cell>Загальна площа:</td>
-              <td md-cell>
+              <td md-cell class="hoa-cell-50">Загальна площа:</td>
+              <td md-cell class="hoa-cell-50">
                 {{apartment.total_area || "—"}} <span ng-if="apartment.total_area">м<sup>2</sup></span>
               </td>
             </tr>
             <tr md-row>
-              <td md-cell>Житлова площа:</td>
-              <td md-cell>
+              <td md-cell class="hoa-cell-50">Житлова площа:</td>
+              <td md-cell class="hoa-cell-50">
                 {{apartment.dwelling_space || "—"}} <span ng-if="apartment.dwelling_space">м<sup>2</sup></span>
               </td>
             </tr>
             <tr md-row>
-              <td md-cell>Опалювальна площа:</td>
-              <td md-cell>
+              <td md-cell class="hoa-cell-50">Опалювальна площа:</td>
+              <td md-cell class="hoa-cell-50">
                 {{apartment.heating_area || "—"}} <span ng-if="apartment.heating_area">м<sup>2</sup></span>
               </td>
             </tr>

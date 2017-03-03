@@ -12,7 +12,7 @@
         <span>&nbsp; All fields are required.</span>
       </p>
 
-      <div layout="row" class="input-row">
+      <div layout="row">
         <md-input-container flex>
           <label>Номер</label>
           <input name="number" ng-model="apartment.apartment_number"
@@ -32,24 +32,19 @@
           <input name="room_number" ng-model="apartment.room_number">
         </md-input-container>
       </div>
+      <h3 class="md-subhead">Площа, м<sup>2</sup></h3>
       <div layout="row" class="input-row">
         <md-input-container flex>
-          <label>Загальна площа</label>
+          <label>Загальна</label>
           <input name="total_area" ng-model="apartment.total_area">
         </md-input-container>
         <md-input-container flex>
-          <label>Житлова площа</label>
+          <label>Житлова</label>
           <input name="dwelling_space" ng-model="apartment.dwelling_space">
         </md-input-container>
         <md-input-container flex>
-          <label>Опалювальна площа</label>
+          <label>Опалювальна</label>
           <input name="heating_area" ng-model="apartment.heating_area">
-        </md-input-container>
-      </div>
-      <div layout="row" class="input-row">
-        <md-input-container flex>
-          <label>Індивідуальний тариф квартплати</label>
-          <input name="tariff" ng-model="apartment.tariff">
         </md-input-container>
       </div>
 
