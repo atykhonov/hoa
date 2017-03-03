@@ -132,6 +132,16 @@ class House(BaseModel):
         self.address.delete()
         return super().delete(*args, **kwargs)
 
+    def get_tariff(self, service):
+        """
+        Get tariff for the given `service`.
+        """
+        tariffs = self.tariffs.filter(service=service)
+        if tariffs.exists():
+            tariff = tariffs[0]
+            return tariff.tariff
+        return None
+
 
 class Apartment(BaseModel):
     house = models.ForeignKey(House, related_name='apartments')
@@ -157,6 +167,16 @@ class Apartment(BaseModel):
         self.address.delete()
         return super().delete(*args, **kwargs)
 
+    def get_tariff(self, service):
+        """
+        Get tariff for the given `service`.
+        """
+        tariffs = self.tariffs.filter(service=service)
+        if tariffs.exists():
+            tariff = tariffs[0]
+            return tariff.tariff
+        return None
+
 
 class Account(BaseModel):
     apartment = models.OneToOneField(Apartment)
@@ -168,10 +188,13 @@ class Account(BaseModel):
         blank=True, max_length=30, verbose_name='last name')
     is_staff = models.BooleanField(default=False, verbose_name='staff status')
 
-    def get_tariff(self):
-        tariff = self.apartment.tariff
+    def get_tariff(self, service):
+        """
+        Get tariff for the given `service`.
+        """
+        tariff = self.apartment.get_tariff(service)
         if not tariff:
-            return self.apartment.house.tariff
+            return self.apartment.house.get_tariff(service)
         return tariff
 
     def get_pid(self):

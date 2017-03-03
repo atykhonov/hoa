@@ -57,17 +57,15 @@ def calccharges(apartment=None, house=None):
                     if indicator and indicator.value:
                         prev_indicator_value = indicator.value
                     value = Decimal(0)
-                    if (indicator_value > prev_indicator_value
-                        and service.tariff):
+                    tariff = account.get_tariff(service)
+                    if (indicator_value > prev_indicator_value and tariff):
                         # Avoid an negative value.
                         value = (
-                            (indicator_value - prev_indicator_value)
-                            * meter.service.tariff
-                            )
+                            (indicator_value - prev_indicator_value) * tariff)
                     service_charge = ServiceCharge(
                         charge=charge,
                         service=service,
-                        tariff=service.tariff,
+                        tariff=value,
                         indicator_beginning=prev_indicator_value,
                         indicator_end=indicator_value,
                         value=value
@@ -78,7 +76,7 @@ def calccharges(apartment=None, house=None):
                             0 - value, 'Charge', service_charge)
                     total += value
             else:
-                tariff = account.get_tariff()
+                tariff = account.get_tariff(service)
                 value = 0
                 if tariff and apartment.total_area:
                     value = tariff * apartment.total_area
