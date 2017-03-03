@@ -30,7 +30,7 @@
             {{charge.pid}}
           </td>
           <td md-cell ng-repeat="service_charge in charge.service_charges">
-            {{ service_charge.value }}
+            {{ service_charge.value || '0.00' }}
           </td>
           <td md-cell>{{charge.total}}</td>
         </tr>
