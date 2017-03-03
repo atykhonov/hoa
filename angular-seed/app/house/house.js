@@ -15,7 +15,7 @@ mod.controller(
     function (house, $mdDialog, $resources, $scope, auth) {
 
       this.cancel = $mdDialog.cancel;
-      
+
       if ('id' in house) {
         $scope.house = JSON.parse(JSON.stringify(house));
       } else {
@@ -26,6 +26,18 @@ mod.controller(
           }
         };
       }
+
+      $scope.getTariffs = function () {
+        $scope.tariffsPromise = $resources.cooperative_services.get(
+          { cooperative_id: house.associationId, limit: 50 },
+          function(tariffs) {
+            console.log('House tariffs: ');
+            console.log(tariffs);
+            $scope.tariffs = tariffs;
+          }
+        ).$promise;
+      }
+      $scope.getTariffs();
 
       $scope.house.street_name = function (name) {
         if (arguments.length) {
@@ -84,6 +96,11 @@ mod.controller(
      $scope.recalcChargesCallback = function () {
        $scope.getAccounts();
      }
+
+     $scope.tarrifsResource = $resources.house_tariffs;
+     $scope.tarrifsQueryParams = {
+       house_id: $routeParams.houseId
+     };
 
      var houseBlock = function (houseId) {
        $scope.housePromise = $resources.houses.get(
@@ -299,3 +316,27 @@ mod.controller(
         });
       }
     }]);
+
+mod.controller(
+  'HouseTariffDialogCtrl',
+  ['tariff', '$mdDialog', '$resources', '$scope', '$q',
+   function (tariff, $mdDialog, $resources, $scope, $q) {
+
+     self = this;
+
+     this.cancel = $mdDialog.cancel;
+
+     $scope.tariff = tariff;
+
+     this.saveTariff = function (event) {
+       var tariff = $scope.tariff;
+       tariff['house_id'] = tariff.house.id;
+       var deferred = $resources.house_tariffs.update(
+         {}, tariff);
+       deferred.$promise.then(function (tariff) {
+         $mdDialog.hide(tariff);
+       });
+       return deferred.$promise;
+     }
+
+}]);

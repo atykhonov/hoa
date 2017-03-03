@@ -112,24 +112,15 @@ class User(AbstractUser):
 class Service(BaseModel):
     name = models.CharField(max_length=50)
     unit = models.CharField(max_length=2, choices=UNITS)
-    # Required services are called services which are automatically
+    # Required services are services that are automatically
     # created when cooperative is created.
     required = models.BooleanField(default=False)
     requires_meter = models.BooleanField(default=False)
-    tariff = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
-
-
-# class Tariff(BaseModel):
-#     # current = models.BooleanField()
-#     service = models.ForeignKey(Service)
 
 
 class House(BaseModel):
     cooperative = models.ForeignKey(HousingCooperative, related_name='houses')
     address = models.OneToOneField(Address, related_name='house_address')
-    tariff = models.DecimalField(
-        max_digits=10, decimal_places=2, default=None, null=True)
 
     def get_cooperative(self):
         """
@@ -154,8 +145,6 @@ class Apartment(BaseModel):
     dwelling_space = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, default=None)
     heating_area = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, default=None)
-    tariff = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, default=None)
 
     def get_cooperative(self):
@@ -254,19 +243,18 @@ class Account(BaseModel):
         return None
 
 
-class ApartmentTariff(BaseModel):
-    apartment = models.ForeignKey(Apartment)
-    date = models.DateField()
-    deleted = models.BooleanField()
-    service = models.ForeignKey(Service)  # One-to-One
-    value = models.FloatField()
-
-
 class HouseTariff(BaseModel):
-    date = models.DateField()
-    house = models.ForeignKey(House)
-    service = models.ForeignKey(Service)  # One-to-One
-    value = models.FloatField()
+    house = models.ForeignKey(House, related_name='tariffs')
+    service = models.ForeignKey(Service)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
+
+
+class ApartmentTariff(BaseModel):
+    apartment = models.ForeignKey(Apartment, related_name='tariffs')
+    service = models.ForeignKey(Service)
+    tariff = models.DecimalField(
+        max_digits=10, decimal_places=2, default=None, null=True)
 
 
 class Meter(BaseModel):

@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from decimal import Decimal
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
@@ -19,11 +20,13 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from osbb.models import (
     Account,
     Apartment,
+    ApartmentTariff,
     BankAccount,
     Charge,
     House,
     HousingCooperative,
     HousingCooperativeService as HCService,
+    HouseTariff,
     Meter,
     MeterIndicator,
     Service,
@@ -39,9 +42,11 @@ from osbb.permissions import (
 from osbb.serializers import (
     AccountSerializer,
     ApartmentSerializer,
+    ApartmentTariffSerializer,
     BankAccountSerializer,
     ChargeSerializer,
     HouseSerializer,
+    HouseTariffSerializer,
     HousingCooperativeSerializer as HCSerializer,
     HousingCooperativeServiceSerializer as HCServiceSerializer,
     MeterSerializer,
@@ -409,6 +414,26 @@ class HouseViewSet(BaseModelViewSet, CooperativeServicesMixin):
         house = House.objects.get(pk=pk)
         return self.process_recalc_charges(request, house=house)
 
+    @detail_route(methods=['get', 'patch'])
+    def tariffs(self, request, pk):
+        house = House.objects.get(pk=pk)
+        if request.method == 'GET':
+            return self.list_paginated(
+                request, house.tariffs, HouseTariffSerializer)
+        elif request.method == 'PATCH':
+            tariff_id = request.data.get('id', None)
+            tariff = HouseTariff.objects.get(pk=tariff_id)
+            value = request.data.get('tariff', Decimal(0))
+            tariff.tariff = request.data.get('tariff', Decimal(0))
+            tariff.save()
+            response = {
+                'id': tariff.id,
+                'house': tariff.house.id,
+                'service': tariff.service.id,
+                'tariff': tariff.tariff,
+                }
+            return Response(response, status=status.HTTP_200_OK)
+
 
 class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
     """
@@ -540,6 +565,26 @@ class ApartmentViewSet(BaseModelViewSet, CooperativeServicesMixin):
     def recalccharges(self, request, pk=None):
         apartment = Apartment.objects.get(pk=pk)
         return self.process_recalc_charges(request, apartment=apartment)
+
+    @detail_route(methods=['get', 'patch'])
+    def tariffs(self, request, pk):
+        apartment = Apartment.objects.get(pk=pk)
+        if request.method == 'GET':
+            return self.list_paginated(
+                request, apartment.tariffs, ApartmentTariffSerializer)
+        elif request.method == 'PATCH':
+            tariff_id = request.data.get('id', None)
+            tariff = ApartmentTariff.objects.get(pk=tariff_id)
+            value = request.data.get('tariff', Decimal(0))
+            tariff.tariff = request.data.get('tariff', Decimal(0))
+            tariff.save()
+            response = {
+                'id': tariff.id,
+                'apartment': tariff.apartment.id,
+                'service': tariff.service.id,
+                'tariff': tariff.tariff,
+                }
+            return Response(response, status=status.HTTP_200_OK)
 
 
 class ServiceViewSet(BaseModelViewSet):

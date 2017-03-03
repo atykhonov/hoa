@@ -34,6 +34,11 @@ mod.controller(
         apartment_id: apartmentId
       };
 
+      $scope.tarrifsResource = $resources.apartment_tariffs;
+      $scope.tarrifsQueryParams = {
+        apartment_id: apartmentId
+      };
+
       $scope.getApartment = function () {
         $scope.promise = $resources.apartments.get(
           { id: apartmentId },
@@ -152,3 +157,27 @@ mod.controller(
         });
       }
     }]);
+
+mod.controller(
+  'ApartmentTariffDialogCtrl',
+  ['tariff', '$mdDialog', '$resources', '$scope', '$q',
+   function (tariff, $mdDialog, $resources, $scope, $q) {
+
+     self = this;
+
+     this.cancel = $mdDialog.cancel;
+
+     $scope.tariff = tariff;
+
+     this.saveTariff = function (event) {
+       var tariff = $scope.tariff;
+       tariff['apartment_id'] = tariff.apartment.id;
+       var deferred = $resources.apartment_tariffs.update(
+         {}, tariff);
+       deferred.$promise.then(function (tariff) {
+         $mdDialog.hide(tariff);
+       });
+       return deferred.$promise;
+     }
+
+}]);

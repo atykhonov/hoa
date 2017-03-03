@@ -25,9 +25,14 @@
           <input name="number" ng-model="house.house_number" ng-model-options="{ getterSetter: true }" required>
         </md-input-container>
       </div>
+      <h3 class="md-subhead">Тарифи</h3>
       <div layout="row" class="input-row">
         <md-input-container flex>
-          <label>Тариф</label>
+          <label>Квартплата</label>
+          <input name="tariff" ng-model="house.tariff">
+        </md-input-container>
+        <md-input-container flex>
+          <label>Квартплати</label>
           <input name="tariff" ng-model="house.tariff">
         </md-input-container>
       </div>

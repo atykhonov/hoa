@@ -91,3 +91,57 @@ mod.controller(
       }
 
     }]);
+
+mod.directive('tariffs', function () {
+  return {
+    scope: {
+      resource: '=',
+      queryParams: '=',
+      controller: '@controller'
+    },
+    templateUrl: 'service/service-traffics-directive.html',
+    controller: ['$scope', '$resources', '$mdDialog', 'auth',
+      function ($scope, $resources, $mdDialog, auth) {
+
+        $scope.selected = [];
+
+        $scope.filter = {
+          options: {
+            debounce: 500
+          }
+        };
+
+        $scope.query = {
+          filter: '',
+          limit: '5',
+          order: 'id',
+          page: 1
+        };
+
+        angular.extend($scope.query, $scope.queryParams);
+
+        $scope.getTariffs = function () {
+          $scope.promise = $scope.resource.get(
+            $scope.query,
+            function (tariffs) {
+              $scope.tariffs = tariffs;
+            }
+          ).$promise;
+        };
+
+        $scope.editTariff = function (event) {
+          $mdDialog.show({
+            clickOutsideToClose: true,
+            controller: $scope.controller,
+            controllerAs: 'ctrl',
+            focusOnOpen: true,
+            targetEvent: event,
+            locals: { tariff: $scope.selected[0] },
+            templateUrl: 'service/service-tariff-dialog.html',
+          }).then(function (tariff) {
+            $scope.getTariffs();
+          });
+        };
+      }]
+  }
+});

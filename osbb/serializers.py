@@ -12,11 +12,13 @@ from osbb.models import (
     Account,
     AccountBalance,
     Apartment,
+    ApartmentTariff,
     BankAccount,
     Charge,
     House,
     HousingCooperative,
     HousingCooperativeService,
+    HouseTariff,
     Meter,
     MeterIndicator,
     Service,
@@ -283,6 +285,8 @@ class MeterSerializer(serializers.ModelSerializer):
 
 class ServiceSerializer(serializers.ModelSerializer):
 
+    id = serializers.IntegerField()
+
     unit_translated = serializers.SerializerMethodField()
 
     class Meta:
@@ -295,7 +299,6 @@ class ServiceSerializer(serializers.ModelSerializer):
             'unit',
             'unit_translated',
             'required',
-            'tariff',
             )
 
     def get_unit_translated(self, obj):
@@ -349,7 +352,6 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'dwelling_space',
             'heating_area',
             'meters',
-            'tariff',
             'account',
             )
 
@@ -368,19 +370,24 @@ class ApartmentSerializer(serializers.ModelSerializer):
             house.address, apartment_number)
 
         apartment = Apartment.objects.create(address=address, **validated_data)
-        apartment.save()
 
-        coop_services = house.cooperative.services.filter(
-            service__requires_meter=True)
+        account = Account.objects.create(apartment=apartment)
+
+        coop_services = house.cooperative.services.all()
         for coop_service in coop_services:
-            meter = Meter.objects.create(
+            ApartmentTariff.objects.create(
                 apartment=apartment, service=coop_service.service)
-            meter.create_indicators()
+            if coop_service.service.requires_meter:
+                meter = Meter.objects.create(
+                    apartment=apartment, service=coop_service.service)
+                meter.create_indicators()
 
         return apartment
 
 
 class HouseSerializer(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
 
     apartments = ApartmentSerializer(many=True, read_only=True)
 
@@ -402,7 +409,6 @@ class HouseSerializer(serializers.ModelSerializer):
             'street',
             'number',
             'apartments',
-            'tariff',
             )
 
         depth = 2
@@ -432,7 +438,11 @@ class HouseSerializer(serializers.ModelSerializer):
             street_name, house_number)
 
         house = House.objects.create(address=address, **validated_data)
-        house.save()
+
+        coop_services = house.cooperative.services.all()
+        for coop_service in coop_services:
+            HouseTariff.objects.create(
+                house=house, service=coop_service.service)
 
         return house
 
@@ -485,4 +495,40 @@ class BankAccountSerializer(serializers.ModelSerializer):
             'mfo',
             'name',
             'address',
+            )
+
+
+class HouseTariffSerializer(serializers.ModelSerializer):
+
+    house = HouseSerializer()
+
+    service = ServiceSerializer()
+
+    class Meta:
+
+        model = HouseTariff
+
+        fields = (
+            'id',
+            'house',
+            'service',
+            'tariff',
+            )
+
+
+class ApartmentTariffSerializer(serializers.ModelSerializer):
+
+    apartment = ApartmentSerializer(read_only=True)
+
+    service = ServiceSerializer(read_only=True)
+
+    class Meta:
+
+        model = ApartmentTariff
+
+        fields = (
+            'id',
+            'apartment',
+            'service',
+            'tariff',
             )

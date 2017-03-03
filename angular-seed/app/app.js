@@ -149,6 +149,9 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
     house_accounts: $resource(
       APIV1 + 'houses/:house_id/accounts/',
       { house_id: '@house_id' }),
+    house_tariffs: $resource(
+      APIV1 + 'houses/:house_id/tariffs/',
+      { house_id: '@house_id' }),
     apartments: $resource(APIV1 + 'apartments/:id/'),
     apartment_account: $resource(APIV1 + 'apartments/:id/account/'),
     accounts: $resource(APIV1 + 'accounts/:id/'),
@@ -168,6 +171,9 @@ app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
       { apartment_id: '@apartment_id' }),
     apartment_charges: $resource(
       APIV1 + 'apartments/:apartment_id/charges/',
+      { apartment_id: '@apartment_id' }),
+    apartment_tariffs: $resource(
+      APIV1 + 'apartments/:apartment_id/tariffs/',
       { apartment_id: '@apartment_id' }),
     assoc_services: $resource(
       APIV1 + 'cooperatives/:cooperative_id/services/',
