@@ -75,7 +75,6 @@
           <thead md-head md-order="houseQuery.order" md-on-reorder="getHouses">
             <tr md-row>
               <th md-column md-string md-order-by="address">Адреса</th>
-              <th md-column md-numeric>Тариф квартплати, грн / м<sup>2</sup></th>
             </tr>
           </thead>
           <tbody md-body>
@@ -85,7 +84,6 @@
                   {{house.address.medium}}
                 </a>
               </td>
-              <td md-cell>{{house.tariff || "—"}}</td>
             </tr>
           </tbody>
         </table>

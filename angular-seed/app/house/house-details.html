@@ -61,7 +61,6 @@
           <tr md-row>
             <th md-column md-order-by="address__apartment__number"><span>Номер</span></th>
             <th md-column md-string>Власник</th>
-            <th md-column md-numeric>Тариф квартплати, грн / м<sup>2</sup></th>
           </tr>
         </thead>
         <tbody md-body>
@@ -77,7 +76,6 @@
                 ng-class="{'md-placeholder': !apartment.account.full_name}">
               {{apartment.account.full_name || 'Змінити'}}
             </td>
-            <td md-cell>{{apartment.tariff || '—'}}</td>
           </tr>
         </tbody>
       </table>
