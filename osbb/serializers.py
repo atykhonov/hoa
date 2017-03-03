@@ -387,8 +387,6 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
 class HouseSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField()
-
     apartments = ApartmentSerializer(many=True, read_only=True)
 
     cooperative = serializers.PrimaryKeyRelatedField(
