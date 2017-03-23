@@ -15,6 +15,8 @@
     "angular-material": "^1.1.1",
     "moment": "^2.17.1",
     "angular-moment": "^1.0.1",
-    "angular-modal-progress-bar": "^1.0.2"
+    "angular-modal-progress-bar": "^1.0.2",
+    "angular-translate": "^2.15.1",
+    "angular-i18n": "^1.6.3"
   }
 }

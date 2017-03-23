@@ -128,7 +128,8 @@ var app = angular.module('myApp', [
   'myApp.navbar',
   'myApp.breadcrumb',
   'myApp.service',
-  'myApp.bankAccount'
+  'myApp.bankAccount',
+  'pascalprecht.translate'
 ]);
 
 app.factory('$resources', ['$resource', 'APIV1', function ($resource, APIV1) {
@@ -214,6 +215,14 @@ app.constant('APIV1', API_URL + 'api/v1/');
 
 app.config(function ($compileProvider) {
   $compileProvider.preAssignBindingsEnabled(true);
+});
+
+app.config(function ($translateProvider) {
+  $translateProvider.useMissingTranslationHandlerLog();
+  $translateProvider
+    .translations('uk', translations)
+    .preferredLanguage('uk');
+  $translateProvider.useSanitizeValueStrategy('escape');
 });
 
 app.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
