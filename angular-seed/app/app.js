@@ -222,7 +222,7 @@ app.config(function ($translateProvider) {
   $translateProvider
     .translations('uk', translations)
     .preferredLanguage('uk');
-  $translateProvider.useSanitizeValueStrategy('escape');
+  $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
 });
 
 app.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {

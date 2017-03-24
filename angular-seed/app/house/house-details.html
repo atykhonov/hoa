@@ -4,7 +4,7 @@
     <md-card>
       <md-card-title>
         <md-card-title-text>
-          <span class="md-headline">Будинок {{house.number}}</span>
+          <span class="md-headline">{{"house.details.headline" | translate}} {{house.number}}</span>
         </md-card-title-text>
         <div flex></div>
         <md-button class="md-icon-button" ng-click="editHouse($event, house)">
@@ -16,7 +16,7 @@
           <table md-table md-progress="housePromise">
             <tbody md-body>
               <tr md-row>
-                <td md-cell class="hoa-cell-50">Адреса:</td>
+                <td md-cell class="hoa-cell-50">{{"house.details.address" | translate}}:</td>
                 <td md-cell class="hoa-cell-50">{{house.address.medium || '—'}}</td>
               </tr>
             </tbody>
@@ -34,7 +34,7 @@
 
     <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedApartments.length">
       <div class="md-toolbar-tools">
-        <h2 class="md-title">Квартири</h2>
+        <h2 class="md-title">{{"house.details.apartments.title" | translate}}</h2>
         <div flex></div>
         <md-button class="md-icon-button" ng-click="addApartment($event)">
           <md-icon>add_circle_outline</md-icon>
@@ -59,8 +59,14 @@
       <table md-table md-row-select ng-model="selectedApartments" md-progress="apartmentsPromise" class="house-apartments">
         <thead md-head md-order="apartmentsQuery.order" md-on-reorder="getApartments">
           <tr md-row>
-            <th md-column md-order-by="address__apartment__number"><span>Номер</span></th>
-            <th md-column md-string>Власник</th>
+            <th md-column md-order-by="address__apartment__number">
+              <span>
+                {{"house.details.apartments.number" | translate}}
+              </span>
+            </th>
+            <th md-column md-string>
+              {{"house.details.apartments.owner" | translate}}
+            </th>
           </tr>
         </thead>
         <tbody md-body>
@@ -74,7 +80,7 @@
             </td>
             <td md-cell ng-click="editFullname($event, apartment.account)"
                 ng-class="{'md-placeholder': !apartment.account.full_name}">
-              {{apartment.account.full_name || 'Змінити'}}
+              {{apartment.account.full_name || ("house.details.apartments.actions.change" | translate)}}
             </td>
           </tr>
         </tbody>
@@ -99,7 +105,9 @@
   <md-card>
     <md-toolbar class="md-table-toolbar md-default" ng-hide="selectedAccounts.length">
       <div class="md-toolbar-tools">
-        <h2 class="md-title">Особові Рахунки</h2>
+        <h2 class="md-title">
+          {{"house.details.accounts.title" | translate}}
+        </h2>
       </div>
     </md-toolbar>
 
@@ -117,10 +125,18 @@
       <table md-table md-row-select ng-model="selectedAccounts" md-progress="accountsPromise" class="md-data-table">
         <thead md-head md-order="accountsQuery.order" md-on-reorder="getAccounts">
           <tr md-row>
-            <th md-column md-string md-order-by="apartment__address__apartment__number">Квартира</th>
-            <th md-column md-string>Особовий рахунок</th>
-            <th md-column md-string md-order-by="last_name">Прізвище, ім’я</th>
-            <th md-column md-numeric>Баланс, грн.</th>
+            <th md-column md-string md-order-by="apartment__address__apartment__number">
+              {{"house.details.accounts.apartment" | translate}}
+            </th>
+            <th md-column md-string>
+              {{"house.details.accounts.account" | translate}}
+            </th>
+            <th md-column md-string md-order-by="last_name">
+              {{"house.details.accounts.owner" | translate}}
+            </th>
+            <th md-column md-numeric>
+              {{"house.details.accounts.balance" | translate}}, {{"general.currency.short" | translate}}.
+            </th>
           </tr>
         </thead>
         <tbody md-body>
@@ -136,10 +152,10 @@
               {{account.pid}}
             </td>
             <td md-cell ng-click="editFullname($event, account)" ng-class="{'md-placeholder': !account.full_name}">
-              {{account.full_name || 'Змінити'}}
+              {{account.full_name || ("house.details.accounts.actions.change" | translate)}}
             </td>
             <td md-cell ng-click="editBalance($event, account)" ng-class="{'md-placeholder': !account.balance}">
-              {{account.balance || 'Змінити'}}
+              {{account.balance || ("house.details.accounts.actions.change" | translate)}}
             </td>
           </tr>
         </tbody>

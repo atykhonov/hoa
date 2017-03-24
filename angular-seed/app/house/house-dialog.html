@@ -6,8 +6,12 @@
   <md-dialog add-item-dialog>
     <md-dialog-content class="md-dialog-content">
       
-      <h2 class="md-title" ng-if="!house.id">Додати будинок</h2>
-      <h2 class="md-title" ng-if="house.id">Змінити будинок</h2>
+      <h2 class="md-title" ng-if="!house.id">
+        {{"house.add-dialog.title" | translate}}
+      </h2>
+      <h2 class="md-title" ng-if="house.id">
+        {{"house.edit-dialog.title" | translate}}
+      </h2>
       
       <p ng-if="houseForm.$submitted && houseForm.$invalid" class="md-warn"
          layout="row" layout-align="start center">
@@ -17,12 +21,12 @@
 
       <div layout="row" class="input-row">
         <md-input-container flex>
-          <label>Вулиця</label>
+          <label>{{"house.dialog.street" | translate}}</label>
           <input name="street" ng-model="house.street_name" ng-model-options="{ getterSetter: true }"
                  md-maxlength="20" required md-autofocus>
         </md-input-container>
         <md-input-container flex>
-          <label>Номер</label>
+          <label>{{"house.dialog.number" | translate}}</label>
           <input name="number" ng-model="house.house_number"
                  ng-model-options="{ getterSetter: true }" required>
         </md-input-container>
@@ -32,11 +36,17 @@
     
     <div class="md-actions">
       <md-button type="submit" ng-if="!house.id"
-                 class="md-primary" ng-disabled="houseForm.$invalid">Додати</md-button>
+                 class="md-primary" ng-disabled="houseForm.$invalid">
+        {{"house.dialog.buttons.add" | translate}}
+      </md-button>
       <md-button type="submit" ng-if="house.id"
                  class="md-primary" ng-click="ctrl.updateHouse()"
-                 ng-disabled="houseForm.$invalid">Зберегти</md-button>
-      <md-button class="md-primary" ng-click="ctrl.cancel()">Скасувати</md-button>
+                 ng-disabled="houseForm.$invalid">
+        {{"house.dialog.buttons.save" | translate}}
+      </md-button>
+      <md-button class="md-primary" ng-click="ctrl.cancel()">
+        {{"house.dialog.buttons.cancel" | translate}}
+      </md-button>
     </div>
     
   </md-dialog>
